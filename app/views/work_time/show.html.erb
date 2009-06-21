@@ -1,0 +1,106 @@
+<%=javascript_include_tag "prototype" %>
+<%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
+<SCRIPT Language="JavaScript">
+<!--
+var add_ticket_count = 1;
+function add_ticket(pop_url, ajax_url)
+{
+  var ticket = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
+  if(ticket!=null) {
+    if(String(ticket).match(/.* #(\d+): .*/)) {
+      id = RegExp.$1; // ID部分の抜き出し
+      new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.Before});
+      add_ticket_count ++;
+    }
+  }
+}
+-->
+</SCRIPT>
+
+<div align="right">
+<%= render :partial=>'select_project' %>
+<%
+if User.current.allowed_to?(:view_work_time_other_member, @project) then
+%>
+<br>
+<%= link_to(l(:wt_all_member_report), @link_params.merge(:action=>"total")) %>
+
+<%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %>
+<%end%>
+</div>
+
+<%= @message %>
+<h2><%=l(:wt_monthly_report)%> (<%=User.find(@this_uid)%>)</h2>
+<%= render :partial=>'user_month_table' %>
+
+</SCRIPT>
+<br>
+
+<h2>
+  <%=l(:wt_daily_report)%>
+</h2>
+<% form_tag :action => "show" do %>
+<%= hidden_field_tag('year', @this_year); %> 
+<%= hidden_field_tag('month', @this_month); %> 
+<%= hidden_field_tag('day', @this_day); %> 
+<%= hidden_field_tag('user', @this_uid); %> 
+<%= hidden_field_tag('prj', @restrict_project); %> 
+
+<%= render :partial=>'user_day_table' %>
+
+<%if @this_uid==@crnt_uid then%>
+[<a href="JavaScript:add_ticket('<%=url_for(:action=>"popup_select_ticket")%>',
+                                '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');"
+>
+  <%=l(:wt_add_ticket)%>
+</a>]
+[<%= link_to(l(:wt_copy_last_month_tickets), @link_params.merge(:cp_dsp=>sprintf("%04d-%02d", @last_month.year, @last_month.month))) %>]
+<%= submit_tag l(:button_submit) %>
+<br>
+<%end%>
+<div id="memo" name="memo">
+<%if @this_uid==@crnt_uid then%>
+[<a href="#" onclick="JavaScript:new Ajax.Updater('memo',
+                                                  '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
+                                                  {asynchronous:true});
+                     return false;">
+edit memo
+</a>]
+<%end%>
+
+<%#------------------------------------------- Wiki表示#%>
+<%
+memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+if memo then # この日のメモがある場合
+%>
+<br><br>
+<h2> memo <%= @this_year %>/<%= @month_names[@this_month-1]%>/<%=@this_day%> </h2>
+<div class="wiki" style="background:#ffb;">
+  <%=textilizable(memo.description) %>
+  <div align="right">
+    (update:<%=memo.updated_on.strftime("%y/%m/%d %H:%M")%>)
+  </div>
+</div>
+<%end%>
+
+<%
+memo=WtDailyMemo.find(:first, :order=>"day DESC", :conditions=>["day<:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+if memo then
+d = memo.day;
+%>
+<%= link_to("[pre. memo]", @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>
+<%end%>
+
+<%
+memo=WtDailyMemo.find(:first, :order=>"day", :conditions=>["day>:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+if memo then
+d = memo.day;
+%>
+<%= link_to("[next memo]", @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>
+<%end%>
+<br>
+
+<%= render :partial=>'select_user', :locals=>{:link_params=>@link_params.merge(:anchor=>"memo")} %>
+</div>
+<%end%>
+

@@ -1,0 +1,16 @@
+<%#*************************************************** プロジェクトセレクタ %>
+<%= @restrict_project ? Project.find(@restrict_project).name : ""%>
+
+<select onchange="if (this.value != '') {window.location = this.value;}">
+  <option selected="selectes">select project...</option>
+  <option value="<%= url_for(@link_params.merge(:prj=>false));%>">---</option>
+<%
+prjs = Project.find(:all, :order=>"name");
+prjs.each do |prj|
+  members = Member.find(:all, :conditions=>
+            ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}]);
+  next if members.size==0;
+%>
+  <option value="<%= url_for(@link_params.merge(:prj=>prj.id));%>"> <%=prj.name%> </option>
+<%end%>
+</select>

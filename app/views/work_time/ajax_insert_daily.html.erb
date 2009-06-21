@@ -1,0 +1,59 @@
+<%
+uid = params[:user];
+year = params[:year];
+month = params[:month];
+add_issue_id = params[:add_issue]
+count = params[:count];
+month_str = sprintf("%04d-%02d", year, month);
+
+if uid!=User.current.id then
+
+  # セレクトタグ用の工程項目を準備
+  activities = "";
+  Enumeration.get_values("ACTI").each do |enm|
+    activities += "<option value="+enm.id.to_s+">"+enm.name
+  end
+
+  add_issue = Issue.find(add_issue_id);
+  if add_issue then
+    issueHtml = add_issue.closed? ? "<del>"+add_issue.to_s+"</del>" : add_issue.to_s;
+
+    prj = Project.find(add_issue.project_id);
+
+    # 既存の表示項目を取得
+    disps = UserIssueMonth.find(:all, :conditions=>["uid=:u and month=:m",{:u=>uid, :m=>month_str}]);
+    disp_count = 0;
+    begin
+      disp_count += 1;
+      disp = disps.shift;
+      if disp==nil then # 同じチケットが最後まで無かったら
+        # 表示項目を追加
+        UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id,
+                              :month=>month_str, :odr=>disp_count+1);
+        break;
+      end
+    end while disp.issue != add_issue_id.to_i; # 同じチケットが既にあったら追加しない
+
+    suffix = count+"_"+add_issue_id;
+%>
+<tr style="background:#ddf;">
+  <td>
+    <%=prj.name%>
+    <br>
+    <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>add_issue.id) %>
+    <%= print_issue_cost(add_issue) %>
+  </td>
+  <td>
+    <%= text_field_tag("new_hour"+suffix, "", :size=>5) %>
+  </td>
+  <td>
+    <%= select_tag "new_act"+suffix, activities, :required => true %>
+  </td>
+  <td>
+    <%= text_field_tag("new_cmnt"+suffix, "", :size=>80)%>
+  </td>
+</tr>
+<%
+  end
+end
+%>

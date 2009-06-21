@@ -1,0 +1,14 @@
+﻿<%#**************************************************** ユーザセレクタ %>
+<select onchange="if (this.value != '') {window.location = this.value;}">
+  <option selected="selected">select user...</option>
+  <option disabled="disabled">---</option>
+<%
+@members.each do |mem|
+%>
+  <option value="<%= url_for(link_params.merge(:user=>mem[0]));%>">
+    <%=mem[1]%>
+  </option>
+<%
+end
+%>
+</select>

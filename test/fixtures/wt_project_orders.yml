@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  prj: 1
+  uid: 1
+  dsp_prj: 1
+  dsp_pos: 1
+two:
+  id: 2
+  prj: 1
+  uid: 1
+  dsp_prj: 1
+  dsp_pos: 1

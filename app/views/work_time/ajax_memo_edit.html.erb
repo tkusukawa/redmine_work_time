@@ -1,0 +1,13 @@
+<%
+year = params["year"];
+month = params["month"];
+day = params["day"];
+user_id = params["user"];
+date = Date.new(year.to_i,month.to_i,day.to_i);
+memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>date,:u=>user_id}])
+if memo then
+%>
+<textarea name="memo" rows="15" cols="100"><%=memo.description -%></textarea>
+<%else%>
+<textarea name="memo" rows="15" cols="100"></textarea>
+<%end%>

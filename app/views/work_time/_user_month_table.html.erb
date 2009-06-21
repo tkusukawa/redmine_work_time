@@ -1,0 +1,215 @@
+<%
+win_w = 35;    # 小窓の幅
+win_h = 30;    # 小窓の高さ
+win_hs = 20;   # 小さい小窓の高さ
+
+box_w = 300;
+box_h = win_hs*3+win_h*@disp_count+win_hs*@disp_prj_issues.keys.size+20;
+%>
+
+<table width="100%" style="border:0;border-collapse:collapse;">
+<tr>
+  <!-- ************************************************ 左側を表示 -->
+  <td style="width:<%=box_w%>px;padding:0px;">
+    <div style="background: #ccc;">
+    <div style="position:relative;height:<%=box_h%>px;overflow:auto;">
+
+      <div style="position:absolute;top:1px;left:2px;">
+      <div style="background: #eee;font-size:2.0em;">
+      <div align="center" style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
+        <%= @this_year %>/<%= @month_names[@this_month-1] %>
+      </div>
+      </div>
+      <div align="right" style="position:absolute;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
+        <%= link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year));%>
+      </div>
+      <div align="left" style="position:absolute;top:1px;left:1px;">
+        <%= link_to("<<", @link_params.merge(:day=>@last_month.day, :month=>@last_month.month, :year=>@last_month.year));%>
+      </div>
+      </div>
+<%
+ofst_t = win_hs*3-5;
+max = @disp_issues.size;
+month_cost = 0;
+
+prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
+
+prj_odr.each do |po|
+  dsp_prj = po.dsp_prj;
+  dsp_pos = po.dsp_pos;
+  next if @disp_prj_issues.key?(dsp_prj) == false;
+  prj = Project.find(dsp_prj);
+  prj_month_cost = 0;
+  prj_ofst_t = ofst_t;
+
+  ofst_t += win_hs;
+  @disp_prj_issues[dsp_prj].each do |dsp_issue|
+  issue_id = dsp_issue[0];
+  issue_odr = dsp_issue[1];
+  issue = Issue.find(issue_id);
+  issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+
+  issue_month_cost = TimeEntry.sum(:hours, :conditions=>
+             ["user_id=:u and issue_id=:i and spent_on>=:d1 and spent_on<=:d2",
+             {:u => @this_uid, :i=>issue_id, :d1=>@first_date, :d2=>@last_date}])
+  prj_month_cost += issue_month_cost;
+%>
+    <div style="position:absolute;top:<%=ofst_t%>px;left:2px;">
+      <div style="background: #eee;font-size:0.8em;">
+        <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_h-2%>px;">
+<%if @this_uid==@crnt_uid then%>
+          <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=max%>);">
+            <%= issue_odr %>
+          </a>
+<%end%>
+          <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue_id) %>
+          <%= print_issue_cost(issue) %>
+          <div style="position:absolute;top:15px;right:15px;">
+            <%=sprintf("%1.1f", issue_month_cost)%>
+          </div>
+  <%if @this_uid==@crnt_uid then%>
+          <div style="position:absolute;top:15px;right:2px;">
+            <%=link_to("×", @link_params.merge(:ticket_del=>issue_id))%>
+          </div>
+  <%end%>
+        </div>
+      </div>
+    </div>
+<%
+  ofst_t += win_h;
+ end
+%>
+  <div style="position:absolute;top:<%=prj_ofst_t%>px;left:2px;">
+    <div style="background:#000;color:#fff;font-size:1.0em;">
+      <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
+        <a href="JavaScript:prj_pos('<%=url_for(@link_params) %>',<%=dsp_prj%>,<%=dsp_pos%>,<%=prj_odr.size%>);">
+          <%= dsp_pos %>
+        </a>
+        <%= prj.name%>
+          <div style="position:absolute;top:1px;right:10px;">
+            <%=sprintf("%1.1f",prj_month_cost)%>
+          </div>
+      </div>
+    </div>
+  </div>
+<%
+  month_cost += prj_month_cost;
+end
+%>
+      <div style="position:absolute;bottom:10px;right:10px;">
+        <%=sprintf("%1.1f",month_cost)%>
+      </div>
+      <div style="position:absolute;top:<%=win_hs*2%>px;right:10px;">
+        <%=sprintf("%1.1f",month_cost)%>
+      </div>
+    </div>
+
+    </div>
+  </td>
+
+  <!-- ************************************************ 右側を表示 -->
+  <td>
+    <div style="background: #ccc;">
+    <div style="position:relative;height:<%=box_h%>px;overflow:auto;" id="day_scroll">
+
+<% # チケット毎の合計時間を計算＆表示
+(@first_date..@last_date).each do |date|
+  day = date.day
+  wday = date.wday
+  ofst_l = win_w*(day-1);
+%>
+<%if day==@this_day then%>
+    <div style="position:absolute;top:1px;left:<%=ofst_l%>px;" id="day_scroll_today">
+      <div style="background:#cfc;">
+<%else%>
+    <div style="position:absolute;top:1px;left:<%=ofst_l%>px;">
+      <div style="background:<%=@wday_color[wday]%>;">
+<%end%>
+        <div align="center" style="position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+          <%= link_to(day, @link_params.merge(:day=>day)) %>
+        </div>
+      </div>
+    </div>
+    <div style="position:absolute;top:<%=win_hs+1%>px;left:<%=ofst_l%>px;">
+      <div style="background:<%= @wday_color[wday] %>;">
+        <div align="center" style="position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+          <%= @wday_name[wday]%>
+        </div>
+      </div>
+    </div>
+<%
+ofst_t = win_hs*3-5;
+day_cost = 0;
+
+prj_odr.each do |po|
+  dsp_prj = po.dsp_prj;
+  dsp_pos = po.dsp_pos;
+  next if @disp_prj_issues.key?(dsp_prj) == false;
+  prj_day_cost =0;
+  prj_ofst_t = ofst_t;
+%>
+<%
+ ofst_t += win_hs;
+ @disp_prj_issues[dsp_prj].each do |dsp_issue|
+  issue_id = dsp_issue[0];
+  issue_odr = dsp_issue[1];
+
+  issue_day_cost = TimeEntry.sum(:hours, :conditions=>
+             ["user_id=:u and issue_id=:i and spent_on=:d",
+             {:u => @this_uid, :i=>issue_id, :d=>date}])
+  prj_day_cost += issue_day_cost;
+%>
+    <div style="position:absolute;top:<%=ofst_t%>px;left:<%=ofst_l%>px;">
+      <div style="background:<%=@wday_color[wday]%>;font-size:0.8em;">
+        <div align="center" style="position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_h-2%>px;">
+<%
+  if issue_day_cost!=0 then
+%>
+          <%=sprintf("%1.1f",issue_day_cost)%>
+<%
+   end
+%>
+        </div>
+      </div>
+    </div>
+<%
+  ofst_t += win_h;
+ end
+%>
+  <div style="position:absolute;top:<%=prj_ofst_t%>px;left:<%=ofst_l%>px;">
+    <div style="background:#000;color:#fff;font-size:0.8em;">
+      <div align="center" style="position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+<%if prj_day_cost>0 then%>
+        <%=sprintf("%1.1f",prj_day_cost)%>
+<%end%>
+      </div>
+    </div>
+  </div>
+
+<%
+  day_cost += prj_day_cost;
+end
+%>
+<!--日毎の合計時間表示-->
+    <div style="position:absolute;top:<%=win_hs*2%>px;left:<%=ofst_l%>px;">
+      <div style="font-size:0.8em;">
+        <div align="center" style="position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+<%if day_cost>0 then%>
+          <%= sprintf("%1.1f",day_cost)%>
+<%end%>
+        </div>
+      </div>
+    </div>
+<%end%>
+    </div>
+    </div>
+  </td>
+</tr>
+</table>
+
+<SCRIPT Language="JavaScript">
+<!--
+  var scr = document.getElementById("day_scroll");
+  var tgt = document.getElementById("day_scroll_today");
+  scr.scrollLeft = tgt.offsetLeft - scr.offsetLeft;
+-->
