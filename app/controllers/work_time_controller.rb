@@ -39,7 +39,7 @@ class WorkTimeController < ApplicationController
     change_ticket_position;
     change_project_position;
     calc_total;
-    @link_params.merge!(:action=>"total");
+    @link_params.merge!(:action=>"edit_relay");
   end
   
   def relay_total
@@ -52,7 +52,7 @@ class WorkTimeController < ApplicationController
     change_ticket_position;
     change_project_position;
     calc_total;
-    @link_params.merge!(:action=>"total");
+    @link_params.merge!(:action=>"relay_total");
   end
   
   def popup_select_ticket # チケット選択ウィンドウの内容を返すアクション

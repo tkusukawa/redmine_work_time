@@ -1,4 +1,4 @@
-<%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
+﻿<%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
 
 <%= @message %>
 <div align="right">
@@ -12,7 +12,7 @@
 ###################################################### チケット関係テーブルの表示
 %>
 <br>
-<h2><%=l(:wt_edit_relay)%></h2>
+<h2><%=l(:wt_edit_relay)%> <%= @this_year %>-<%= @month_names[@this_month-1] %></h2>
 <table border="1">
 <%
 prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=-1",{:p=>@project.id}]);
@@ -36,6 +36,7 @@ prjs.each do |po|
    <%=prj.name%>
   </td>
   <td> <%=@prj_cost[dsp_prj][-1]%> </td>
+  <td><b><%=@r_prj_cost[dsp_prj][-1]%></b></td>
   <td>&nbsp</td>
 </tr>
 <%
@@ -61,6 +62,27 @@ prjs.each do |po|
   else
     parent = "";
   end
+
+  if @issue_cost.key?(issue_id) && 
+     @issue_cost[issue_id].key?(-1) && 
+     @issue_cost[issue_id][-1]!=0 then
+    cost=sprintf("%.2f",@issue_cost[issue_id][-1]);
+  else
+    cost="&nbsp";
+  end
+
+  if @r_issue_cost.key?(issue_id) && 
+     @r_issue_cost[issue_id].key?(-1) && 
+     @r_issue_cost[issue_id][-1]!=0 then
+    if @issue_cost[issue_id][-1]!=@r_issue_cost[issue_id][-1] then
+      r_cost=sprintf("<b>%.2f</b>",@r_issue_cost[issue_id][-1]);
+    else
+      r_cost=sprintf("%.2f",@r_issue_cost[issue_id][-1]);
+    end
+  else
+    r_cost="&nbsp";
+  end
+
 %>
 <tr>
   <td>
@@ -72,13 +94,9 @@ prjs.each do |po|
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
   </td>
-<td>
-<%if @issue_cost.key?(issue_id) && @issue_cost[issue_id].key?(-1) then%>
-<%=@issue_cost[issue_id][-1]%>
-<%end%>
-</tc>
-<td>
- => <%=parentHtml%>
+  <td><%=cost%></td>
+  <td><%=r_cost%></td>
+  <td id="<%=issue_id%>"> => <%=parentHtml%>
 <%
 if User.current.allowed_to?(:edit_work_time_total, @project) then
   if parent != "" then
@@ -96,7 +114,7 @@ if User.current.allowed_to?(:edit_work_time_total, @project) then
   end
 end
 %>
-</tc>
+</td>
 </tr>
 <%
  end

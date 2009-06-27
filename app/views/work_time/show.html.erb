@@ -58,12 +58,11 @@ if User.current.allowed_to?(:view_work_time_other_member, @project) then
 <%= submit_tag l(:wt_update) %>
 <br>
 <%end%>
-<div id="memo" name="memo">
+<div id="memo">
 <%if @this_uid==@crnt_uid then%>
 [<a href="#" onclick="JavaScript:new Ajax.Updater('memo',
-                                                  '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
-                                                  {asynchronous:true});
-                     return false;">
+  '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
+  {asynchronous:true}); return false;">
 edit memo
 </a>]
 <%end%>
