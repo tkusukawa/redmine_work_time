@@ -12,62 +12,33 @@
     <td><%=l(:field_comments)%></td>
   </tr>
 <%
-# この日のチケット作成を洗い出す
 day_total = 0;
-worked_issues = [];
-next_date = @this_date+1
-t1 = Time.local(@this_date.year, @this_date.month, @this_date.day);
-t2 = Time.local(next_date.year, next_date.month, next_date.day);
-issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
-                                       {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
-issues.each do |issue|
-  worked_issues |= [issue.id];
-end
-# この日のチケット操作を洗い出す
-journals = Journal.find(:all, :conditions=>
-             ["journalized_type='Issue' and user_id=:u and created_on>=:t1 and created_on<:t2",
-             {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
-journals.each do |j|
-  worked_issues |= [j.journalized_id];
-end
-
-input_issues = @disp_issues;
-input_prj_issues = @disp_prj_issues;
-worked_issues.each do |i|
-  next if input_issues.include?(i); #既存の項目は追加しない
-  issue = Issue.find(i);
-  p = issue.project_id;
-  next if @restrict_project && p != @restrict_project; #プロジェクト制限チェック
-  input_issues.push(i);
-  work_issues |= [i];
-  if input_prj_issues.key?(p) then
-    input_prj_issues[p].push([i, -1]); #既存ハッシュに要素追加
-  else
-    input_prj_issues[p] = [[i, -1]]; #新規ハッシュに配列を追加
-  end
-end
-
 prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
 
 prj_odr.each do |po|
  dsp_prj = po.dsp_prj;
  dsp_pos = po.dsp_pos;
- next if input_prj_issues.key?(dsp_prj) == false;
+ next if @input_prj_issues.key?(dsp_prj) == false;
  prj = Project.find(dsp_prj);
  prj_day_sum = TimeEntry.sum(:hours, :conditions=>
              ["user_id=:u and project_id=:p and spent_on=:d", 
              {:u => @this_uid, :p=>dsp_prj, :d=>@this_date}]);
 %>
 <tr style="background:#000;color:#fff;">
-  <td><%=prj.name%></td>
+  <td>
+        <a href="JavaScript:prj_pos('<%=url_for(@link_params) %>',<%=dsp_prj%>,<%=dsp_pos%>,<%=prj_odr.size%>);">
+          <%= dsp_pos %>
+        </a>
+        <%=prj.name%>
+  </td>
   <td><%=prj_day_sum%></td>
   <td></td>
   <td></td>
 </tr>
 <%
- input_prj_issues[dsp_prj].each do |issue_odr|
+ @input_prj_issues[dsp_prj].each do |issue_odr|
   issue_id = issue_odr[0];
-  issue_color = worked_issues.include?(issue_id) ? "#cfc" : "#fff";
+  issue_color = @worked_issues.include?(issue_id) ? "#cfc" : "#fff";
   issue = Issue.find(issue_id);
   issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
 

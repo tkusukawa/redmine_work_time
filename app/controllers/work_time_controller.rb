@@ -284,10 +284,44 @@ private
       end
     end
     
+    # この日のチケット作成を洗い出す
+    @worked_issues = [];
+    next_date = @this_date+1
+    t1 = Time.local(@this_date.year, @this_date.month, @this_date.day);
+    t2 = Time.local(next_date.year, next_date.month, next_date.day);
+    issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
+                                       {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
+    issues.each do |issue|
+      @worked_issues |= [issue.id];
+    end
+    # この日のチケット操作を洗い出す
+    journals = Journal.find(:all, :conditions=>
+             ["journalized_type='Issue' and user_id=:u and created_on>=:t1 and created_on<:t2",
+             {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
+    journals.each do |j|
+      @worked_issues |= [j.journalized_id];
+    end
+
+    input_issues = @disp_issues.dup;
+    @input_prj_issues = @disp_prj_issues.dup;
+    @worked_issues.each do |i|
+      next if input_issues.include?(i); #既存の項目は追加しない
+      issue = Issue.find(i);
+      p = issue.project_id;
+      next if @restrict_project && p != @restrict_project; #プロジェクト制限チェック
+      input_issues.push(i);
+      work_issues |= [i];
+      if @input_prj_issues.key?(p) then
+        @input_prj_issues[p].push([i, -1]); #既存ハッシュに要素追加
+      else
+        @input_prj_issues[p] = [[i, -1]]; #新規ハッシュに配列を追加
+      end
+    end
+    
     # 各ユーザの表示プロジェクトに不足がないか確認
     prj_odr = WtProjectOrders.find(:all, :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
     prj_odr_num = prj_odr.size;
-    prjs = @disp_prj_issues.keys; # 表示すべき全Prjから
+    prjs = @input_prj_issues.keys; # 表示すべき全Prjから
     prj_odr.each do |po|
       prjs.delete(po.dsp_prj); # 既存の表示Prjを削除すると、追加すべきPrjが残る
     end
