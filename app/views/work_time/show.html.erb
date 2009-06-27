@@ -23,7 +23,7 @@ function add_ticket(pop_url, ajax_url)
 if User.current.allowed_to?(:view_work_time_other_member, @project) then
 %>
 <br>
-<%= link_to(l(:wt_all_member_report), @link_params.merge(:action=>"total")) %>
+<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
 
 <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %>
 <%end%>
@@ -55,7 +55,7 @@ if User.current.allowed_to?(:view_work_time_other_member, @project) then
   <%=l(:wt_add_ticket)%>
 </a>]
 [<%= link_to(l(:wt_copy_last_month_tickets), @link_params.merge(:cp_dsp=>sprintf("%04d-%02d", @last_month.year, @last_month.month))) %>]
-<%= submit_tag l(:button_submit) %>
+<%= submit_tag l(:wt_update) %>
 <br>
 <%end%>
 <div id="memo" name="memo">

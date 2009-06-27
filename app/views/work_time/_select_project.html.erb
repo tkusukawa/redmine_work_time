@@ -2,7 +2,7 @@
 <%= @restrict_project ? Project.find(@restrict_project).name : ""%>
 
 <select onchange="if (this.value != '') {window.location = this.value;}">
-  <option selected="selectes">select project...</option>
+  <option selected="selectes">restrict project...</option>
   <option value="<%= url_for(@link_params.merge(:prj=>false));%>">---</option>
 <%
 prjs = Project.find(:all, :order=>"name");
