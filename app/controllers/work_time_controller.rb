@@ -303,14 +303,16 @@ private
     end
 
     input_issues = @disp_issues.dup;
-    @input_prj_issues = @disp_prj_issues.dup;
+    @input_prj_issues = Hash.new;
+    @disp_prj_issues.each do |k,v|
+      @input_prj_issues[k] = v.dup;
+    end
     @worked_issues.each do |i|
       next if input_issues.include?(i); #既存の項目は追加しない
       issue = Issue.find(i);
       p = issue.project_id;
       next if @restrict_project && p != @restrict_project; #プロジェクト制限チェック
       input_issues.push(i);
-      work_issues |= [i];
       if @input_prj_issues.key?(p) then
         @input_prj_issues[p].push([i, -1]); #既存ハッシュに要素追加
       else
