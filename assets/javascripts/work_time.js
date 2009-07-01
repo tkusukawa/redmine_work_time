@@ -37,7 +37,10 @@ function set_ticket_relay(pop_url, rep_url, child)
   if(parent!=null) {
     if(String(parent).match(/.* #(\d+): .*/)) {
       var id = RegExp.$1;
-      location.replace(rep_url+"&ticket_relay="+child+"_"+id);
+      //location.replace(rep_url+"&ticket_relay="+child+"_"+id);
+      new Ajax.Updater('relay_table', 
+                       rep_url+"&ticket_relay="+child+"_"+id, 
+                       {asynchronous:true, evalScripts:true});
     }
   }
 }

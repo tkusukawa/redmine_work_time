@@ -71,6 +71,20 @@ class WorkTimeController < ApplicationController
     render(:layout=>false);
   end
   
+  def ajax_relay_table
+    find_project;
+    authorize;
+    prepare_values;
+    member_add_del_check;
+    add_ticket_relay;
+    change_member_position;
+    change_ticket_position;
+    change_project_position;
+    calc_total;
+    @link_params.merge!(:action=>"edit_relay");
+    render(:layout=>false);
+  end
+  
 private
   def find_project
     # Redmine Pluginとして必要らしいので@projectを設定
