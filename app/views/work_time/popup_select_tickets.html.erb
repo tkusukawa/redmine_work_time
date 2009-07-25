@@ -1,0 +1,42 @@
+<%=javascript_include_tag "prototype" %>
+<SCRIPT Language="JavaScript">
+<!--
+function ticket_selected()
+{
+  var issue_ids="";
+  for(i=0; e = document.forms[0].elements[i]; i++) {
+    if(e.checked)
+      issue_ids+="_"+e.value;
+  }
+  returnValue = issue_ids;
+  close();
+}
+
+function ticket_check(url)
+{
+  showModalDialog(url, window, "");
+}
+-->
+</SCRIPT>
+
+<h2><%=l(:wt_ticket)%></h2>
+
+<select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, evalScripts:true}); return false;}">
+  <option selected="selected">select tracker...</option>
+  <option disabled="disabled">---</option>
+<%
+projects = Project.find(:all, :order=>"name");
+projects.each do |prj|
+  members = Member.find(:all, :conditions=>
+            ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}]);
+  next if members.size==0;
+%>
+  <option value="<%= url_for(:action=>"ajax_select_tickets", :prj=>prj.id) %>">
+    <%= prj.name %> 
+  </option>
+<%
+end
+%>
+</select> <br>
+<div id="tickets">
+</div>

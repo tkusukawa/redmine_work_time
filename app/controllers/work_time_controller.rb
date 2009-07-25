@@ -63,6 +63,14 @@ class WorkTimeController < ApplicationController
     render(:layout=>false);
   end
   
+  def popup_select_tickets # 複数チケット選択ウィンドウの内容を返すアクション
+    render(:layout=>false);
+  end
+  
+  def ajax_select_tickets # 複数チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
+    render(:layout=>false);
+  end
+  
   def ajax_insert_daily # 日毎工数に挿入するAjaxアクション
     render(:layout=>false);
   end

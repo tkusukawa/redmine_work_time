@@ -5,13 +5,16 @@
 var add_ticket_count = 1;
 function add_ticket(pop_url, ajax_url)
 {
-  var ticket = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
-  if(ticket!=null) {
-    if(String(ticket).match(/.* #(\d+): .*/)) {
-      id = RegExp.$1; // ID部分の抜き出し
+  var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
+  for(;;) {
+    if(String(tickets).match(/^(.*)_(\d+)$/)) {
+      tickets = RegExp.$1;
+      id = RegExp.$2;
       new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.Before});
       add_ticket_count ++;
-    }
+   }
+   else
+     break;
   }
 }
 -->
@@ -49,7 +52,7 @@ if User.current.allowed_to?(:view_work_time_other_member, @project) then
 <%= render :partial=>'user_day_table' %>
 
 <%if @this_uid==@crnt_uid then%>
-[<a href="JavaScript:add_ticket('<%=url_for(:action=>"popup_select_ticket")%>',
+[<a href="JavaScript:add_ticket('<%=url_for(:action=>"popup_select_tickets")%>',
                                 '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');"
 >
   <%=l(:wt_add_ticket)%>

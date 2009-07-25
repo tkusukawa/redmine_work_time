@@ -1,0 +1,14 @@
+<form style="font-size:14px;">
+<%
+issues = Issue.find(:all, :order=>"id DESC", :conditions =>
+                     ["project_id=:p",{:p=>params[:prj]}])
+issues.each do |issue|
+issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+%>
+<input type="checkbox" name="selected"  value="<%=issue.id%>">
+<%=issueHtml%>
+<a onclick="JavaScript:ticket_check('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');" href="#">？</a>
+<br>
+<%end%>
+</form>
+<a onclick="JavaScript:ticket_selected();" href="#">[<%=l(:button_apply)%>]</a>
