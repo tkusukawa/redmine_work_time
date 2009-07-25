@@ -73,7 +73,7 @@ memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_d
 if memo then # この日のメモがある場合
 %>
 <br><br>
-<h2> memo <%= @this_year %>/<%= @month_names[@this_month-1]%>/<%=@this_day%> </h2>
+<h2> memo <%= @this_year %>/<%= @this_month%>/<%=@this_day%> </h2>
 <div class="wiki" style="background:#ffb;">
   <%=textilizable(memo.description) %>
   <div align="right">

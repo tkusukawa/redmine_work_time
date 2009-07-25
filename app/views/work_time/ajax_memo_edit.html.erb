@@ -3,6 +3,9 @@ year = params["year"];
 month = params["month"];
 day = params["day"];
 user_id = params["user"];
+%>
+<h2> memo <%= year %>/<%= month%>/<%=day%> </h2>
+<%
 date = Date.new(year.to_i,month.to_i,day.to_i);
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>date,:u=>user_id}])
 if memo then
