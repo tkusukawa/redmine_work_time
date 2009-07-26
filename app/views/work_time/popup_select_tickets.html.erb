@@ -22,7 +22,7 @@ function ticket_check(url)
 <h2><%=l(:wt_ticket)%></h2>
 
 <select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, evalScripts:true}); return false;}">
-  <option selected="selected">select tracker...</option>
+  <option selected="selected">select project...</option>
   <option disabled="disabled">---</option>
 <%
 projects = Project.find(:all, :order=>"name");
