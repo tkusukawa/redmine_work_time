@@ -1,0 +1,77 @@
+<%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
+
+<%= @message %>
+<div align="right">
+<%= render :partial=>'select_project' %> <br>
+[<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
+[<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>]
+[<%= link_to(l(:wt_edit_relay), @link_params.merge(:action=>"edit_relay")) %>]
+[<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
+</div>
+
+<h2>Data List
+<%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year));%>
+<%= @this_year %>-<%= @month_names[@this_month-1] %>
+<%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year));%>
+</h2>
+
+<%
+if !User.current.allowed_to?(:view_work_time_other_member, @project) then
+  return
+end
+############################################## 集計表 #####################
+%>
+<table border="1">
+<%
+#-------------------------------------- メンバーのループ
+members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}]);
+members.each do |mem|
+  user = User.find(mem.user_id);
+
+  #-------------------------------------- プロジェクトのループ
+  prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=-1",{:p=>@project.id}]);
+  prjs.each do |po|
+    dsp_prj = po.dsp_prj;
+    dsp_pos = po.dsp_pos;
+    next unless @r_prj_cost.key?(dsp_prj); # 値の無いプロジェクトはパス
+    next unless @r_prj_cost[dsp_prj].key?(-1); # 値の無いプロジェクトはパス
+    next if @r_prj_cost[dsp_prj][-1] == 0; # 値の無いプロジェクトはスパ
+    prj =Project.find(dsp_prj);
+
+    #-------------------------------------- チケットのループ
+    tickets = WtTicketRelay.find(:all, :order=>"position");
+    tickets.each do |tic|
+      issue_id = tic.issue_id;
+      next unless @r_issue_cost.key?(issue_id); # 値の無いチケットはパス
+      next unless @r_issue_cost[issue_id].key?(-1); # 値の無いチケットはパス
+      next if @r_issue_cost[issue_id][-1] == 0; # 値の無いチケットはパス
+      next unless @r_issue_cost[issue_id].key?(mem.user_id); # 値の無いチケットはパス
+      next if @r_issue_cost[issue_id][mem.user_id] == 0; # 値の無いチケットはパス
+
+      issue = Issue.find(issue_id);
+      next if issue.project_id != dsp_prj; # このプロジェクトに表示するチケットでない場合はパス
+
+      issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+%>
+
+<tr>
+<td><%=user%></td>
+<td><%=prj%></td>
+<td><%=issue.subject%></td>
+<td><%=@r_issue_cost[issue_id][mem.user_id]%></td>
+</tr>
+
+<%
+    end
+  end
+end
+%>
+</table>
+
+<div align="right">
+<%= render :partial=>'select_project' %> <br>
+[<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
+[<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>]
+[<%= link_to(l(:wt_edit_relay), @link_params.merge(:action=>"edit_relay")) %>]
+[<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
+</div>
