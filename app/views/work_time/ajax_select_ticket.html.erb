@@ -2,7 +2,12 @@
 issues = Issue.find(:all, :order=>"id DESC", :conditions =>
                      ["project_id=:p",{:p=>params[:prj]}])
 issues.each do |issue|
-issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+  if issue.closed? then
+    next if !params.key?(:all);
+    issueHtml = "<del>"+issue.to_s+"</del>";
+  else
+    issueHtml = issue.to_s;
+  end
 %>
 <div style="font-size:14px;">
 <a onclick="JavaScript:ticket_selected('<%=issue%>');" href="#">[<%=l(:button_apply)%>]</a>
@@ -10,4 +15,9 @@ issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
 <a onclick="JavaScript:ticket_check('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');" href="#">？</a>
 <br>
 </div>
+<%end%>
+
+<%if !params.key?(:all) then
+    url=url_for(:action=>'ajax_select_ticket', :prj=>params[:prj], :all=>'');%>
+  <a onclick="new Ajax.Updater('tickets', '<%=url%>', {asynchronous:true, evalScripts:true}); return false;" href="#">[display all]</a>
 <%end%>
