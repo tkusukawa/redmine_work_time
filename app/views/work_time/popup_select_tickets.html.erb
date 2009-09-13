@@ -1,12 +1,30 @@
 <%=javascript_include_tag "prototype" %>
 <SCRIPT Language="JavaScript">
 <!--
-function ticket_selected()
+function ticket_inputed()
 {
-  var issue_ids="";
+  var vals = document.forms[0].elements[0].value;
+  var tickets = vals.split(',');
+  var issue_ids = new Array;
+  while(val=tickets.shift()) {
+    issue_ids.push(val);
+  }
+  returnValue=issue_ids;
+  close();
+}
+
+function ticket_selected(issue_id)
+{
+  returnValue = [issue_id];
+  close();
+}
+
+function tickets_selected()
+{
+  var issue_ids = new Array;
   for(i=0; e = document.forms[0].elements[i]; i++) {
     if(e.checked)
-      issue_ids+="_"+e.value;
+      issue_ids.push(e.value);
   }
   returnValue = issue_ids;
   close();
@@ -39,4 +57,9 @@ end
 %>
 </select> <br>
 <div id="tickets">
+or input ticket numbers
+  <form>
+    <input type="text" size=32>
+    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
+  </form>
 </div>

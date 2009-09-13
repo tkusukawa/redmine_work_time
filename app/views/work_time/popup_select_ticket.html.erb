@@ -1,6 +1,12 @@
 <%=javascript_include_tag "prototype" %>
 <SCRIPT Language="JavaScript">
 <!--
+function ticket_inputed()
+{
+  returnValue = document.forms[0].elements[0].value;
+  close();
+}
+
 function ticket_selected(issue_id)
 {
   returnValue = issue_id;
@@ -34,4 +40,9 @@ end
 %>
 </select> <br>
 <div id="tickets">
+or input a ticket number
+  <form>
+    <input type="text" size=32>
+    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
+  </form>
 </div>
