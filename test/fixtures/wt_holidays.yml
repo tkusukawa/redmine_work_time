@@ -1,0 +1,15 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+one:
+  id: 1
+  holiday: 2009-09-12
+  created_on: 2009-09-12 18:48:19
+  created_by: 1
+  deleted_on: 2009-09-12 18:48:19
+  deleted_by: 1
+two:
+  id: 2
+  holiday: 2009-09-12
+  created_on: 2009-09-12 18:48:19
+  created_by: 1
+  deleted_on: 2009-09-12 18:48:19
+  deleted_by: 1

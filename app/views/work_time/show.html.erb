@@ -21,14 +21,17 @@ function add_ticket(pop_url, ajax_url)
 </SCRIPT>
 
 <div align="right">
-<%= render :partial=>'select_project' %>
-<%
-if User.current.allowed_to?(:view_work_time_other_member, @project) then
-%>
-<br>
-<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
-
-<%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %>
+<%= render :partial=>'select_project' %><br>
+<%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
+  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
+  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br>
+<%end%>
+<%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
+  <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
+    <%= link_to(l(:wt_set_holiday), @link_params.merge(:set_holiday=>@this_date)) %>
+  <%else%>
+    <%= link_to(l(:wt_del_holiday), @link_params.merge(:del_holiday=>@this_date)) %>
+  <%end%>
 <%end%>
 </div>
 

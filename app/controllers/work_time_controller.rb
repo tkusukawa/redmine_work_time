@@ -14,6 +14,7 @@ class WorkTimeController < ApplicationController
     prepare_activity_options;
     member_add_del_check;
     update_daily_memo;
+    set_holiday;
     @link_params.merge!(:action=>"show");
   end
   
@@ -438,7 +439,23 @@ private
                          :description=>text);
     end
   end
-  
+
+  ################################ 休日設定
+  def set_holiday
+    user_id = params["user"] || return;
+    if set_date = params['set_holiday'] then
+      WtHolidays.create(:holiday=>set_date, :created_on=>Time.now, :created_by=>user_id);
+    end
+    if del_date = params['del_holiday'] then
+      holidays = WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>del_date}]);
+      holidays.each do |h|
+        h.deleted_on = Time.now;
+        h.deleted_by = user_id;
+        h.save;
+      end
+    end
+  end
+
   def add_ticket_relay
     ################################### チケット付け替え関係処理
     if params.key?("ticket_relay") && params[:ticket_relay]=~/^(.*)_(.*)$/ then
