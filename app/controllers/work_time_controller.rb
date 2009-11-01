@@ -87,6 +87,7 @@ class WorkTimeController < ApplicationController
   end
   
   def ajax_insert_daily # 日毎工数に挿入するAjaxアクション
+    prepare_values;
     render(:layout=>false);
   end
   

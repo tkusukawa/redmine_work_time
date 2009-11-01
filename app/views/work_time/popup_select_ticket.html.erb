@@ -1,3 +1,6 @@
+<html>
+<head>
+<title>select a ticket</title>
 <%=javascript_include_tag "prototype" %>
 <SCRIPT Language="JavaScript">
 <!--
@@ -19,7 +22,9 @@ function ticket_check(url)
 }
 -->
 </SCRIPT>
+</head>
 
+<body onLoad="document.forms[0].elements[0].focus();">
 <h2><%=l(:wt_ticket)%></h2>
 
 <select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, evalScripts:true}); return false;}">
@@ -43,6 +48,7 @@ end
 or input a ticket number
   <form>
     <input type="text" size=32>
-    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
+    <input type="submit" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
   </form>
 </div>
+</body>

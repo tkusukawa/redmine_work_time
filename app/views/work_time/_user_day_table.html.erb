@@ -48,8 +48,11 @@ prj_odr.each do |po|
   if time_entries.size == 0 then
 %>
 <!-- 工数エントリなし -->
-<tr>
+<tr id="time_entry_new0<%=issue.id%>">
   <td style="background:<%=issue_color%>;">
+    <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+                                   'time_entry_new0<%=issue.id%>',
+                                    <%=issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
   </td>
@@ -70,8 +73,11 @@ prj_odr.each do |po|
     day_total += t.hours;
 %>
 <!-- 工数エントリあり -->
-<tr>
+<tr id="time_entry<%=t.id%>">
   <td style="background:<%=issue_color%>;">
+    <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+                                   'time_entry<%=t.id%>',
+                                    <%=issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
   </td>

@@ -11,6 +11,12 @@ function add_ticket(pop_url, ajax_url)
       add_ticket_count ++;
   }
 }
+
+function dup_ticket(ajax_url, insert_pos, id)
+{
+    new Ajax.Updater( insert_pos, ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.After});
+      add_ticket_count ++;
+}
 -->
 </SCRIPT>
 
@@ -73,7 +79,7 @@ memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_d
 if memo then # この日のメモがある場合
 %>
 <br><br>
-<h2> memo <%= @this_year %>/<%= @this_month%>/<%=@this_day%> </h2>
+<h2> memo <%= @this_year %>/<%= @this_month%>/<%=@this_day%> (<%=@wday_name[@this_date.wday]%>)</h2>
 <div class="wiki" style="background:#ffb;">
   <%=textilizable(memo.description) %>
   <div align="right">
