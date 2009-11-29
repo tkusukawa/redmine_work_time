@@ -234,12 +234,14 @@ private
           cmnt = params["new_cmnt"+suffix];
           act = params["new_act"+suffix];
           if suffix =~ /^(.*)_(.*)$/ then
-            issue = Issue.find($2);
-            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
-            new_entry.hours = hour;
-            new_entry.activity_id = act;
-            new_entry.comments = cmnt;
-            new_entry.save;
+            issue = Issue.find_by_id($2);
+            if !issue.nil? then
+              new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
+              new_entry.hours = hour;
+              new_entry.activity_id = act;
+              new_entry.comments = cmnt;
+              new_entry.save;
+            end
           end
         end
 
@@ -299,11 +301,13 @@ private
     {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
 
     time_entry.each do |e| #各工数のチケットを追加対象にする
-      add_issues |= [e.issue.id];
+      add_issues |= [e.issue.id] if e.issue;
     end
 
     add_issues.each do |add| # 追加対象をチェックして
-      prj = Issue.find(add).project_id;
+      issue = Issue.find_by_id(add);
+      next if issue.nil?; # 削除されていたらパス
+      prj = issue.project_id;
       next if @restrict_project && prj != @restrict_project;
       if (@disp_issues & [add]).size==0 then #既存の表示項目に当該チケットが無かったら
         # 追加する
@@ -347,7 +351,8 @@ private
     end
     @worked_issues.each do |i|
       next if input_issues.include?(i); #既存の項目は追加しない
-      issue = Issue.find(i);
+      issue = Issue.find_by_id(i);
+      next if issue.nil?; # 削除されていたらパス
       p = issue.project_id;
       next if @restrict_project && p != @restrict_project; #プロジェクト制限チェック
       input_issues.push(i);
@@ -623,7 +628,8 @@ printf("mv:prj%d, uid%d, dprj%d, dpos%d\n", mv.prj, mv.uid, mv.dsp_prj, mv.dsp_p
       # 本プロジェクトのユーザの工数でなければパス
       next unless @member_cost.key?(uid);
       
-      issue = Issue.find(iid);
+      issue = Issue.find_by_id(iid);
+      next if issue.nil?; # チケットが削除されていたらパス
       pid = issue.project_id;
       # プロジェクト限定の対象でなければパス
       next if @restrict_project && pid != @restrict_project;
@@ -634,6 +640,9 @@ printf("mv:prj%d, uid%d, dprj%d, dpos%d\n", mv.prj, mv.uid, mv.dsp_prj, mv.dsp_p
       # 親チケットを探索する
       parent_iid = iid;
       while true do
+        parent_issue = Issue.find_by_id(parent_iid);
+        break if parent_issue.nil?; # チケットが削除されていたらそこまで
+        
         if !(relay.key?(parent_iid)) then
           # まだ登録されていないチケットの場合、追加処理を行う
           relay[parent_iid] = 0;
@@ -642,7 +651,7 @@ printf("mv:prj%d, uid%d, dprj%d, dpos%d\n", mv.prj, mv.uid, mv.dsp_prj, mv.dsp_p
           WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0);
         end
         
-        parent_pid = Issue.find(parent_iid).project_id;
+        parent_pid = parent_issue.project_id;
         if !(@prj_cost.key?(parent_pid)) then
           # まだ登録されていないプロジェクトの場合、追加処理を行う
           @prj_cost[parent_pid] = Hash.new;

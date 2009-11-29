@@ -14,7 +14,7 @@ if uid!=User.current.id then
     activities += "<option value="+enm.id.to_s+">"+enm.name
   end
 
-  add_issue = Issue.find(add_issue_id);
+  add_issue = Issue.find_by_id(add_issue_id);
   if add_issue then
     issueHtml = add_issue.closed? ? "<del>"+add_issue.to_s+"</del>" : add_issue.to_s;
 

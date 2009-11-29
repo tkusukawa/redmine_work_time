@@ -39,8 +39,12 @@ prj_odr.each do |po|
  @input_prj_issues[dsp_prj].each do |issue_odr|
   issue_id = issue_odr[0];
   issue_color = @worked_issues.include?(issue_id) ? "#cfc" : "#fff";
-  issue = Issue.find(issue_id);
-  issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+  issue = Issue.find_by_id(issue_id);
+  if issue.nil? then
+    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>";
+  else
+    issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+  end
 
   time_entries = TimeEntry.find(:all, :conditions=>
              ["user_id=:u and issue_id=:i and spent_on=:d", 

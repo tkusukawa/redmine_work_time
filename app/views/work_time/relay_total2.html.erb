@@ -48,7 +48,8 @@ members.each do |mem|
       next unless @r_issue_cost[issue_id].key?(mem.user_id); # 値の無いチケットはパス
       next if @r_issue_cost[issue_id][mem.user_id] == 0; # 値の無いチケットはパス
 
-      issue = Issue.find(issue_id);
+      issue = Issue.find_by_id(issue_id);
+      next if issue.nil?; # チケットが削除されていたらパス
       next if issue.project_id != dsp_prj; # このプロジェクトに表示するチケットでない場合はパス
 
       issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;

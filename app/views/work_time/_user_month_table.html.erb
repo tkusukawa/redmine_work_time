@@ -46,8 +46,12 @@ prj_odr.each do |po|
   @disp_prj_issues[dsp_prj].each do |dsp_issue|
   issue_id = dsp_issue[0];
   issue_odr = dsp_issue[1];
-  issue = Issue.find(issue_id);
-  issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+  issue = Issue.find_by_id(issue_id);
+  if issue.nil? then
+    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>";
+  else
+    issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+  end
 
   issue_month_cost = TimeEntry.sum(:hours, :conditions=>
              ["user_id=:u and issue_id=:i and spent_on>=:d1 and spent_on<=:d2",

@@ -1,4 +1,4 @@
-<%
+﻿<%
 prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=-1",{:p=>@project.id}]);
 tickets = WtTicketRelay.find(:all, :order=>"position");
 tic_max = tickets.size;
@@ -36,13 +36,18 @@ prjs.each do |po|
   next unless @issue_cost.key?(issue_id);
   next unless @issue_cost[issue_id].key?(-1);
 
-  issue = Issue.find(issue_id);
+  issue = Issue.find_by_id(issue_id);
+  next if issue.nil?; # チケットが削除されていたらパス
   next if issue.project_id != dsp_prj;
   issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
 
   if tic.parent && tic.parent != 0 then
-    parent = Issue.find(tic.parent);
-    parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s;
+    parent = Issue.find_by_id(tic.parent);
+    if parent.nil? then
+      parentHtml = "<del>Issue:"+tic.parent.to_s+"</del>";
+    else
+      parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s;
+    end
   else
     parent = "";
   end
