@@ -90,7 +90,7 @@ if User.current.allowed_to?(:edit_work_time_total, @project) then
                                   <%=tic.issue_id%>);">[<%=l(:button_change)%>]</a>
 <a href="#" onclick="JavaScript:new Ajax.Updater('relay_table',
   '<%=url_for(@link_params.merge(:action=>"ajax_relay_table", :ticket_relay=>tic.issue_id.to_s+"_0"))%>',
-  {asynchronous:true}); return false;">
+  {asynchronous:true, method:'get'}); return false;">
 [<%=l(:button_delete)%>]
 </a>
 

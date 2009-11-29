@@ -38,7 +38,7 @@ function set_ticket_relay(pop_url, rep_url, child)
       //location.replace(rep_url+"&ticket_relay="+child+"_"+id);
       new Ajax.Updater('relay_table', 
                        rep_url+"&ticket_relay="+child+"_"+parent, 
-                       {asynchronous:true, evalScripts:true});
+                       {asynchronous:true, method:'get'});
   }
 }
 

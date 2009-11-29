@@ -44,7 +44,7 @@ function ticket_check(url)
 <body onLoad="document.forms[0].elements[0].focus();">
 <h2><%=l(:wt_ticket)%></h2>
 
-<select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, evalScripts:true}); return false;}">
+<select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, method:'get'}); return false;}">
   <option value=''>select project...</option>
   <option disabled="disabled">---</option>
 <%

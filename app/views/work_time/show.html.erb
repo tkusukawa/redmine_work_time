@@ -7,14 +7,14 @@ function add_ticket(pop_url, ajax_url)
 {
   var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   while(id = tickets.shift()) {
-      new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.Before});
+      new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.Before, method:'get'});
       add_ticket_count ++;
   }
 }
 
 function dup_ticket(ajax_url, insert_pos, id)
 {
-    new Ajax.Updater( insert_pos, ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.After});
+    new Ajax.Updater( insert_pos, ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.After, method:'get'});
       add_ticket_count ++;
 }
 -->
@@ -68,7 +68,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 <%if @this_uid==@crnt_uid then%>
 [<a href="#" onclick="JavaScript:new Ajax.Updater('memo',
   '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
-  {asynchronous:true}); return false;">
+  {asynchronous:true, method:'get'}); return false;">
 edit memo
 </a>]
 <%end%>
