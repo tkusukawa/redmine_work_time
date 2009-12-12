@@ -20,6 +20,17 @@ function ticket_check(url)
 {
   showModalDialog(url, window, "");
 }
+
+function checkKey(e)
+{
+  if (!e) var e = window.event;
+  if(e.keyCode == 13) {
+    ticket_inputed();
+    return false;
+  }
+  else
+    return e;
+}
 -->
 </SCRIPT>
 </head>
@@ -47,8 +58,8 @@ end
 <div id="tickets">
 or input a ticket number
   <form>
-    <input type="text" size=32>
-    <input type="submit" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
+    <input type="text" size=32 onKeyPress="return checkKey(event);">
+    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
   </form>
 </div>
 </body>
