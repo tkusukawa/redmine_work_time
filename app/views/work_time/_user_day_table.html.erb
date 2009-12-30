@@ -10,6 +10,9 @@
     <td><%=l(:work_time)%></td>
     <td><%=l(:field_activity)%></td>
     <td><%=l(:field_comments)%></td>
+    <% @custom_fields.each do |cf| %>
+       <td><%= cf.name %></td>
+    <% end %>
   </tr>
 <%
 day_total = 0;
@@ -32,8 +35,11 @@ prj_odr.each do |po|
         <%=prj.name%>
   </td>
   <td><%=prj_day_sum%></td>
-  <td></td>
-  <td></td>
+  <td>&nbsp;</td>
+  <td>&nbsp;</td>
+  <% @custom_fields.each do |cf| %>
+     <td>&nbsp;</td>
+  <% end %>
 </tr>
 <%
  @input_prj_issues[dsp_prj].each do |issue_odr|
@@ -52,23 +58,36 @@ prj_odr.each do |po|
   if time_entries.size == 0 then
 %>
 <!-- 工数エントリなし -->
-<tr id="time_entry_new0<%=issue.id%>">
+<tr id="time_entry_pos[<%=issue.id%>][0]">
   <td style="background:<%=issue_color%>;">
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry_new0<%=issue.id%>',
+                                   'time_entry_pos[<%=issue.id%>][0]',
                                     <%=issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
   </td>
   <td>
-    <%= text_field_tag("new_hour0_"+issue_id.to_s, "", :size=>5) %>
+    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= select_tag "new_act0_"+issue.id.to_s, @activity_options, :required => true %>
+    <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", @activity_options, :required => true %>
   </td>
   <td>
-    <%= text_field_tag("new_cmnt0_"+issue_id.to_s, "", :size=>80)%>
+    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][comments]", "", :size=>80)%>
   </td>
+  <%@custom_fields.each do |cf|
+    def cf.custom_field
+      return self;
+    end
+    def cf.value
+      return self.default_value;
+    end
+    def cf.true?
+      return self.default_value;
+    end
+  %>
+     <td><%= custom_field_tag "new_time_entry["+issue_id.to_s+"][0]", cf %></td>
+  <% end %>
 </tr>
 <%
   else
@@ -77,16 +96,16 @@ prj_odr.each do |po|
     day_total += t.hours;
 %>
 <!-- 工数エントリあり -->
-<tr id="time_entry<%=t.id%>">
+<tr id="time_entry_pos<%=t.id%>">
   <td style="background:<%=issue_color%>;">
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry<%=t.id%>',
+                                   'time_entry_pos<%=t.id%>',
                                     <%=issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
   </td>
   <td>
-    <%= text_field_tag("hour"+t.id.to_s, t.hours, :size=>5) %>
+    <%= text_field_tag("time_entry["+t.id.to_s+"][hours]", t.hours, :size=>5) %>
   </td>
   <td>
 <%
@@ -99,11 +118,16 @@ Enumeration.get_values("ACTI").each do |enm|
   end
 end
 %>
-    <%= select_tag "act"+t.id.to_s, activity, :required => true %>
+    <%= select_tag "time_entry["+t.id.to_s+"][activity_id]", activity, :required => true %>
   </td>
   <td>
-    <%= text_field_tag("cmnt"+t.id.to_s, t.comments, :size=>80)%>
+    <%= text_field_tag("time_entry["+t.id.to_s+"][comments]", t.comments, :size=>80)%>
   </td>
+  <% @custom_fields.each do |cf|
+    cfv = t.custom_field_values.detect {|v| v.custom_field_id == cf.id};
+  %>
+     <td><%= custom_field_tag "time_entry["+t.id.to_s+"]", cfv %></td>
+  <% end %>
 </tr>
 <%
    end
@@ -116,5 +140,8 @@ end
   <td><%=sprintf("%1.1f",day_total)%></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
+  <% @custom_fields.each do |cf| %>
+     <td>&nbsp;</td>
+  <% end %>
 </tr>
 </table>

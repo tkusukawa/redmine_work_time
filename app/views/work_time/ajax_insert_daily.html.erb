@@ -34,27 +34,40 @@ if uid!=User.current.id then
       end
     end while disp.issue != add_issue_id.to_i; # 同じチケットが既にあったら追加しない
 
-    suffix = count+"_"+add_issue_id;
+    suffix = "["+add_issue_id+"]["+count+"]";
 %>
-<tr style="background:#ddf;" id="time_entry_new<%=suffix%>">
+<tr style="background:#ddf;" id="time_entry_pos<%=suffix%>">
   <td>
     <%=prj.name%>
     <br>
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry_new<%=suffix%>',
+                                   'time_entry_pos<%=suffix%>',
                                     <%=add_issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>add_issue.id) %>
     <%= print_issue_cost(add_issue) %>
   </td>
   <td>
-    <%= text_field_tag("new_hour"+suffix, "", :size=>5) %>
+    <%= text_field_tag("new_time_entry"+suffix+"[hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= select_tag "new_act"+suffix, activities, :required => true %>
+    <%= select_tag "new_time_entry"+suffix+"[activity_id]", activities, :required => true %>
   </td>
   <td>
-    <%= text_field_tag("new_cmnt"+suffix, "", :size=>80)%>
+    <%= text_field_tag("new_time_entry"+suffix+"[comments]", "", :size=>80)%>
   </td>
+  <%@custom_fields.each do |cf|
+    def cf.custom_field
+      return self;
+    end
+    def cf.value
+      return self.default_value;
+    end
+    def cf.true?
+      return self.default_value;
+    end
+  %>
+     <td><%= custom_field_tag "new_time_entry"+suffix, cf %></td>
+  <% end %>
 </tr>
 <%
   end

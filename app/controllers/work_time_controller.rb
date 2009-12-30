@@ -2,6 +2,9 @@ class WorkTimeController < ApplicationController
   unloadable
 #  before_filter :find_project, :authorize
 
+  helper :custom_fields
+  include CustomFieldsHelper
+
   def show
     find_project;
     authorize;
@@ -15,6 +18,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check;
     update_daily_memo;
     set_holiday;
+    @custom_fields = TimeEntryCustomField.find(:all);
     @link_params.merge!(:action=>"show");
   end
   
@@ -88,6 +92,7 @@ class WorkTimeController < ApplicationController
   
   def ajax_insert_daily # 日毎工数に挿入するAjaxアクション
     prepare_values;
+    @custom_fields = TimeEntryCustomField.find(:all);
     render(:layout=>false);
   end
   
@@ -225,39 +230,62 @@ private
   end
   
   def hour_update # *********************************** 工数更新要求の処理
-    if @this_uid == @crnt_uid then
-      params.each do |k,v|
-        # 新規工数 記入
-        if k =~ /^new_hour(.*)$/ && v != "" && params.key?("new_cmnt"+$1) && params.key?("new_act"+$1)then
-          suffix = $1;
-          hour = v;
-          cmnt = params["new_cmnt"+suffix];
-          act = params["new_act"+suffix];
-          if suffix =~ /^(.*)_(.*)$/ then
-            issue = Issue.find_by_id($2);
-            if !issue.nil? then
-              new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
-              new_entry.hours = hour;
-              new_entry.activity_id = act;
-              new_entry.comments = cmnt;
-              new_entry.save;
-            end
-          end
-        end
+    return if @this_uid != @crnt_uid;
 
-        # 既存工数 更新
-        if k =~ /^hour(.*)$/ && params.key?("cmnt"+$1) && params.key?("act"+$1) then
-          hour = (v == "") ? "0" : v;
-          cmnt = params["cmnt"+$1];
-          act = params["act"+$1];
-          tm = TimeEntry.find($1);
-          tm.hours = hour;
-          tm.activity_id = act;
-          tm.comments = cmnt;
-          tm.save;
+    @message ||= "";
+    # 新規工数の登録
+    if params["new_time_entry"] then
+      params["new_time_entry"].each do |issue_id, valss|
+        issue = Issue.find_by_id(issue_id);
+        next if issue.nil?;
+        valss.each do |count, vals|
+          next if vals['hours'] == "";
+          new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
+          new_entry.attributes = vals;
+          new_entry.save;
+          msg = hour_update_check_error(new_entry, issue.id);
+          @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != "";
         end
       end
     end
+
+    # 既存工数の更新
+    if params["time_entry"] then
+      params["time_entry"].each do |id, vals|
+        tm = TimeEntry.find(id);
+        vals["hours"] = (vals["hours"] == "") ? "0" : vals["hours"];
+        tm.attributes = vals;
+        tm.save;
+        msg = hour_update_check_error(tm, tm.issue.id);
+        @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != "";
+      end
+    end
+  end
+
+  def hour_update_check_error(obj, issue_id)
+    return "" if obj.errors.empty?;
+    p obj;
+    str = "ERROR:#"+issue_id.to_s+"<br>";
+    obj.errors.each do |attr, msg|
+      next if msg.nil?
+      msg = [msg] unless msg.is_a?(Array)
+      if attr == "base"
+        str += l(*msg)
+      else
+        str += "&#171; " + (l_has_string?("field_" + attr) ? l("field_" + attr) : object.class.human_attribute_name(attr)) + " &#187; " + l(*msg) + "<br>" unless attr == "custom_values"
+      end
+    end
+    # retrieve custom values error messages
+    if obj.errors[:custom_values]
+      obj.custom_values.each do |v|
+        v.errors.each do |attr, msg|
+          next if msg.nil?
+          msg = [msg] unless msg.is_a?(Array)
+          str += "&#171; " + v.custom_field.name + " &#187; " + l(*msg) + "<br>"
+        end
+      end
+    end
+    return str;
   end
 
   def prepare_tickets_array # チケット表示項目を作成
@@ -573,14 +601,10 @@ private
     
     po = WtProjectOrders.find(:first, :conditions=>["prj=:p and uid=-1 and dsp_prj=:d",{:p=>@project.id, :d=>dsp_prj}]);
     return if po == nil; # 対象の表示プロジェクトが無ければパス
-printf("po:prj%d, uid%d, dprj%d, dpos%d\n", po.prj, po.uid, po.dsp_prj, po.dsp_pos);
     
     if po.dsp_pos > dst then # 前に持っていく場合
-print "po.dsp_pos > dst\n";
       tgts = WtProjectOrders.find(:all, :conditions=> ["prj=:p and uid=-1 and dsp_pos>=:o1 and dsp_pos<:o2",{:p=>@project.id, :o1=>dst, :o2=>po.dsp_pos}]);
-printf("tgts.size=%d\n", tgts.size);;
       tgts.each do |mv|
-printf("mv:prj%d, uid%d, dprj%d, dpos%d\n", mv.prj, mv.uid, mv.dsp_prj, mv.dsp_pos);
         mv.dsp_pos+=1; mv.save; # 順位を一つずつ後へ
       end
       po.dsp_pos=dst; po.save;
