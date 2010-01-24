@@ -407,7 +407,7 @@ private
   def prepare_activity_options
     # セレクトタグ用の工程項目を準備
     @activity_options = "";
-    Enumeration.get_values("ACTI").each do |enm|
+    WorkTimeCompatibility::Enumeration.activities.each do |enm|
       @activity_options += "<option value="+enm.id.to_s+">"+enm.name
     end
   end

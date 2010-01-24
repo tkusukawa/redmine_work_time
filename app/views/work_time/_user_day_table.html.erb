@@ -110,7 +110,7 @@ prj_odr.each do |po|
   <td>
 <%
 activity = "";
-Enumeration.get_values("ACTI").each do |enm|
+WorkTimeCompatibility::Enumeration.activities.each do |enm|
   if enm.id == t.activity_id then
     activity += "<option value="+enm.id.to_s+" selected>"+enm.name
   else
