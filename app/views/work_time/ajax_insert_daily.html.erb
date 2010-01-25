@@ -10,7 +10,7 @@ if uid!=User.current.id then
 
   # セレクトタグ用の工程項目を準備
   activities = "";
-  Enumeration.get_values("ACTI").each do |enm|
+  WorkTimeCompatibility::Enumeration.activities.each do |enm|
     activities += "<option value="+enm.id.to_s+">"+enm.name
   end
 
