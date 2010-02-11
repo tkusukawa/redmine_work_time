@@ -35,7 +35,8 @@ members.each do |mem|
     mem.position=num; #posがずれていたら修正
     mem.save;
   end
-  user = User.find(mem.user_id);
+  user = User.find_by_id(mem.user_id);
+  next if user.nil?;
 %>
 <td align="center">
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
@@ -57,7 +58,7 @@ end
 <%=@total_cost%>
 </td>
 <%
-#---------------------------------------各人の合計を表示 
+#---------------------------------------各人の合計を表示
 members.each do |mo|
 %>
 <td style="background:#ddd;">
@@ -84,13 +85,13 @@ prjs.each do |po|
  prj =Project.find(dsp_prj);
 %>
 <tr style="background:#000;color:#fff;">
- <td> 
+ <td>
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
     <a href="JavaScript:prj_pos('<%=url_for(@link_params)%>', <%=dsp_prj%>,<%=dsp_pos%>,<%=prjs.size%>);">
       <%=dsp_pos%>
     </a>
 <%end%>
-   <%=prj.name%> 
+   <%=prj.name%>
  </td>
  <td> <%=(@prj_cost[dsp_prj])[-1]%> </td>
 <%

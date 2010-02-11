@@ -21,7 +21,7 @@ class WorkTimeController < ApplicationController
     @custom_fields = TimeEntryCustomField.find(:all);
     @link_params.merge!(:action=>"show");
   end
-  
+
   def total
     find_project;
     authorize;
@@ -34,7 +34,7 @@ class WorkTimeController < ApplicationController
     calc_total;
     @link_params.merge!(:action=>"total");
   end
-  
+
   def edit_relay
     find_project;
     authorize;
@@ -47,7 +47,7 @@ class WorkTimeController < ApplicationController
     calc_total;
     @link_params.merge!(:action=>"edit_relay");
   end
-  
+
   def relay_total
     find_project;
     authorize;
@@ -60,7 +60,7 @@ class WorkTimeController < ApplicationController
     calc_total;
     @link_params.merge!(:action=>"relay_total");
   end
-  
+
   def relay_total2
     find_project;
     authorize;
@@ -73,33 +73,33 @@ class WorkTimeController < ApplicationController
     calc_total;
     @link_params.merge!(:action=>"relay_total2");
   end
-  
+
   def popup_select_ticket # チケット選択ウィンドウの内容を返すアクション
     render(:layout=>false);
   end
-  
+
   def ajax_select_ticket # チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
     render(:layout=>false);
   end
-  
+
   def popup_select_tickets # 複数チケット選択ウィンドウの内容を返すアクション
     render(:layout=>false);
   end
-  
+
   def ajax_select_tickets # 複数チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
     render(:layout=>false);
   end
-  
+
   def ajax_insert_daily # 日毎工数に挿入するAjaxアクション
     prepare_values;
     @custom_fields = TimeEntryCustomField.find(:all);
     render(:layout=>false);
   end
-  
+
   def ajax_memo_edit # 日毎のメモ入力フォームを出力するAjaxアクション
     render(:layout=>false);
   end
-  
+
   def ajax_relay_table
     find_project;
     authorize;
@@ -113,7 +113,7 @@ class WorkTimeController < ApplicationController
     @link_params.merge!(:action=>"edit_relay");
     render(:layout=>false);
   end
-  
+
 private
   def find_project
     # Redmine Pluginとして必要らしいので@projectを設定
@@ -135,16 +135,16 @@ private
     @last_month = @this_date << 1;
     @next_month = @this_date >> 1;
     @month_str = sprintf("%04d-%02d", @this_year, @this_month);
-    
+
     @restrict_project = (params.key?(:prj) && params[:prj].to_i > 0) ? params[:prj].to_i : false;
-    
+
     @first_date = Date.new(@this_year, @this_month, 1);
     @last_date = (@first_date >> 1) - 1;
-    
+
     @month_names = l(:wt_month_names).split(',');
     @wday_name = l(:wt_week_day_names).split(',');
     @wday_color = ["#faa", "#eee", "#eee", "#eee", "#eee", "#eee", "#aaf"];
-    
+
     @link_params = {:controller=>"work_time", :id=>@project,
                     :year=>@this_year, :month=>@this_month, :day=>@this_day,
                     :user=>@this_uid, :prj=>@restrict_project};
@@ -228,7 +228,7 @@ private
       end
     end
   end
-  
+
   def hour_update # *********************************** 工数更新要求の処理
     return if @this_uid != @crnt_uid;
 
@@ -346,14 +346,14 @@ private
         else
           @disp_prj_issues[prj] = [[add,@disp_count]];
         end
-        
+
         if @this_uid==@crnt_uid then #本人ならDBに書き込んでしまう
           UserIssueMonth.create(:uid=>@this_uid, :issue=>add,
           :month=>@month_str, :odr=>@disp_count)
         end
       end
     end
-    
+
     # この日のチケット作成を洗い出す
     @worked_issues = [];
     next_date = @this_date+1
@@ -390,7 +390,7 @@ private
         @input_prj_issues[p] = [[i, -1]]; #新規ハッシュに配列を追加
       end
     end
-    
+
     # 各ユーザの表示プロジェクトに不足がないか確認
     prj_odr = WtProjectOrders.find(:all, :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
     prj_odr_num = prj_odr.size;
@@ -403,7 +403,7 @@ private
       WtProjectOrders.create(:prj=>@project.id, :uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
     end
   end
-  
+
   def prepare_activity_options
     # セレクトタグ用の工程項目を準備
     @activity_options = "";
@@ -417,7 +417,8 @@ private
     members = Member.find(:all, :conditions=>
     ["project_id=:prj", {:prj=>@project.id}]);
     members.each do |mem| # 現メンバーの中で
-      user = User.find(mem.user_id);
+      user = User.find_by_id(mem.user_id);
+      next if user.nil?;
       if user.active? then # アクティブで
         odr = WtMemberOrder.find(:first, :conditions=>["user_id=:u and prj_id=:p", {:u=>mem.user_id, :p=>@project.id}]);
         if !odr then # 未登録の者を追加
@@ -426,15 +427,15 @@ private
         end
       end
     end
-    
+
     @members = [];
     WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}]).each do |mo| # 登録されている者の中で
       mem = Member.find(:first, :conditions=>["user_id=:u and project_id=:p", {:u=>mo.user_id, :p=>@project.id}]);
       if !mem then # 登録されていないものは削除
         mo.destroy;
       else # 登録されていても
-        user = User.find(mo.user_id);
-        if !(user.active?) then # アクティブでないものは
+        user = User.find_by_id(mo.user_id);
+        if user.nil? || !(user.active?) then # アクティブでないものは
           mo.destroy; # 削除
         else
           @members.push([user.id,user.to_s]);
@@ -442,21 +443,21 @@ private
       end
     end
   end
-  
+
   def update_daily_memo # 日ごとメモの更新
     text = params["memo"] || return; # メモ更新のpostがあるか？
     year = params["year"] || return;
     month = params["month"] || return;
     day = params["day"] || return;
     user_id = params["user"] || return;
-    
+
     # ユーザと日付で既存のメモを検索
     date = Date.new(year.to_i,month.to_i,day.to_i);
     find = WtDailyMemo.find(:all, :conditions=>["day=:d and user_id=:u",{:d=>date,:u=>user_id}]);
     while find.size > 1 do # もし複数見つかったら
       (find.shift).destroy; # 消しておく
     end
-    
+
     if find.size != 0 then
       # 既存のメモがあれば
       record = find.shift;
@@ -521,7 +522,7 @@ private
       end
     end
   end
-  
+
   def change_member_position
     ################################### メンバー順序変更処理
     if params.key?("member_pos") && params[:member_pos]=~/^(.*)_(.*)$/ then
@@ -553,7 +554,7 @@ private
       end
     end
   end
-  
+
   def change_ticket_position
     ################################### チケット表示順序変更処理
     if params.key?("ticket_pos") && params[:ticket_pos]=~/^(.*)_(.*)$/ then
@@ -585,23 +586,23 @@ private
       end
     end
   end
-  
+
   def change_project_position
     ################################### プロジェクト表示順序変更処理
     return if !params.key?("prj_pos"); # 位置変更パラメータが無ければパス
     return if !(params[:prj_pos]=~/^(.*)_(.*)$/); # パラメータの形式が正しくなければパス
     dsp_prj = $1.to_i;
     dst = $2.to_i;
-    
+
     if !User.current.allowed_to?(:edit_work_time_total, @project) then
        # 権限が無ければパス
       @message = '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>';
       return;
     end
-    
+
     po = WtProjectOrders.find(:first, :conditions=>["prj=:p and uid=-1 and dsp_prj=:d",{:p=>@project.id, :d=>dsp_prj}]);
     return if po == nil; # 対象の表示プロジェクトが無ければパス
-    
+
     if po.dsp_pos > dst then # 前に持っていく場合
       tgts = WtProjectOrders.find(:all, :conditions=> ["prj=:p and uid=-1 and dsp_pos>=:o1 and dsp_pos<:o2",{:p=>@project.id, :o1=>dst, :o2=>po.dsp_pos}]);
       tgts.each do |mv|
@@ -609,7 +610,7 @@ private
       end
       po.dsp_pos=dst; po.save;
     end
-    
+
     if po.dsp_pos < dst then # 後に持っていく場合
       tgts = WtProjectOrders.find(:all, :conditions=> ["prj=:p and uid=-1 and dsp_pos<=:o1 and dsp_pos>:o2",{:p=>@project.id, :o1=>dst, :o2=>po.dsp_pos}]);
       tgts.each do |mv|
@@ -618,7 +619,7 @@ private
       po.dsp_pos=dst; po.save;
     end
   end
-  
+
   def calc_total
     ################################################  合計集計計算ループ ########
     @total_cost = 0;
@@ -640,7 +641,7 @@ private
       @prj_cost[i.dsp_prj] = Hash.new;
       @r_prj_cost[i.dsp_prj] = Hash.new;
     end
-    
+
     #当月の時間記録を抽出
     TimeEntry.find(:all, :conditions =>
     ["spent_on>=:t1 and spent_on<=:t2 and hours>0",
@@ -648,25 +649,25 @@ private
       iid = time_entry.issue_id;
       uid = time_entry.user_id;
       cost = time_entry.hours;
-      
+
       # 本プロジェクトのユーザの工数でなければパス
       next unless @member_cost.key?(uid);
-      
+
       issue = Issue.find_by_id(iid);
       next if issue.nil?; # チケットが削除されていたらパス
       pid = issue.project_id;
       # プロジェクト限定の対象でなければパス
       next if @restrict_project && pid != @restrict_project;
-      
+
       @total_cost += cost;
       @member_cost[uid] += cost;
-      
+
       # 親チケットを探索する
       parent_iid = iid;
       while true do
         parent_issue = Issue.find_by_id(parent_iid);
         break if parent_issue.nil?; # チケットが削除されていたらそこまで
-        
+
         if !(relay.key?(parent_iid)) then
           # まだ登録されていないチケットの場合、追加処理を行う
           relay[parent_iid] = 0;
@@ -674,7 +675,7 @@ private
           @r_issue_cost[parent_iid] = Hash.new;
           WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0);
         end
-        
+
         parent_pid = parent_issue.project_id;
         if !(@prj_cost.key?(parent_pid)) then
           # まだ登録されていないプロジェクトの場合、追加処理を行う
@@ -682,27 +683,27 @@ private
           @r_prj_cost[parent_pid] = Hash.new;
           WtProjectOrders.create(:prj=>@project.id, :uid=>-1, :dsp_prj=>parent_pid, :dsp_pos=>@prj_cost.size);
         end
-        
+
         (@issue_cost[parent_iid])[uid] ||= 0;
         (@issue_cost[parent_iid])[-1] ||= 0;
         (@prj_cost[parent_pid])[uid] ||= 0;
         (@prj_cost[parent_pid])[-1] ||= 0;
-        
+
         break if relay[parent_iid] == 0;
         # このチケットに親チケットがある場合は、その親チケットについて同じ処理を繰り返す
         parent_iid = relay[parent_iid];
       end
-      
+
       (@issue_cost[iid])[uid] += cost;
       (@issue_cost[iid])[-1] += cost;
       (@prj_cost[pid])[uid] += cost;
       (@prj_cost[pid])[-1] += cost;
-      
+
       (@r_issue_cost[parent_iid])[uid] ||= 0;
       (@r_issue_cost[parent_iid])[-1] ||= 0;
       (@r_prj_cost[parent_pid])[uid] ||= 0;
       (@r_prj_cost[parent_pid])[-1] ||= 0;
-      
+
       (@r_issue_cost[parent_iid])[uid] += cost;
       (@r_issue_cost[parent_iid])[-1] += cost;
       (@r_prj_cost[parent_pid])[uid] += cost;

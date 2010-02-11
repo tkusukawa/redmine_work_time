@@ -36,7 +36,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 </div>
 
 <%= @message %>
-<h2><%=l(:wt_monthly_report)%> (<%=User.find(@this_uid)%>)</h2>
+<h2><%=l(:wt_monthly_report)%> (<%=User.find_by_id(@this_uid)%>)</h2>
 <%= render :partial=>'user_month_table' %>
 
 </SCRIPT>
@@ -46,11 +46,11 @@ function dup_ticket(ajax_url, insert_pos, id)
   <%=l(:wt_daily_report)%>
 </h2>
 <% form_tag :action => "show" do %>
-<%= hidden_field_tag('year', @this_year); %> 
-<%= hidden_field_tag('month', @this_month); %> 
-<%= hidden_field_tag('day', @this_day); %> 
-<%= hidden_field_tag('user', @this_uid); %> 
-<%= hidden_field_tag('prj', @restrict_project); %> 
+<%= hidden_field_tag('year', @this_year); %>
+<%= hidden_field_tag('month', @this_month); %>
+<%= hidden_field_tag('day', @this_day); %>
+<%= hidden_field_tag('user', @this_uid); %>
+<%= hidden_field_tag('prj', @restrict_project); %>
 
 <%= render :partial=>'user_day_table' %>
 
