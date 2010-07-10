@@ -14,7 +14,6 @@ class WorkTimeController < ApplicationController
     ticket_del;
     hour_update;
     prepare_tickets_array;
-    prepare_activity_options;
     member_add_del_check;
     update_daily_memo;
     set_holiday;
@@ -401,14 +400,6 @@ private
     prjs.each do |prj| # 追加すべきPrjをDB登録
       prj_odr_num += 1;
       WtProjectOrders.create(:prj=>@project.id, :uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
-    end
-  end
-
-  def prepare_activity_options
-    # セレクトタグ用の工程項目を準備
-    @activity_options = "";
-    WorkTimeCompatibility::Enumeration.activities.each do |enm|
-      @activity_options += "<option value="+enm.id.to_s+">"+enm.name
     end
   end
 

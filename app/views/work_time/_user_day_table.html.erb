@@ -26,6 +26,10 @@ prj_odr.each do |po|
  prj_day_sum = TimeEntry.sum(:hours, :conditions=>
              ["user_id=:u and project_id=:p and spent_on=:d", 
              {:u => @this_uid, :p=>dsp_prj, :d=>@this_date}]);
+  activities = [];
+  prj.activities.each do |act|
+    activities.push([act.name, act.id]);
+  end
 %>
 <tr style="background:#000;color:#fff;">
   <td>
@@ -70,7 +74,7 @@ prj_odr.each do |po|
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", @activity_options, :required => true %>
+    <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", options_for_select(activities), :required => true %>
   </td>
   <td>
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][comments]", "", :size=>80)%>
@@ -108,17 +112,7 @@ prj_odr.each do |po|
     <%= text_field_tag("time_entry["+t.id.to_s+"][hours]", t.hours, :size=>5) %>
   </td>
   <td>
-<%
-activity = "";
-WorkTimeCompatibility::Enumeration.activities.each do |enm|
-  if enm.id == t.activity_id then
-    activity += "<option value="+enm.id.to_s+" selected>"+enm.name
-  else
-    activity += "<option value="+enm.id.to_s+">"+enm.name
-  end
-end
-%>
-    <%= select_tag "time_entry["+t.id.to_s+"][activity_id]", activity, :required => true %>
+    <%= select_tag "time_entry["+t.id.to_s+"][activity_id]", options_for_select(activities, t.activity_id), :required => true %>
   </td>
   <td>
     <%= text_field_tag("time_entry["+t.id.to_s+"][comments]", t.comments, :size=>80)%>
