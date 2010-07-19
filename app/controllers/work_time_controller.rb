@@ -252,11 +252,15 @@ private
     if params["time_entry"] then
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find(id);
-        vals["hours"] = (vals["hours"] == "") ? "0" : vals["hours"];
-        tm.attributes = vals;
-        tm.save;
-        msg = hour_update_check_error(tm, tm.issue.id);
-        @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != "";
+        if vals["hours"] == "" then
+          # 工数指定が空文字の場合は工数項目を削除
+          tm.destroy;
+        else
+          tm.attributes = vals;
+          tm.save;
+          msg = hour_update_check_error(tm, tm.issue.id);
+          @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != "";
+        end
       end
     end
   end
