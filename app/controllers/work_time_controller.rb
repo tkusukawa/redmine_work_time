@@ -239,6 +239,10 @@ private
         next if issue.nil?;
         valss.each do |count, vals|
           next if vals['hours'] == "";
+          if !vals['activity_id'] then
+            @message += '<div style="background:#faa;">Error: Issue'+issue_id+': No Activities!</div><br>';
+             next;
+          end
           new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
           new_entry.attributes = vals;
           new_entry.save;
