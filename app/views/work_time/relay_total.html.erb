@@ -6,7 +6,7 @@
 [<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
 [<%= link_to(l(:wt_edit_relay), @link_params.merge(:action=>"edit_relay")) %>]
 [<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
-[<%= link_to("data list", @link_params.merge(:action=>"relay_total2")) %>]
+[<%= link_to(l(:wt_data_list), @link_params.merge(:action=>"relay_total2")) %>]
 </div>
 
 <h2><%=l(:wt_relay_total)%></h2>
@@ -43,7 +43,7 @@ members.each do |mem|
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
 <a href="JavaScript:member_pos('<%=url_for(@link_params)%>', <%=mem.user_id%>,<%=mem.position%>,<%=max%>);"><%=mem.position%></a>
 <%end%>
-<div style="top:2px;width:16px;font-size:16px;">
+<div style="top:2px;width:56px;font-size:10px;">
 <%= link_to(user, @link_params.merge(:action=>"show", :user=>mem.user_id));%>
 </td>
 <%
@@ -160,5 +160,5 @@ end
 [<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
 [<%= link_to(l(:wt_edit_relay), @link_params.merge(:action=>"edit_relay")) %>]
 [<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
-[<%= link_to("data list", @link_params.merge(:action=>"relay_total2")) %>]
+[<%= link_to(l(:wt_data_list), @link_params.merge(:action=>"relay_total2")) %>]
 </div>

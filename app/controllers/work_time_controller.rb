@@ -215,7 +215,7 @@ private
                    ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0 and issue_id=:i",
                    {:uid => src.uid, :day1 => @first_date, :day2 => @last_date, :i=>src.issue}]);
         if entry.size != 0 then
-          @message = '<div style="color:#f00;">当該チケットの工数登録が0でないため削除できません</div>';
+        @message = '<div style="color:#f00;">'+l(:wt_no_permission_del)+'</div>';
         else
           tgts = UserIssueMonth.find(:all, :conditions=>
                  ["uid=:u and month=:m and odr>:o",{:u=>src.uid, :m=>src.month, :o=>src.odr}]);

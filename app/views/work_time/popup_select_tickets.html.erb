@@ -56,7 +56,7 @@ function checkKey(e)
 <h2><%=l(:wt_ticket)%></h2>
 
 <select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, method:'get'}); return false;}">
-  <option value=''>select project...</option>
+  <option value=''><%=l(:wt_select_project)%></option>
   <option disabled="disabled">---</option>
 <%
 projects = Project.find(:all, :order=>"name");
@@ -74,7 +74,7 @@ end
 %>
 </select> <br>
 <div id="tickets">
-or input ticket numbers
+<%=l(:wt_input_ticket_numbers)%>
   <form>
     <input type="text" size=32 onKeyPress="return checkKey(event);">
     <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">

@@ -42,7 +42,7 @@ members.each do |mem|
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
 <a href="JavaScript:member_pos('<%=url_for(@link_params)%>', <%=mem.user_id%>,<%=mem.position%>,<%=max%>);"><%=mem.position%></a>
 <%end%>
-<div style="top:2px;width:16px;font-size:16px;">
+<div style="top:2px;width:56px;font-size:10px;">
 <%= link_to(user, @link_params.merge(:action=>"show", :user=>mem.user_id));%>
 </td>
 <%

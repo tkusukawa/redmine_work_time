@@ -1,6 +1,6 @@
 ﻿<%#**************************************************** ユーザセレクタ %>
 <select onchange="if (this.value != '') {window.location = this.value;}">
-  <option selected="selected">select user...</option>
+  <option selected="selected"><%=l(:wt_select_user)%></option>
   <option disabled="disabled">---</option>
 <%
 @members.each do |mem|
