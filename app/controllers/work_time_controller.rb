@@ -275,11 +275,10 @@ private
     str = "ERROR:#"+issue_id.to_s+"<br>";
     obj.errors.each do |attr, msg|
       next if msg.nil?
-      msg = [msg] unless msg.is_a?(Array)
       if attr == "base"
-        str += l(*msg)
+        str += msg
       else
-        str += "&#171; " + (l_has_string?("field_" + attr) ? l("field_" + attr) : object.class.human_attribute_name(attr)) + " &#187; " + l(*msg) + "<br>" unless attr == "custom_values"
+        str += "&#171; " + l("field_#{attr}") + " &#187; " + msg + "<br>" unless attr == "custom_values"
       end
     end
     # retrieve custom values error messages
@@ -287,8 +286,7 @@ private
       obj.custom_values.each do |v|
         v.errors.each do |attr, msg|
           next if msg.nil?
-          msg = [msg] unless msg.is_a?(Array)
-          str += "&#171; " + v.custom_field.name + " &#187; " + l(*msg) + "<br>"
+          str += "&#171; " + v.custom_field.name + " &#187; " + msg + "<br>"
         end
       end
     end
