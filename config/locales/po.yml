@@ -21,5 +21,7 @@ po:
   wt_select_project: "Select project..."
   wt_select_user: "Select user..."
   wt_edit_memo: "Edit memo"
+  wt_pre_memo: "pre. memo"
+  wt_next_memo: "next memo"
   wt_data_list: "Data list"
   wt_input_ticket_numbers: "or input ticket numbers"

@@ -93,7 +93,7 @@ memo=WtDailyMemo.find(:first, :order=>"day DESC", :conditions=>["day<:d and user
 if memo then
 d = memo.day;
 %>
-<%= link_to("[pre. memo]", @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>
+[<%= link_to(l(:wt_pre_memo), @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>]
 <%end%>
 
 <%
@@ -101,7 +101,7 @@ memo=WtDailyMemo.find(:first, :order=>"day", :conditions=>["day>:d and user_id=:
 if memo then
 d = memo.day;
 %>
-<%= link_to("[next memo]", @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>
+[<%= link_to(l(:wt_next_memo), @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>]
 <%end%>
 <br>
 
