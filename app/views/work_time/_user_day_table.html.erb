@@ -69,6 +69,8 @@ prj_odr.each do |po|
                                     <%=issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
+    <a href="JavaScript:update_done_ratio('<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+                                    <%=issue.id%>);">[<%=issue.done_ratio%>&#37;]</a>
   </td>
   <td>
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
@@ -107,6 +109,8 @@ prj_odr.each do |po|
                                     <%=issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
     <%= print_issue_cost(issue) %>
+    <a href="JavaScript:update_done_ratio('<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+                                   <%=issue.id%>);">[<%=issue.done_ratio%>&#37;]</a>
   </td>
   <td>
     <%= text_field_tag("time_entry["+t.id.to_s+"][hours]", t.hours, :size=>5) %>
