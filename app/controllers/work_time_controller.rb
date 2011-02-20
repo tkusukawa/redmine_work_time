@@ -323,8 +323,8 @@ private
       last_month_str = params["cp_dsp"];
       last_disp = UserIssueMonth.find(:all, :order=>"odr",
       :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>last_month_str}])
-      last_disp.each do |disp|
-        add_issues |= [disp.issue]
+      last_disp.each do |d|
+        add_issues |= [d.issue]
       end
     end
 

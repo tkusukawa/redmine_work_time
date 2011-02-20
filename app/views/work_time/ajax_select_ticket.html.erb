@@ -10,10 +10,10 @@ issues.each do |issue|
   end
 %>
 <div style="font-size:14px;">
-<a onclick="JavaScript:ticket_selected('<%=issue.id%>');" href="#">[<%=l(:button_apply)%>]</a>
+<input type="button" onclick="JavaScript:ticket_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
 <%=issueHtml%>
 <a onclick="JavaScript:ticket_check('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');" href="#">？</a>
-<br>
+<br/>
 </div>
 <%end%>
 

@@ -2,14 +2,14 @@
 <head>
 <title>select tickets</title>
 <%=javascript_include_tag "prototype" %>
-<SCRIPT Language="JavaScript">
+<script type="text/javascript">
 <!--
 function ticket_inputed()
 {
   var vals = document.forms[0].elements[0].value;
   var tickets = vals.split(',');
   var issue_ids = new Array;
-  while(val=tickets.shift()) {
+  while((val=tickets.shift())) {
     issue_ids.push(val);
   }
   returnValue=issue_ids;
@@ -49,7 +49,7 @@ function checkKey(e)
     return e;
 }
 -->
-</SCRIPT>
+</script>
 </head>
 
 <body onLoad="document.forms[0].elements[0].focus();">
@@ -72,12 +72,14 @@ projects.each do |prj|
 <%
 end
 %>
-</select> <br>
+</select>
+<br/>
 <div id="tickets">
 <%=l(:wt_input_ticket_numbers)%>
-  <form>
-    <input type="text" size=32 onKeyPress="return checkKey(event);">
-    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
+  <form action="">
+    <input type="text" size=32 onKeyPress="return checkKey(event);"/>
+    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();"/>
   </form>
 </div>
 </body>
+</html>
