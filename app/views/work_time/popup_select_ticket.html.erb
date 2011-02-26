@@ -2,7 +2,7 @@
 <head>
 <title>select a ticket</title>
 <%=javascript_include_tag "prototype" %>
-<SCRIPT Language="JavaScript">
+<script type="text/javascript">
 <!--
 function ticket_inputed()
 {
@@ -16,11 +16,6 @@ function ticket_selected(issue_id)
   close();
 }
 
-function ticket_check(url)
-{
-  showModalDialog(url, window, "");
-}
-
 function checkKey(e)
 {
   if (!e) var e = window.event;
@@ -32,7 +27,7 @@ function checkKey(e)
     return e;
 }
 -->
-</SCRIPT>
+</script>
 </head>
 
 <body onLoad="document.forms[0].elements[0].focus();">
@@ -55,12 +50,14 @@ projects.each do |prj|
 <%
 end
 %>
-</select> <br>
+</select>
+<br/>
 <div id="tickets">
 or input a ticket number
-  <form>
-    <input type="text" size=32 onKeyPress="return checkKey(event);">
-    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();">
+  <form action="">
+    <input type="text" size=32 onKeyPress="return checkKey(event);"/>
+    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();"/>
   </form>
 </div>
 </body>
+</html>

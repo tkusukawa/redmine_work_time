@@ -37,12 +37,19 @@ if uid!=User.current.id then
 <tr style="background:#ddf;" id="time_entry_pos<%=suffix%>">
   <td>
     <%=prj.name%>
-    <br>
+    <br/>
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos<%=suffix%>',
                                     <%=add_issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>add_issue.id) %>
     <%= print_issue_cost(add_issue) %>
+        <a name="<%='done_ratio'+add_issue.id.to_s%>"
+        href="JavaScript:update_done_ratio(
+          '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+          '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+          <%=add_issue.id%>);">
+      [<%=add_issue.done_ratio%>&#37;]
+    </a>
   </td>
   <td>
     <%= text_field_tag("new_time_entry"+suffix+"[hours]", "", :size=>5) %>

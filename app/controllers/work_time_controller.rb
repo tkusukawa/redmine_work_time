@@ -113,6 +113,30 @@ class WorkTimeController < ApplicationController
     render(:layout=>false);
   end
 
+  def popup_update_done_ratio # 進捗％更新ポップアップ
+    issue_id = params[:issue_id];
+    @issue = Issue.find_by_id(issue_id);
+    if @issue.closed? then
+      next if !params.key?(:all);
+      @issueHtml = "<del>"+@issue.to_s+"</del>";
+    else
+      @issueHtml = @issue.to_s;
+    end
+    render(:layout=>false);
+  end
+
+  def ajax_update_done_ratio
+    issue_id = params[:issue_id];
+    done_ratio = params[:done_ratio];
+    @issue = Issue.find_by_id(issue_id);
+    if User.current.allowed_to?(:edit_issues, @issue.project) then
+      @issue.init_journal(User.current);
+      @issue.done_ratio = done_ratio;
+      @issue.save;
+    end
+    render(:layout=>false);
+  end
+
 private
   def find_project
     # Redmine Pluginとして必要らしいので@projectを設定
@@ -323,8 +347,8 @@ private
       last_month_str = params["cp_dsp"];
       last_disp = UserIssueMonth.find(:all, :order=>"odr",
       :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>last_month_str}])
-      last_disp.each do |disp|
-        add_issues |= [disp.issue]
+      last_disp.each do |d|
+        add_issues |= [d.issue]
       end
     end
 

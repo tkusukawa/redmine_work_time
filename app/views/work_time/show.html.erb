@@ -1,12 +1,12 @@
 <%=javascript_include_tag "prototype" %>
 <%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
-<SCRIPT Language="JavaScript">
+<script type="text/javascript">
 <!--
 var add_ticket_count = 1;
 function add_ticket(pop_url, ajax_url)
 {
   var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
-  while(id = tickets.shift()) {
+  while((id = tickets.shift())) {
       new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.Before, method:'get'});
       add_ticket_count ++;
   }
@@ -18,13 +18,13 @@ function dup_ticket(ajax_url, insert_pos, id)
       add_ticket_count ++;
 }
 -->
-</SCRIPT>
+</script>
 
-<div align="right">
-<%= render :partial=>'select_project' %><br>
+<div style="text-align:right;">
+<%= render :partial=>'select_project' %><br/>
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
   <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
-  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br>
+  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br/>
 <%end%>
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
   <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
@@ -39,8 +39,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 <h2><%=l(:wt_monthly_report)%> (<%=User.find_by_id(@this_uid)%>)</h2>
 <%= render :partial=>'user_month_table' %>
 
-</SCRIPT>
-<br>
+<br/>
 
 <h2>
   <%=l(:wt_daily_report)%>
@@ -62,9 +61,30 @@ function dup_ticket(ajax_url, insert_pos, id)
 </a>]
 [<%= link_to(l(:wt_copy_last_month_tickets), @link_params.merge(:cp_dsp=>sprintf("%04d-%02d", @last_month.year, @last_month.month))) %>]
 <%= submit_tag l(:wt_update) %>
-<br>
+<br/>
 <%end%>
+
+<br/>
+<h2>
+  <%= @this_year %>/<%= @this_month%>/<%=@this_day%> (<%=@wday_name[@this_date.wday]%>)
+  <%=User.find_by_id(@this_uid)%>
+</h2>
 <div id="memo">
+
+
+<%#------------------------------------------- Wiki表示#%>
+<%
+memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+if memo then # この日のメモがある場合
+%>
+<div class="wiki" style="background:#ffb;">
+  <%=textilizable(memo.description) %>
+  <div style="text-align:right;">
+    (update:<%=memo.updated_on.strftime("%y/%m/%d %H:%M")%>)
+  </div>
+</div>
+<%end%>
+
 <%if @this_uid==@crnt_uid then%>
 [<a href="#" onclick="JavaScript:new Ajax.Updater('memo',
   '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
@@ -73,22 +93,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 </a>]
 <%end%>
 
-<%#------------------------------------------- Wiki表示#%>
-<%
-memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
-if memo then # この日のメモがある場合
-%>
-<br><br>
-<h2> memo <%= @this_year %>/<%= @this_month%>/<%=@this_day%> (<%=@wday_name[@this_date.wday]%>)</h2>
-<div class="wiki" style="background:#ffb;">
-  <%=textilizable(memo.description) %>
-  <div align="right">
-    (update:<%=memo.updated_on.strftime("%y/%m/%d %H:%M")%>)
-  </div>
-</div>
-<%end%>
-
-<%
+  <%
 memo=WtDailyMemo.find(:first, :order=>"day DESC", :conditions=>["day<:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
 if memo then
 d = memo.day;
@@ -103,7 +108,7 @@ d = memo.day;
 %>
 [<%= link_to(l(:wt_next_memo), @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year));%>]
 <%end%>
-<br>
+<br/>
 
 <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params.merge(:anchor=>"memo")} %>
 

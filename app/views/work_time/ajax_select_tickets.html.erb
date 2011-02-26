@@ -1,4 +1,4 @@
-<form style="font-size:14px;">
+<form style="font-size:14px;" action="">
 <%
 issues = Issue.find(:all, :order=>"id DESC", :conditions =>
                      ["project_id=:p",{:p=>params[:prj]}])
@@ -10,16 +10,19 @@ issues.each do |issue|
     issueHtml = issue.to_s;
   end
 %>
-<input type="checkbox" name="selected"  value="<%=issue.id%>">
-<a onclick="JavaScript:ticket_selected('<%=issue.id%>');" href="#">[<%=l(:button_apply)%>]</a>
+<input type="checkbox" name="selected"  value="<%=issue.id%>"/>
+<input type="button" onclick="JavaScript:ticket_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
 <%=issueHtml%>
-<a onclick="JavaScript:ticket_check('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');" href="#">？</a>
-<br>
+<a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
+  ？
+</a>
+<br/>
 <%end%>
 </form>
-<a onclick="JavaScript:tickets_selected();" href="#">[<%=l(:wt_apply_checked)%>]</a>
+<input type="button" onclick="JavaScript:tickets_selected();" value="<%=l(:wt_apply_checked)%>"/>
 
 <%if !params.key?(:all) then
     url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'');%>
+  <br/>
   <a onclick="new Ajax.Updater('tickets', '<%=url%>', {asynchronous:true, method:'get'}); return false;" href="#">[display closed ticket]</a>
 <%end%>

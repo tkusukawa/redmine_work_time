@@ -1,8 +1,8 @@
 <%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
 
 <%= @message %>
-<div align="right">
-<%= render :partial=>'select_project' %> <br>
+<div style="text-align:right;">
+<%= render :partial=>'select_project' %> <br/>
 [<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
 [<%= link_to(l(:wt_edit_relay), @link_params.merge(:action=>"edit_relay")) %>]
 [<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
@@ -20,7 +20,7 @@ end
 <table border="1">
 <tr valign="top">
 <td>
-<div align="center" style="position:relative;top:1px;left:1px;font-size:2.0em;">
+<div style="text-align:center;position:relative;top:1px;left:1px;font-size:2.0em;">
 <%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year));%>
 <%= @this_year %>-<%= @month_names[@this_month-1] %>
 <%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year));%>
@@ -45,6 +45,7 @@ members.each do |mem|
 <%end%>
 <div style="top:2px;width:56px;font-size:10px;">
 <%= link_to(user, @link_params.merge(:action=>"show", :user=>mem.user_id));%>
+</div>
 </td>
 <%
   num += 1;
@@ -155,8 +156,8 @@ end
 %>
 </table>
 
-<div align="right">
-<%= render :partial=>'select_project' %> <br>
+<div style="text-align:right;">
+<%= render :partial=>'select_project' %> <br/>
 [<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
 [<%= link_to(l(:wt_edit_relay), @link_params.merge(:action=>"edit_relay")) %>]
 [<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]

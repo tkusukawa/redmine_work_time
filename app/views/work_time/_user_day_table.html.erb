@@ -2,8 +2,8 @@
   <tr align="center" style="background:#ddd;">
     <td>
       <div style="position:relative;height:25px;">
-        <div style="posision:absolute;top:3px;left:20px;width:200px;font-size:1.5em;">
-          <%= @this_year %>/<%= @month_names[@this_month-1]%>/<%=@this_day%><br>
+        <div style="top:3px;left:20px;width:200px;font-size:1.5em;">
+          <%= @this_year %>/<%= @month_names[@this_month-1]%>/<%=@this_day%><br/>
         </div>
       </div>
     </td>
@@ -38,7 +38,7 @@ prj_odr.each do |po|
         </a>
         <%=prj.name%>
   </td>
-  <td><%=prj_day_sum%></td>
+  <td><%=sprintf("%1.1f", prj_day_sum)%></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>
@@ -67,8 +67,17 @@ prj_odr.each do |po|
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos[<%=issue.id%>][0]',
                                     <%=issue.id%>);">+</a>
-    <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
+    <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
+      <%=issueHtml%>
+    </a>
     <%= print_issue_cost(issue) %>
+    <a name="<%='done_ratio'+issue.id.to_s%>"
+        href="JavaScript:update_done_ratio(
+          '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+          '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+          <%=issue.id%>);">
+      [<%=issue.done_ratio%>&#37;]
+    </a>
   </td>
   <td>
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
@@ -105,8 +114,18 @@ prj_odr.each do |po|
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos<%=t.id%>',
                                     <%=issue.id%>);">+</a>
-    <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
+    <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
+      <%=issueHtml%>
+    </a>
+
     <%= print_issue_cost(issue) %>
+    <a name="<%='done_ratio'+issue.id.to_s%>"
+        href="JavaScript:update_done_ratio(
+          '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+          '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+          <%=issue.id%>);">
+      [<%=issue.done_ratio%>&#37;]
+    </a>
   </td>
   <td>
     <%= text_field_tag("time_entry["+t.id.to_s+"][hours]", t.hours, :size=>5) %>

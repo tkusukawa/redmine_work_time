@@ -1,0 +1,51 @@
+<%#
+# 進捗％更新ポップアップ
+%>
+
+<script type="text/javascript">
+<!--
+function ticket_inputed()
+{
+  returnValue = document.forms[0].elements[0].value;
+  close();
+}
+
+function checkKey(e)
+{
+  if (!e) var e = window.event;
+  if(e.keyCode == 13) {
+    ticket_inputed();
+    return false;
+  }
+  else
+    return e;
+}
+-->
+</script>
+
+<html>
+  <head>
+    <title>update done ratio</title>
+  </head>
+  <body onLoad="document.forms[0].elements[0].focus();">
+    <h2><%=l(:label_update_issue_done_ratios)%></h2>
+    <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>@issue.id)%>', window, '');" href="#">
+      <%= @issueHtml %>
+    </a>
+    <% if @issue.estimated_hours then %>
+      <%= print_issue_cost(@issue) %>
+      &#61;
+      <%= print_issue_cost_rate(@issue) %>
+      &#37;
+    <% end %>
+    <br/>
+    <form action="">
+      <%= @issue.done_ratio %>
+      &#37;
+      &rarr;
+      <input type="text" size="4" onKeyPress="return checkKey(event);" value="<%= print_issue_cost_rate(@issue) %>"/>
+       &#37;
+      <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();"/>
+    </form>
+  </body>
+</html>

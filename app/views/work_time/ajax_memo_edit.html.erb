@@ -5,9 +5,6 @@ day = params["day"];
 user_id = params["user"];
 date = Date.new(year.to_i,month.to_i,day.to_i);
 wday_name = l(:wt_week_day_names).split(',');
-%>
-<h2> memo <%= year %>/<%= month%>/<%=day%> (<%=wday_name[date.wday]%>)</h2>
-<%
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>date,:u=>user_id}])
 if memo then
 %>
@@ -15,3 +12,5 @@ if memo then
 <%else%>
 <textarea name="memo" rows="15" cols="100"></textarea>
 <%end%>
+<br/>
+<%= submit_tag l(:wt_update) %>
