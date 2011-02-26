@@ -43,7 +43,7 @@ if uid!=User.current.id then
                                     <%=add_issue.id%>);">+</a>
     <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>add_issue.id) %>
     <%= print_issue_cost(add_issue) %>
-        <a id="<%='done_ratio'+add_issue.id.to_s%>"
+        <a name="<%='done_ratio'+add_issue.id.to_s%>"
         href="JavaScript:update_done_ratio(
           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
           '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',

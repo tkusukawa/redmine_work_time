@@ -45,10 +45,16 @@ function set_ticket_relay(pop_url, rep_url, child)
 function update_done_ratio(pop_url, rep_url, issue_id)
 {
   var done_ratio = showModalDialog(pop_url+"&issue_id="+issue_id,
-        window, "dialogWidth:200px;dialogHeight:150px");
+        window, "dialogWidth:500px;dialogHeight:150px");
   if(done_ratio!=null){
     new Ajax.Updater('done_ratio'+issue_id,
                      rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
                      {asynchronous:true, method:'get'});
+
+    var drs = document.getElementsByName("done_ratio"+issue_id);
+    for(var i = 0; i < drs.length; i++) {
+      drs[i].innerHTML = "["+done_ratio+"&#37;]";
+    }
   }
+
 }

@@ -67,9 +67,11 @@ prj_odr.each do |po|
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos[<%=issue.id%>][0]',
                                     <%=issue.id%>);">+</a>
-    <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
+    <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
+      <%=issueHtml%>
+    </a>
     <%= print_issue_cost(issue) %>
-    <a id="<%='done_ratio'+issue.id.to_s%>"
+    <a name="<%='done_ratio'+issue.id.to_s%>"
         href="JavaScript:update_done_ratio(
           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
           '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
@@ -112,9 +114,12 @@ prj_odr.each do |po|
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos<%=t.id%>',
                                     <%=issue.id%>);">+</a>
-    <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
+    <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
+      <%=issueHtml%>
+    </a>
+
     <%= print_issue_cost(issue) %>
-    <a id="<%='done_ratio'+issue.id.to_s%>"
+    <a name="<%='done_ratio'+issue.id.to_s%>"
         href="JavaScript:update_done_ratio(
           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
           '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',

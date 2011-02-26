@@ -130,6 +130,7 @@ class WorkTimeController < ApplicationController
     done_ratio = params[:done_ratio];
     @issue = Issue.find_by_id(issue_id);
     if User.current.allowed_to?(:edit_issues, @issue.project) then
+      @issue.init_journal(User.current);
       @issue.done_ratio = done_ratio;
       @issue.save;
     end

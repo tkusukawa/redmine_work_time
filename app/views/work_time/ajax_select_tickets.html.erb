@@ -13,7 +13,9 @@ issues.each do |issue|
 <input type="checkbox" name="selected"  value="<%=issue.id%>"/>
 <input type="button" onclick="JavaScript:ticket_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
 <%=issueHtml%>
-<a onclick="JavaScript:ticket_check('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');" href="#">？</a>
+<a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
+  ？
+</a>
 <br/>
 <%end%>
 </form>
