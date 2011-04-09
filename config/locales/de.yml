@@ -1,4 +1,4 @@
-﻿de:
+de:
   work_time: "Zeiterfassung"
   wt_update: "Aktualisieren"
   wt_month_names: "Jan,Feb,Mar,Apr,Mai,Jun,Jul,Aug,Sep,Okt,Nov,Dez"
@@ -13,7 +13,7 @@
   wt_add_ticket: "Ticket hinzufügen"
   wt_copy_last_month_tickets: "Vormonatstickets einfügen"
   wt_no_permission: "Keine Berechtigung"
-  wt_no_permission_del: "Can not delete because there are requests man-hours"
+  wt_no_permission_del: "Eintrag kann nicht gelöscht werden, da Aufwände erfasst sind."
   wt_loop_relay: "Zyklus bei der Aufwandsfortschreibung!"
   wt_set_holiday: "Tag zum Urlaubs-/Feiertag machen"
   wt_del_holiday: "Tag zum Arbeitstag machen"
