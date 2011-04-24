@@ -13,5 +13,6 @@ Redmine::Plugin.register :redmine_work_time do
     permission :view_work_time_other_member, {}
   end
 
+  menu :account_menu, :work_time, {:controller => 'work_time', :action => 'index'}, :caption => :work_time
   menu :project_menu, :work_time, {:controller => 'work_time', :action => 'show'}, :caption => :work_time
 end

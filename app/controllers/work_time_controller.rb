@@ -5,6 +5,21 @@ class WorkTimeController < ApplicationController
   helper :custom_fields
   include CustomFieldsHelper
 
+  def index
+    @project = nil
+    prepare_values;
+    ticket_pos;
+    prj_pos;
+    ticket_del;
+    hour_update;
+    prepare_tickets_array;
+    update_daily_memo;
+    set_holiday;
+    @custom_fields = TimeEntryCustomField.find(:all);
+    @link_params.merge!(:action=>"index");
+    render "show"
+  end
+
   def show
     find_project;
     authorize;
@@ -320,7 +335,7 @@ private
   def prepare_tickets_array # チケット表示項目を作成
     # 既存の表示項目を取得
     disp = UserIssueMonth.find(:all, :order=>"odr",
-           :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>@month_str}])
+      :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>@month_str}])
     # 今回表示するチケットIDの配列を作成
     @disp_prj_issues = Hash.new;
     @disp_issues = [];
@@ -346,7 +361,7 @@ private
     if params.key?("cp_dsp") then
       last_month_str = params["cp_dsp"];
       last_disp = UserIssueMonth.find(:all, :order=>"odr",
-      :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>last_month_str}])
+        :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>last_month_str}])
       last_disp.each do |d|
         add_issues |= [d.issue]
       end
@@ -354,8 +369,8 @@ private
 
     #当該ユーザの当月の工数に新しいチケットが無いか確認
     time_entry = TimeEntry.find(:all, :conditions =>
-    ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0",
-    {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
+        ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0",
+        {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
 
     time_entry.each do |e| #各工数のチケットを追加対象にする
       add_issues |= [e.issue.id] if e.issue;
@@ -378,7 +393,7 @@ private
 
         if @this_uid==@crnt_uid then #本人ならDBに書き込んでしまう
           UserIssueMonth.create(:uid=>@this_uid, :issue=>add,
-          :month=>@month_str, :odr=>@disp_count)
+            :month=>@month_str, :odr=>@disp_count)
         end
       end
     end
@@ -389,14 +404,14 @@ private
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day);
     t2 = Time.local(next_date.year, next_date.month, next_date.day);
     issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
-                                       {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
+        {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
     issues.each do |issue|
       @worked_issues |= [issue.id];
     end
     # この日のチケット操作を洗い出す
     journals = Journal.find(:all, :conditions=>
-             ["journalized_type='Issue' and user_id=:u and created_on>=:t1 and created_on<:t2",
-             {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
+        ["journalized_type='Issue' and user_id=:u and created_on>=:t1 and created_on<:t2",
+        {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
     journals.each do |j|
       @worked_issues |= [j.journalized_id];
     end
@@ -421,7 +436,12 @@ private
     end
 
     # 各ユーザの表示プロジェクトに不足がないか確認
-    prj_odr = WtProjectOrders.find(:all, :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
+    if @project then
+      prj_odr = WtProjectOrders.find(:all, :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
+
+    else 
+      prj_odr = WtProjectOrders.find(:all, :conditions=>["prj is null and uid=:u",{:u=>@this_uid}]);
+    end
     prj_odr_num = prj_odr.size;
     prjs = @input_prj_issues.keys; # 表示すべき全Prjから
     prj_odr.each do |po|
@@ -429,10 +449,14 @@ private
     end
     prjs.each do |prj| # 追加すべきPrjをDB登録
       prj_odr_num += 1;
-      WtProjectOrders.create(:prj=>@project.id, :uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
+      if @project then
+        WtProjectOrders.create(:prj=>@project.id, :uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
+      else
+        WtProjectOrders.create(:uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
+      end
     end
   end
-
+  
   def member_add_del_check
     #---------------------------------------- メンバーの増減をチェック
     members = Member.find(:all, :conditions=>

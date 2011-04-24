@@ -1,4 +1,5 @@
 ﻿<%#**************************************************** ユーザセレクタ %>
+<%if @project then%>
 <select onchange="if (this.value != '') {window.location = this.value;}">
   <option selected="selected"><%=l(:wt_select_user)%></option>
   <option disabled="disabled">---</option>
@@ -12,3 +13,4 @@
 end
 %>
 </select>
+<%end%>

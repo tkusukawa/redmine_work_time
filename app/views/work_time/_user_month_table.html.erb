@@ -32,7 +32,11 @@ ofst_t = win_hs*3-5;
 max = @disp_issues.size;
 month_cost = 0;
 
-prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
+if @project then
+  prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
+else
+  prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj is null and uid=:u",{:u=>@this_uid}]);
+end
 
 prj_odr.each do |po|
   dsp_prj = po.dsp_prj;
