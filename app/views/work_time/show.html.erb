@@ -59,7 +59,6 @@ function dup_ticket(ajax_url, insert_pos, id)
 >
   <%=l(:wt_add_ticket)%>
 </a>]
-[<%= link_to(l(:wt_copy_last_month_tickets), @link_params.merge(:cp_dsp=>sprintf("%04d-%02d", @last_month.year, @last_month.month))) %>]
 <%= submit_tag l(:wt_update) %>
 <br/>
 <%end%>

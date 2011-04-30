@@ -11,7 +11,6 @@ po:
   wt_relay_total: "Tikect Relayed Monthly Report"
   wt_ticket: "Ticket"
   wt_add_ticket: "Add ticket"
-  wt_copy_last_month_tickets: "Copy last month tickets"
   wt_no_permission: "No permission"
   wt_no_permission_del: "Can not delete because there are requests man-hours"
   wt_loop_relay: "Ticket relation looped"

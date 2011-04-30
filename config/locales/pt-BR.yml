@@ -11,7 +11,6 @@ pt-BR:
   wt_relay_total: "Relatório mensal de tarefas reenviadas"
   wt_ticket: "Tarefa"
   wt_add_ticket: "Nova tarefa"
-  wt_copy_last_month_tickets: "Copia tarefas do ultimo mês"
   wt_no_permission: "Sem permissão"
   wt_no_permission_del: "Não é possível excluir porque há pedidos de horas-homem"
   wt_loop_relay: "Ticket relation looped"

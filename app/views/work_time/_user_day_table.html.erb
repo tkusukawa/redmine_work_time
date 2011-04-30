@@ -16,11 +16,7 @@
   </tr>
 <%
 day_total = 0;
-if @project then
-  prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
-else
-  prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj is null and uid=:u",{:u=>@this_uid}]);
-end
+prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]);
 
 prj_odr.each do |po|
  dsp_prj = po.dsp_prj;
@@ -50,11 +46,12 @@ prj_odr.each do |po|
   <% end %>
 </tr>
 <%
- @input_prj_issues[dsp_prj].each do |issue_odr|
-  issue_id = issue_odr[0];
+ @input_prj_issues[dsp_prj].each do |dsp_issue|
+  issue_id = dsp_issue[0];
+  issue_odr = dsp_issue[1];
   issue_color = @worked_issues.include?(issue_id) ? "#cfc" : "#fff";
   issue = Issue.find_by_id(issue_id);
-  if issue.nil? then
+  if issue.nil? || !issue.visible? then
     issueHtml = "<del>Issue:"+issue_id.to_s+"</del>";
   else
     issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
@@ -71,6 +68,9 @@ prj_odr.each do |po|
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos[<%=issue.id%>][0]',
                                     <%=issue.id%>);">+</a>
+    <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@disp_count%>);">
+      <%= issue_odr %>
+    </a>
     <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
       <%=issueHtml%>
     </a>
@@ -118,6 +118,9 @@ prj_odr.each do |po|
     <a href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos<%=t.id%>',
                                     <%=issue.id%>);">+</a>
+    <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@disp_count%>);">
+      <%= issue_odr %>
+    </a>
     <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
       <%=issueHtml%>
     </a>

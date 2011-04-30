@@ -30,7 +30,7 @@ members.each do |mem|
   next if user.nil?;
 
   #-------------------------------------- プロジェクトのループ
-  prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=-1",{:p=>@project.id}]);
+  prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1");
   prjs.each do |po|
     dsp_prj = po.dsp_prj;
     dsp_pos = po.dsp_pos;

@@ -6,6 +6,7 @@ class WorkTimeController < ApplicationController
   include CustomFieldsHelper
 
   def index
+    require_login || return
     @project = nil
     prepare_values;
     ticket_pos;
@@ -131,7 +132,7 @@ class WorkTimeController < ApplicationController
   def popup_update_done_ratio # 進捗％更新ポップアップ
     issue_id = params[:issue_id];
     @issue = Issue.find_by_id(issue_id);
-    if @issue.closed? then
+    if @issue.closed? || !@issue.visible? then
       next if !params.key?(:all);
       @issueHtml = "<del>"+@issue.to_s+"</del>";
     else
@@ -188,26 +189,41 @@ private
                     :user=>@this_uid, :prj=>@restrict_project};
   end
 
-  def ticket_pos # 表示チケット順序変更求処理
+  def ticket_pos 
+    # 重複削除と順序の正規化
+    tgts = UserIssueMonth.find(:all, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}])
+    unique = []
+    tgts.each do |tgt|
+      if unique.include?(tgt.issue) then
+        tgt.destroy
+      else
+        unique.push(tgt.issue)
+        if tgt.odr != unique.length then
+          tgt.odr = unique.length
+          tgt.save
+        end
+      end
+    end
+
+    # 表示チケット順序変更求処理
     if params.key?("ticket_pos") && params[:ticket_pos] =~ /^(.*)_(.*)$/ then
       tid = $1.to_i;
       dst = $2.to_i;
       src = UserIssueMonth.find(:first, :conditions=>
-      ["uid=:u and issue=:i and month=:m",
-      {:u=>@this_uid,:i=>tid,:m=>@month_str}]);
+            ["uid=:u and issue=:i", {:u=>@this_uid,:i=>tid}]);
       if src && src.uid == @crnt_uid then
         if src.odr > dst then # チケットを前にもっていく場合
           tgts = UserIssueMonth.find(:all, :conditions=>
-          ["uid=:u and month=:m and odr>=:o1 and odr<:o2",
-          {:u=>src.uid, :m=>src.month, :o1=>dst, :o2=>src.odr}]);
+          ["uid=:u and odr>=:o1 and odr<:o2",
+          {:u=>src.uid, :o1=>dst, :o2=>src.odr}]);
           tgts.each do |tgt|
             tgt.odr += 1; tgt.save;# 順位をひとつずつ後へ
           end
           src.odr = dst; src.save;
         else # チケットを後に持っていく場合
           tgts = UserIssueMonth.find(:all, :conditions=>
-          ["uid=:u and month=:m and odr<=:o1 and odr>:o2",
-          {:u=>src.uid, :m=>src.month, :o1=>dst, :o2=>src.odr}]);
+          ["uid=:u and odr<=:o1 and odr>:o2",
+          {:u=>src.uid, :o1=>dst, :o2=>src.odr}]);
           tgts.each do |tgt|
             tgt.odr -= 1; tgt.save;# 順位をひとつずつ後へ
           end
@@ -217,24 +233,41 @@ private
     end
   end
 
-  def prj_pos # 表示プロジェクト順序変更求処理
+  def prj_pos
+    # 重複削除と順序の正規化
+    tgts = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}])
+    unique = []
+    tgts.each do |tgt|
+      if unique.include?(tgt.dsp_prj) then
+        tgt.destroy
+      else
+        unique.push(tgt.dsp_prj)
+        if tgt.dsp_pos != unique.length then
+          tgt.dsp_pos = unique.length
+          tgt.save
+        end
+      end
+    end
+
+    # 表示プロジェクト順序変更求処理
     if params.key?("prj_pos") && params[:prj_pos] =~ /^(.*)_(.*)$/ then
       tid = $1.to_i;
       dst = $2.to_i;
-      src = WtProjectOrders.find(:first, :conditions=>["prj=:p and uid=:u and dsp_prj=:d",{:p=>@project.id, :u=>@this_uid, :d=>tid}]);
+      src = WtProjectOrders.find(:first, :conditions=>["uid=:u and dsp_prj=:d",{:u=>@this_uid, :d=>tid}]);
+
       if src then
         if src.dsp_pos > dst then # チケットを前にもっていく場合
           tgts = WtProjectOrders.find(:all, :conditions=>[
-                 "prj=:p and uid=:u and dsp_pos>=:o1 and dsp_pos<:o2",
-                 {:p=>@project.id, :u=>@this_uid, :o1=>dst, :o2=>src.dsp_pos}]);
+                 "uid=:u and dsp_pos>=:o1 and dsp_pos<:o2",
+                 {:u=>@this_uid, :o1=>dst, :o2=>src.dsp_pos}]);
           tgts.each do |tgt|
             tgt.dsp_pos += 1; tgt.save;# 順位をひとつずつ後へ
           end
           src.dsp_pos = dst; src.save;
         else # チケットを後に持っていく場合
           tgts = WtProjectOrders.find(:all, :conditions=>[
-                 "prj=:p and uid=:u and dsp_pos<=:o1 and dsp_pos>:o2",
-                 {:p=>@project.id, :u=>@this_uid, :o1=>dst, :o2=>src.dsp_pos}]);
+                 "uid=:u and dsp_pos<=:o1 and dsp_pos>:o2",
+                 {:u=>@this_uid, :o1=>dst, :o2=>src.dsp_pos}]);
           tgts.each do |tgt|
             tgt.dsp_pos -= 1; tgt.save;# 順位をひとつずつ後へ
           end
@@ -247,8 +280,8 @@ private
   def ticket_del # チケット削除処理
     if params.key?("ticket_del") then
       src = UserIssueMonth.find(:first, :conditions=>
-      ["uid=:u and issue=:i and month=:m",
-      {:u=>@this_uid,:i=>params["ticket_del"],:m=>@month_str}]);
+      ["uid=:u and issue=:i",
+      {:u=>@this_uid,:i=>params["ticket_del"]}]);
       if src && src.uid == @crnt_uid then # 削除対象に工数が残っていないか確認
         entry = TimeEntry.find(:all, :conditions =>
                    ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0 and issue_id=:i",
@@ -257,7 +290,7 @@ private
         @message = '<div style="color:#f00;">'+l(:wt_no_permission_del)+'</div>';
         else
           tgts = UserIssueMonth.find(:all, :conditions=>
-                 ["uid=:u and month=:m and odr>:o",{:u=>src.uid, :m=>src.month, :o=>src.odr}]);
+                 ["uid=:u and odr>:o",{:u=>src.uid, :o=>src.odr}]);
           tgts.each do |tgt|
             tgt.odr -= 1; tgt.save;# 当該チケット表示より後ろの全チケットの順位をアップ
           end
@@ -276,6 +309,7 @@ private
       params["new_time_entry"].each do |issue_id, valss|
         issue = Issue.find_by_id(issue_id);
         next if issue.nil?;
+        next if !issue.visible?
         valss.each do |count, vals|
           next if vals['hours'] == "";
           if !vals['activity_id'] then
@@ -335,7 +369,7 @@ private
   def prepare_tickets_array # チケット表示項目を作成
     # 既存の表示項目を取得
     disp = UserIssueMonth.find(:all, :order=>"odr",
-      :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>@month_str}])
+      :conditions=>["uid=:u",{:u=>@this_uid}])
     # 今回表示するチケットIDの配列を作成
     @disp_prj_issues = Hash.new;
     @disp_issues = [];
@@ -357,16 +391,6 @@ private
     @disp_count = @disp_issues.size;
     add_issues = []; #追加候補初期化
 
-    # 「前月の表示チケットをコピーする」の処理
-    if params.key?("cp_dsp") then
-      last_month_str = params["cp_dsp"];
-      last_disp = UserIssueMonth.find(:all, :order=>"odr",
-        :conditions=>["uid=:u and month=:m",{:u=>@this_uid, :m=>last_month_str}])
-      last_disp.each do |d|
-        add_issues |= [d.issue]
-      end
-    end
-
     #当該ユーザの当月の工数に新しいチケットが無いか確認
     time_entry = TimeEntry.find(:all, :conditions =>
         ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0",
@@ -379,6 +403,7 @@ private
     add_issues.each do |add| # 追加対象をチェックして
       issue = Issue.find_by_id(add);
       next if issue.nil?; # 削除されていたらパス
+      next if !issue.visible?
       prj = issue.project_id;
       next if @restrict_project && prj != @restrict_project;
       if (@disp_issues & [add]).size==0 then #既存の表示項目に当該チケットが無かったら
@@ -392,8 +417,7 @@ private
         end
 
         if @this_uid==@crnt_uid then #本人ならDBに書き込んでしまう
-          UserIssueMonth.create(:uid=>@this_uid, :issue=>add,
-            :month=>@month_str, :odr=>@disp_count)
+          UserIssueMonth.create(:uid=>@this_uid, :issue=>add, :odr=>@disp_count)
         end
       end
     end
@@ -406,6 +430,7 @@ private
     issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
         {:u=>@this_uid, :t1=>t1, :t2=>t2}]);
     issues.each do |issue|
+      next if !issue.visible?
       @worked_issues |= [issue.id];
     end
     # この日のチケット操作を洗い出す
@@ -425,6 +450,7 @@ private
       next if input_issues.include?(i); #既存の項目は追加しない
       issue = Issue.find_by_id(i);
       next if issue.nil?; # 削除されていたらパス
+      next if !issue.visible?
       p = issue.project_id;
       next if @restrict_project && p != @restrict_project; #プロジェクト制限チェック
       input_issues.push(i);
@@ -436,12 +462,7 @@ private
     end
 
     # 各ユーザの表示プロジェクトに不足がないか確認
-    if @project then
-      prj_odr = WtProjectOrders.find(:all, :conditions=>["prj=:p and uid=:u",{:p=>@project.id, :u=>@this_uid}]);
-
-    else 
-      prj_odr = WtProjectOrders.find(:all, :conditions=>["prj is null and uid=:u",{:u=>@this_uid}]);
-    end
+    prj_odr = WtProjectOrders.find(:all, :conditions=>["uid=:u",{:u=>@this_uid}]);
     prj_odr_num = prj_odr.size;
     prjs = @input_prj_issues.keys; # 表示すべき全Prjから
     prj_odr.each do |po|
@@ -449,11 +470,7 @@ private
     end
     prjs.each do |prj| # 追加すべきPrjをDB登録
       prj_odr_num += 1;
-      if @project then
-        WtProjectOrders.create(:prj=>@project.id, :uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
-      else
-        WtProjectOrders.create(:uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
-      end
+      WtProjectOrders.create(:uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num);
     end
   end
   
@@ -645,11 +662,11 @@ private
       return;
     end
 
-    po = WtProjectOrders.find(:first, :conditions=>["prj=:p and uid=-1 and dsp_prj=:d",{:p=>@project.id, :d=>dsp_prj}]);
+    po = WtProjectOrders.find(:first, :conditions=>["uid=-1 and dsp_prj=:d",{:d=>dsp_prj}]);
     return if po == nil; # 対象の表示プロジェクトが無ければパス
 
     if po.dsp_pos > dst then # 前に持っていく場合
-      tgts = WtProjectOrders.find(:all, :conditions=> ["prj=:p and uid=-1 and dsp_pos>=:o1 and dsp_pos<:o2",{:p=>@project.id, :o1=>dst, :o2=>po.dsp_pos}]);
+      tgts = WtProjectOrders.find(:all, :conditions=> ["uid=-1 and dsp_pos>=:o1 and dsp_pos<:o2",{:o1=>dst, :o2=>po.dsp_pos}]);
       tgts.each do |mv|
         mv.dsp_pos+=1; mv.save; # 順位を一つずつ後へ
       end
@@ -657,7 +674,7 @@ private
     end
 
     if po.dsp_pos < dst then # 後に持っていく場合
-      tgts = WtProjectOrders.find(:all, :conditions=> ["prj=:p and uid=-1 and dsp_pos<=:o1 and dsp_pos>:o2",{:p=>@project.id, :o1=>dst, :o2=>po.dsp_pos}]);
+      tgts = WtProjectOrders.find(:all, :conditions=> ["uid=-1 and dsp_pos<=:o1 and dsp_pos>:o2",{:o1=>dst, :o2=>po.dsp_pos}]);
       tgts.each do |mv|
         mv.dsp_pos-=1; mv.save; # 順位を一つずつ前へ
       end
@@ -682,7 +699,7 @@ private
     end
     @prj_cost = Hash.new;
     @r_prj_cost = Hash.new;
-    WtProjectOrders.find(:all, :conditions=>["prj=:p and uid=-1",{:p=>@project.id}]).each do |i|
+    WtProjectOrders.find(:all, :conditions=>"uid=-1").each do |i|
       @prj_cost[i.dsp_prj] = Hash.new;
       @r_prj_cost[i.dsp_prj] = Hash.new;
     end
@@ -700,6 +717,7 @@ private
 
       issue = Issue.find_by_id(iid);
       next if issue.nil?; # チケットが削除されていたらパス
+      next if !issue.visible?
       pid = issue.project_id;
       # プロジェクト限定の対象でなければパス
       next if @restrict_project && pid != @restrict_project;
@@ -712,6 +730,7 @@ private
       while true do
         parent_issue = Issue.find_by_id(parent_iid);
         break if parent_issue.nil?; # チケットが削除されていたらそこまで
+        break if !parent_issue.visible?
 
         if !(relay.key?(parent_iid)) then
           # まだ登録されていないチケットの場合、追加処理を行う
@@ -726,7 +745,7 @@ private
           # まだ登録されていないプロジェクトの場合、追加処理を行う
           @prj_cost[parent_pid] = Hash.new;
           @r_prj_cost[parent_pid] = Hash.new;
-          WtProjectOrders.create(:prj=>@project.id, :uid=>-1, :dsp_prj=>parent_pid, :dsp_pos=>@prj_cost.size);
+          WtProjectOrders.create(:uid=>-1, :dsp_prj=>parent_pid, :dsp_pos=>@prj_cost.size);
         end
 
         (@issue_cost[parent_iid])[uid] ||= 0;
@@ -739,13 +758,22 @@ private
         parent_iid = relay[parent_iid];
       end
 
+      @issue_cost[iid] ||= Hash.new;
+      (@issue_cost[iid])[uid] ||= 0;
       (@issue_cost[iid])[uid] += cost;
+      (@issue_cost[iid])[-1] ||= 0;
       (@issue_cost[iid])[-1] += cost;
+
+      @prj_cost[pid] ||= Hash.new;
+      (@prj_cost[pid])[uid] ||= 0;
       (@prj_cost[pid])[uid] += cost;
+      (@prj_cost[pid])[-1] ||= 0;
       (@prj_cost[pid])[-1] += cost;
 
+      @r_issue_cost[parent_iid] ||= Hash.new;
       (@r_issue_cost[parent_iid])[uid] ||= 0;
       (@r_issue_cost[parent_iid])[-1] ||= 0;
+      @r_prj_cost[parent_pid] ||= Hash.new;
       (@r_prj_cost[parent_pid])[uid] ||= 0;
       (@r_prj_cost[parent_pid])[-1] ||= 0;
 

@@ -9,7 +9,7 @@ month_str = sprintf("%04d-%02d", year, month);
 if uid!=User.current.id then
 
   add_issue = Issue.find_by_id(add_issue_id);
-  if add_issue then
+  if add_issue && add_issue.visible? then
     issueHtml = add_issue.closed? ? "<del>"+add_issue.to_s+"</del>" : add_issue.to_s;
 
     prj = Project.find(add_issue.project_id);
@@ -19,15 +19,14 @@ if uid!=User.current.id then
     end
 
     # 既存の表示項目を取得
-    disps = UserIssueMonth.find(:all, :conditions=>["uid=:u and month=:m",{:u=>uid, :m=>month_str}]);
+    disps = UserIssueMonth.find(:all, :conditions=>["uid=:u",{:u=>uid}]);
     disp_count = 0;
     begin
       disp_count += 1;
       disp = disps.shift;
       if disp==nil then # 同じチケットが最後まで無かったら
         # 表示項目を追加
-        UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id,
-                              :month=>month_str, :odr=>disp_count+1);
+        UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id, :odr=>disp_count+1);
         break;
       end
     end while disp.issue != add_issue_id.to_i; # 同じチケットが既にあったら追加しない

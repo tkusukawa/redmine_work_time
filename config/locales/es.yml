@@ -11,7 +11,6 @@ es:
   wt_relay_total: "Informe mensual de peticiones"
   wt_ticket: "Petición"
   wt_add_ticket: "Añade petición"
-  wt_copy_last_month_tickets: "Copia peticiones del último mes"
   wt_no_permission: "Sin permiso"
   wt_no_permission_del: "No se puede eliminar porque existen peticiones horas-hombre"
   wt_loop_relay: "Transmisión de petición en bucle"

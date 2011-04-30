@@ -1,5 +1,5 @@
 <%
-prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["prj=:p and uid=-1",{:p=>@project.id}]);
+prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1");
 tickets = WtTicketRelay.find(:all, :order=>"position");
 tic_max = tickets.size;
 

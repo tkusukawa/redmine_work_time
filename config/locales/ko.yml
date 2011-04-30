@@ -12,7 +12,6 @@ ko:
   wt_relay_total: "연동된 티켓 월간 보고"
   wt_ticket: "티켓"
   wt_add_ticket: "티켓 추가"
-  wt_copy_last_month_tickets: "마지막 월 티켓 복사"
   wt_no_permission: "권한 없음"
   wt_no_permission_del: "man-hours 요청이 있어서 삭제할 수 없습니다."
   wt_loop_relay: "티켓 관계가 반복(Looping) 됩니다."
