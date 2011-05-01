@@ -13,6 +13,7 @@ if uid!=User.current.id then
     issueHtml = add_issue.closed? ? "<del>"+add_issue.to_s+"</del>" : add_issue.to_s;
 
     prj = Project.find(add_issue.project_id);
+    log_time_allowed = User.current.allowed_to?(:log_time, prj)
     activities = [];
     prj.activities.each do |act|
       activities.push([act.name, act.id]);
@@ -26,7 +27,9 @@ if uid!=User.current.id then
       disp = disps.shift;
       if disp==nil then # 同じチケットが最後まで無かったら
         # 表示項目を追加
-        UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id, :odr=>disp_count+1);
+        if log_time_allowed then
+          UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id, :odr=>disp_count+1);
+        end
         break;
       end
     end while disp.issue != add_issue_id.to_i; # 同じチケットが既にあったら追加しない
@@ -51,7 +54,9 @@ if uid!=User.current.id then
     </a>
   </td>
   <td>
+    <%if log_time_allowed then%>
     <%= text_field_tag("new_time_entry"+suffix+"[hours]", "", :size=>5) %>
+    <%end%>
   </td>
   <td>
     <%= select_tag "new_time_entry"+suffix+"[activity_id]", options_for_select(activities), :required => true %>

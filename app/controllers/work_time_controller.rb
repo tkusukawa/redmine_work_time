@@ -310,6 +310,7 @@ private
         issue = Issue.find_by_id(issue_id);
         next if issue.nil?;
         next if !issue.visible?
+        next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
           next if vals['hours'] == "";
           if !vals['activity_id'] then

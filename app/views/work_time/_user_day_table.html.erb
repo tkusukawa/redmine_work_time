@@ -23,6 +23,7 @@ prj_odr.each do |po|
  dsp_pos = po.dsp_pos;
  next if @input_prj_issues.key?(dsp_prj) == false;
  prj = Project.find(dsp_prj);
+ next if !User.current.allowed_to?(:log_time, prj)
  prj_day_sum = TimeEntry.sum(:hours, :conditions=>
              ["user_id=:u and project_id=:p and spent_on=:d", 
              {:u => @this_uid, :p=>dsp_prj, :d=>@this_date}]);

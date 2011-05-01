@@ -40,6 +40,7 @@ function checkKey(e)
 projects = Project.find(:all, :order=>"name");
 projects.each do |prj|
   next unless prj.active?;
+  next if !User.current.allowed_to?(:log_time, prj)
   members = Member.find(:all, :conditions=>
             ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}]);
   next if members.size==0;
