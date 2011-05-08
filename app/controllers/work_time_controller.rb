@@ -14,6 +14,7 @@ class WorkTimeController < ApplicationController
     ticket_del;
     hour_update;
     prepare_tickets_array;
+    make_pack
     update_daily_memo;
     set_holiday;
     @custom_fields = TimeEntryCustomField.find(:all);
@@ -30,6 +31,7 @@ class WorkTimeController < ApplicationController
     ticket_del;
     hour_update;
     prepare_tickets_array;
+    make_pack
     member_add_del_check;
     update_daily_memo;
     set_holiday;
@@ -784,4 +786,102 @@ private
       (@r_prj_cost[parent_pid])[-1] += cost;
     end
   end
+
+  def make_pack
+    # 月間工数表のデータを作成
+    @month_pack = {:ref_prjs=>{}, :odr_prjs=>[],
+                   :total=>0, :total_by_day=>{},
+                   :count_prjs=>0, :count_issues=>0,
+                   :prj_odr_max=>0, :issue_odr_max=>0}
+
+    # プロジェクト順の表示データを作成
+    dsp_prjs = Project.find(:all, :joins=>"INNER JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id",
+                          :select=>"projects.*, wt_project_orders.dsp_pos",
+                          :conditions=>["wt_project_orders.uid=:u",{:u=>@this_uid}],
+                          :order=>"wt_project_orders.dsp_pos")
+    dsp_prjs.each do |prj|
+      make_pack_add_prj(@month_pack, prj, prj.dsp_pos)
+      @month_pack[:prj_odr_max] = prj.dsp_pos if @month_pack[:prj_odr_max].to_i < prj.dsp_pos.to_i
+    end
+
+    # チケット順の表示データを作成
+    dsp_issues = Issue.find(:all, :joins=>"INNER JOIN user_issue_months ON user_issue_months.issue=issues.id",
+                            :select=>"issues.*, user_issue_months.odr",
+                            :conditions=>["user_issue_months.uid=:u",{:u=>@this_uid}],
+                            :order=>"user_issue_months.odr")
+    dsp_issues.each do |issue|
+      make_pack_add_prj(@month_pack, issue.project, -1)
+      prj_pack = @month_pack[:ref_prjs][issue.project_id]
+      make_pack_add_issue(prj_pack, issue, issue.odr)
+      @month_pack[:issue_odr_max] = issue.odr if @month_pack[:issue_odr_max].to_i < issue.odr.to_i
+    end
+
+    # 月内の工数を集計
+    hours = TimeEntry.find(:all, :conditions =>
+        ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
+        {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
+    hours.each do |hour|
+      # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
+      make_pack_add_prj(@month_pack, hour.project, -1)
+      prj_pack = @month_pack[:ref_prjs][hour.project_id]
+
+      # 表示項目に工数のチケットがあるかチェック→なければ項目追加
+      make_pack_add_issue(prj_pack, hour.issue, -1)
+      issue_pack = prj_pack[:ref_issues][hour.issue_id]
+
+      issue_pack[:count_hours] += 1;
+
+      # 合計時間の計算
+      work_time = hour.hours
+      @month_pack[:total] += work_time
+      prj_pack[:total] += work_time
+      issue_pack[:total] += work_time
+      
+      # 日毎の合計時間の計算
+      date = hour.spent_on
+      @month_pack[:total_by_day][date] ||= 0
+      @month_pack[:total_by_day][date] += work_time
+      prj_pack[:total_by_day][date] ||= 0
+      prj_pack[:total_by_day][date] += work_time
+      issue_pack[:total_by_day][date] ||= 0
+      issue_pack[:total_by_day][date] += work_time
+    end
+
+    @month_pack[:count_issues] = 0;
+    @month_pack[:odr_prjs].each do |prj_pack|
+      prj_pack[:odr_issues].each do |issue_pack|
+        if issue_pack[:count_hours]==0 then
+          prj_pack[:count_issues] -= 1
+        end
+      end
+
+      if prj_pack[:count_issues]==0 then
+        @month_pack[:count_prjs] -= 1
+      else
+        @month_pack[:count_issues] += prj_pack[:count_issues]
+      end
+    end
+
+  end
+
+  def make_pack_add_prj(pack, new_prj, odr)
+      # 表示項目に当該プロジェクトがあるかチェック→なければ項目追加
+      unless pack[:ref_prjs].has_key?(new_prj.id) then
+        prj_pack = {:odr=>odr, :prj=>new_prj, :total=>0, :total_by_day=>{}, :ref_issues=>{}, :odr_issues=>[], :count_issues=>0}
+        pack[:ref_prjs][new_prj.id] = prj_pack
+        pack[:odr_prjs].push prj_pack
+        pack[:count_prjs] += 1;
+      end
+  end
+
+  def make_pack_add_issue(prj_pack, new_issue, odr)
+      # 表示項目に当該チケットがあるかチェック→なければ項目追加
+      unless prj_pack[:ref_issues].has_key?(new_issue.id) then
+        issue_pack = {:odr=>odr, :issue=>new_issue, :total=>0, :total_by_day=>{}, :count_hours=>0}
+        prj_pack[:ref_issues][new_issue.id] = issue_pack
+        prj_pack[:odr_issues].push issue_pack
+        prj_pack[:count_issues] += 1;
+      end
+  end
+
 end

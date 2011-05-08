@@ -4,7 +4,7 @@ win_h = 30;    # 小窓の高さ
 win_hs = 20;   # 小さい小窓の高さ
 
 box_w = 300;
-box_h = win_hs*3+win_h*@disp_count+win_hs*@disp_prj_issues.keys.size+20;
+box_h = win_hs*3+win_h*@month_pack[:count_issues]+win_hs*@month_pack[:count_prjs]+20;
 %>
 
 <table width="100%" style="border:0;border-collapse:collapse;">
@@ -29,56 +29,41 @@ box_h = win_hs*3+win_h*@disp_count+win_hs*@disp_prj_issues.keys.size+20;
       </div>
 <%
 ofst_t = win_hs*3-5;
-max = @disp_issues.size;
-month_cost = 0;
 
-prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]);
-
-prj_odr.each do |po|
-  dsp_prj = po.dsp_prj;
-  dsp_pos = po.dsp_pos;
-  next if @disp_prj_issues.key?(dsp_prj) == false;
-  prj = Project.find(dsp_prj);
-  prj_month_cost = 0;
+@month_pack[:odr_prjs].each do |prj_pack|
+  next if prj_pack[:count_issues] == 0
+  prj = prj_pack[:prj];
+  dsp_pos = prj_pack[:odr];
   prj_ofst_t = ofst_t;
 
   ofst_t += win_hs;
-  @disp_prj_issues[dsp_prj].each do |dsp_issue|
-  issue_id = dsp_issue[0];
-  issue_odr = dsp_issue[1];
-  issue = Issue.find_by_id(issue_id);
+  prj_pack[:odr_issues].each do |issue_pack|
+  next if issue_pack[:count_hours] == 0
+  issue_id = issue_pack[:issue].id;
+  issue_odr = issue_pack[:odr];
+  issue = issue_pack[:issue];
   if issue.nil? || !issue.visible? then
     issueHtml = "<del>Issue:"+issue_id.to_s+"</del>";
   else
     issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
   end
-
-  issue_month_cost = TimeEntry.sum(:hours, :conditions=>
-             ["user_id=:u and issue_id=:i and spent_on>=:d1 and spent_on<=:d2",
-             {:u => @this_uid, :i=>issue_id, :d1=>@first_date, :d2=>@last_date}])
-  prj_month_cost += issue_month_cost;
 %>
     <div style="position:absolute;top:<%=ofst_t%>px;left:2px;">
       <div style="background: #eee;font-size:0.8em;">
         <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_h-2%>px;">
 <%if @this_uid==@crnt_uid then%>
-          <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=max%>);">
+          <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@month_pack[:issue_odr_max]%>);">
             <%= issue_odr %>
           </a>
 <%end%>
           <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue_id) %>
           <%= print_issue_cost(issue) %>
           <div style="position:absolute;top:15px;right:15px;">
-            <%=sprintf("%1.1f", issue_month_cost)%>
+            <%=sprintf("%1.1f", issue_pack[:total])%>
           </div>
-  <%if @this_uid==@crnt_uid then%>
-          <div style="position:absolute;top:15px;right:2px;">
-            <%=link_to("×", @link_params.merge(:ticket_del=>issue_id))%>
           </div>
-  <%end%>
         </div>
       </div>
-    </div>
 <%
   ofst_t += win_h;
  end
@@ -86,25 +71,24 @@ prj_odr.each do |po|
   <div style="position:absolute;top:<%=prj_ofst_t%>px;left:2px;">
     <div style="background:#000;color:#fff;font-size:1.0em;">
       <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
-        <a href="JavaScript:prj_pos('<%=url_for(@link_params) %>',<%=dsp_prj%>,<%=dsp_pos%>,<%=prj_odr.size%>);">
+        <a href="JavaScript:prj_pos('<%=url_for(@link_params) %>',<%=prj.id%>,<%=dsp_pos%>,<%=@month_pack[:prj_odr_max]%>);">
           <%= dsp_pos %>
         </a>
         <%= prj.name%>
           <div style="position:absolute;top:1px;right:10px;">
-            <%=sprintf("%1.1f",prj_month_cost)%>
+            <%=sprintf("%1.1f",prj_pack[:total])%>
           </div>
       </div>
     </div>
   </div>
 <%
-  month_cost += prj_month_cost;
 end
 %>
       <div style="position:absolute;bottom:10px;right:10px;">
-        <%=sprintf("%1.1f",month_cost)%>
+        <%=sprintf("%1.1f", @month_pack[:total])%>
       </div>
       <div style="position:absolute;top:<%=win_hs*2%>px;right:10px;">
-        <%=sprintf("%1.1f",month_cost)%>
+        <%=sprintf("%1.1f", @month_pack[:total])%>
       </div>
     </div>
 
@@ -123,17 +107,21 @@ end
   ofst_l = win_w*(day-1);
   holidayEntry = WtHolidays.find(:all, 
                   :conditions=>["holiday=:h and deleted_on is null",{:h=>date}])
-  if day==@this_day then
-    bcolor = "#cfc"
-  elsif holidayEntry.size == 0 then
+  if holidayEntry.size == 0 then
     bcolor = @wday_color[wday]
   else
     bcolor = "#fbc";
   end
+  if day==@this_day then
+    bcolor_day = "#cfc"
+    today_id = 'id="day_scroll_today"'
+  else
+    bcolor_day = bcolor
+    today_id = ''
+  end
 %>
-    <div style="position:absolute;top:1px;left:<%=ofst_l%>px;"
-<%if day==@this_day then%> id="day_scroll_today"<%end%> >
-      <div style="background:<%=bcolor%>;">
+    <div style="position:absolute;top:1px;left:<%=ofst_l%>px;" <%=today_id%> >
+      <div style="background:<%=bcolor_day%>;">
         <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
           <%= link_to(day, @link_params.merge(:day=>day)) %>
         </div>
@@ -150,31 +138,25 @@ end
 ofst_t = win_hs*3-5;
 day_cost = 0;
 
-prj_odr.each do |po|
-  dsp_prj = po.dsp_prj;
-  dsp_pos = po.dsp_pos;
-  next if @disp_prj_issues.key?(dsp_prj) == false;
-  prj_day_cost =0;
+@month_pack[:odr_prjs].each do |prj_pack|
+  next if prj_pack[:count_issues] == 0
+  dsp_prj = prj_pack[:prj].id;
+  dsp_pos = prj_pack[:odr];
   prj_ofst_t = ofst_t;
-%>
-<%
- ofst_t += win_hs;
- @disp_prj_issues[dsp_prj].each do |dsp_issue|
-  issue_id = dsp_issue[0];
-  issue_odr = dsp_issue[1];
 
-  issue_day_cost = TimeEntry.sum(:hours, :conditions=>
-             ["user_id=:u and issue_id=:i and spent_on=:d",
-             {:u => @this_uid, :i=>issue_id, :d=>date}])
-  prj_day_cost += issue_day_cost;
+  ofst_t += win_hs;
+  prj_pack[:odr_issues].each do |issue_pack|
+    next if issue_pack[:count_hours] == 0
+    issue_id = issue_pack[:issue].id;
+    issue_odr = issue_pack[:odr];
 %>
     <div style="position:absolute;top:<%=ofst_t%>px;left:<%=ofst_l%>px;">
       <div style="background:<%=bcolor%>;font-size:0.8em;">
         <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_h-2%>px;">
 <%
-  if issue_day_cost!=0 then
+  if issue_pack[:total_by_day].has_key?(date) then
 %>
-          <%=sprintf("%1.1f",issue_day_cost)%>
+          <%=sprintf("%1.1f", issue_pack[:total_by_day][date])%>
 <%
    end
 %>
@@ -188,23 +170,22 @@ prj_odr.each do |po|
   <div style="position:absolute;top:<%=prj_ofst_t%>px;left:<%=ofst_l%>px;">
     <div style="background:#000;color:#fff;font-size:0.8em;">
       <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
-<%if prj_day_cost>0 then%>
-        <%=sprintf("%1.1f",prj_day_cost)%>
+<%if prj_pack[:total_by_day].has_key?(date) then%>
+        <%=sprintf("%1.1f", prj_pack[:total_by_day][date])%>
 <%end%>
       </div>
     </div>
   </div>
 
 <%
-  day_cost += prj_day_cost;
 end
 %>
 <!--日毎の合計時間表示-->
     <div style="position:absolute;top:<%=win_hs*2%>px;left:<%=ofst_l%>px;">
       <div style="font-size:0.8em;">
         <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
-<%if day_cost>0 then%>
-          <%= sprintf("%1.1f",day_cost)%>
+<%if @month_pack[:total_by_day].has_key?(date) then%>
+          <%= sprintf("%1.1f", @month_pack[:total_by_day][date])%>
 <%end%>
         </div>
       </div>
