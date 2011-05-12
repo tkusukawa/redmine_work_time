@@ -281,6 +281,21 @@ private
 
   def ticket_del # チケット削除処理
     if params.key?("ticket_del") then
+      if params["ticket_del"]=="closed" then # 終了チケット全削除の場合
+          issues = Issue.find(:all,
+                      :joins=>"INNER JOIN user_issue_months ON user_issue_months.issue=issues.id",
+                      :conditions=>["user_issue_months.uid=:u",{:u=>@this_uid}]);
+          issues.each do |issue|
+            if issue.closed? then
+              tgt = UserIssueMonth.find(:first,
+                       :conditions=>["uid=:u and issue=:i",{:u=>@this_uid,:i=>issue.id}])
+              tgt.destroy
+            end
+          end
+          return
+      end
+
+      # チケット番号指定の削除の場合
       src = UserIssueMonth.find(:first, :conditions=>
       ["uid=:u and issue=:i",
       {:u=>@this_uid,:i=>params["ticket_del"]}]);

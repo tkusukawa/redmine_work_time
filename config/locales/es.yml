@@ -24,3 +24,4 @@ es:
   wt_next_memo: "Siguiente memorandum"
   wt_data_list: "Lista de datos"
   wt_input_ticket_numbers: "o introduzca numero de petición"
+  wt_delete_closed_tickets: "delete closed tickets"

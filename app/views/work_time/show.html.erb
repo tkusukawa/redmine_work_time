@@ -59,6 +59,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 >
   <%=l(:wt_add_ticket)%>
 </a>]
+[<%= link_to(l(:wt_delete_closed_tickets), @link_params.merge(:ticket_del=>"closed")) %>]
 <%= submit_tag l(:wt_update) %>
 <br/>
 <%end%>

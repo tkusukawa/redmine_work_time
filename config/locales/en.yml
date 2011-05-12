@@ -24,3 +24,4 @@ en:
   wt_next_memo: "next memo"
   wt_data_list: "Data list"
   wt_input_ticket_numbers: "or input ticket numbers"
+  wt_delete_closed_tickets: "delete closed tickets"
