@@ -12,7 +12,6 @@ de:
   wt_ticket: "Ticket"
   wt_add_ticket: "Ticket hinzufügen"
   wt_no_permission: "Keine Berechtigung"
-  wt_no_permission_del: "Eintrag kann nicht gelöscht werden, da Aufwände erfasst sind."
   wt_loop_relay: "Zyklus bei der Aufwandsfortschreibung!"
   wt_set_holiday: "Tag zum Urlaubs-/Feiertag machen"
   wt_del_holiday: "Tag zum Arbeitstag machen"

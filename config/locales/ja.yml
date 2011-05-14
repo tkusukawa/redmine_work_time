@@ -12,7 +12,6 @@ ja:
   wt_ticket: "チケット"
   wt_add_ticket: "チケット追加"
   wt_no_permission: "権限がありません"
-  wt_no_permission_del: "当該チケットの工数登録が0でないため削除できません"
   wt_loop_relay: "チケット関係がループしています"
   wt_set_holiday: "この日を休日に設定"
   wt_del_holiday: "この日の休日を解除"

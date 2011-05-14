@@ -5,6 +5,8 @@ class WorkTimeController < ApplicationController
   helper :custom_fields
   include CustomFieldsHelper
 
+  NO_ORDER = -1
+
   def index
     require_login || return
     @project = nil
@@ -13,7 +15,6 @@ class WorkTimeController < ApplicationController
     prj_pos
     ticket_del
     hour_update
-    prepare_tickets_array
     make_pack
     update_daily_memo
     set_holiday
@@ -30,7 +31,6 @@ class WorkTimeController < ApplicationController
     prj_pos
     ticket_del
     hour_update
-    prepare_tickets_array
     make_pack
     member_add_del_check
     update_daily_memo
@@ -192,6 +192,8 @@ private
   end
 
   def ticket_pos
+    return if @this_uid != @crnt_uid
+
     # 重複削除と順序の正規化
     if order_normalization(UserIssueMonth, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}]) then
       @message = '<div style="background:#faa;">Warning: normalize UserIssueMonth</div>'
@@ -204,7 +206,7 @@ private
       dst = $2.to_i
       src = UserIssueMonth.find(:first, :conditions=>
             ["uid=:u and issue=:i", {:u=>@this_uid,:i=>tid}])
-      if src && src.uid == @crnt_uid then
+      if src then # ポジション変更の場合
         if src.odr > dst then # チケットを前にもっていく場合
           tgts = UserIssueMonth.find(:all, :conditions=>
           ["uid=:u and odr>=:o1 and odr<:o2",
@@ -222,11 +224,21 @@ private
           end
           src.odr = dst; src.save
         end
+      else
+        # 新規のポジションの場合
+        tgts = UserIssueMonth.find(:all, :conditions=> ["uid=:u and odr>=:o1",
+                                                  {:u=>@this_uid, :o1=>dst}])
+        tgts.each do |tgt|
+          tgt.odr += 1; tgt.save# 順位をひとつずつ後へ
+        end
+        UserIssueMonth.create(:uid=>@this_uid, :issue=>tid, :odr=>dst) # 追加
       end
     end
   end
 
   def prj_pos
+    return if @this_uid != @crnt_uid
+
     # 重複削除と順序の正規化
     if order_normalization(WtProjectOrders, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]) then
       @message = '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
@@ -239,7 +251,7 @@ private
       dst = $2.to_i
       src = WtProjectOrders.find(:first, :conditions=>["uid=:u and dsp_prj=:d",{:u=>@this_uid, :d=>tid}])
 
-      if src then
+      if src then # ポジション変更の場合
         if src.dsp_pos > dst then # チケットを前にもっていく場合
           tgts = WtProjectOrders.find(:all, :conditions=>[
                  "uid=:u and dsp_pos>=:o1 and dsp_pos<:o2",
@@ -257,6 +269,14 @@ private
           end
           src.dsp_pos = dst; src.save
         end
+      else
+        # 新規のポジションの場合
+          tgts = WtProjectOrders.find(:all, :conditions=>["uid=:u and dsp_pos>=:o1",
+                                       {:u=>@this_uid, :o1=>dst}])
+          tgts.each do |tgt|
+            tgt.dsp_pos += 1; tgt.save# 順位をひとつずつ後へ
+          end
+          WtProjectOrders.create(:uid=>@this_uid, :dsp_prj=>tid, :dsp_pos=>dst)
       end
     end
   end
@@ -281,20 +301,13 @@ private
       src = UserIssueMonth.find(:first, :conditions=>
       ["uid=:u and issue=:i",
       {:u=>@this_uid,:i=>params["ticket_del"]}])
-      if src && src.uid == @crnt_uid then # 削除対象に工数が残っていないか確認
-        entry = TimeEntry.find(:all, :conditions =>
-                   ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0 and issue_id=:i",
-                   {:uid => src.uid, :day1 => @first_date, :day2 => @last_date, :i=>src.issue}])
-        if entry.size != 0 then
-        @message = '<div style="color:#f00;">'+l(:wt_no_permission_del)+'</div>'
-        else
+      if src && src.uid == @crnt_uid then
           tgts = UserIssueMonth.find(:all, :conditions=>
                  ["uid=:u and odr>:o",{:u=>src.uid, :o=>src.odr}])
           tgts.each do |tgt|
             tgt.odr -= 1; tgt.save# 当該チケット表示より後ろの全チケットの順位をアップ
           end
           src.destroy# 当該チケット表示を削除
-        end
       end
     end
   end
@@ -355,7 +368,7 @@ private
       end
     end
     # retrieve custom values error messages
-    if obj.errors[:custom_values]
+    if obj.errors[:custom_values] then
       obj.custom_values.each do |v|
         v.errors.each do |attr, msg|
           next if msg.nil?
@@ -366,114 +379,6 @@ private
     return str
   end
 
-  def prepare_tickets_array # チケット表示項目を作成
-    # 既存の表示項目を取得
-    disp = UserIssueMonth.find(:all, :order=>"odr",
-      :conditions=>["uid=:u",{:u=>@this_uid}])
-    # 今回表示するチケットIDの配列を作成
-    @disp_prj_issues = Hash.new
-    @disp_issues = []
-    disp.each do |d|
-      findIssues = Issue.find(:all, :conditions=>["id=:i", {:i=>d.issue}])
-      if findIssues.size == 0 then # もし当該チケットが削除されていたら
-        d.destroy # 表示項目も削除する
-        next
-      end
-      prj = findIssues[0].project_id
-      next if @restrict_project && prj != @restrict_project
-      @disp_issues |= [d.issue]
-      if @disp_prj_issues.key?(prj) then
-        @disp_prj_issues[prj].push([d.issue,d.odr])
-      else
-        @disp_prj_issues[prj] = [[d.issue,d.odr]]
-      end
-    end
-    @disp_count = @disp_issues.size
-    add_issues = [] #追加候補初期化
-
-    #当該ユーザの当月の工数に新しいチケットが無いか確認
-    time_entry = TimeEntry.find(:all, :conditions =>
-        ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2 and hours>0",
-        {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
-
-    time_entry.each do |e| #各工数のチケットを追加対象にする
-      add_issues |= [e.issue.id] if e.issue
-    end
-
-    add_issues.each do |add| # 追加対象をチェックして
-      issue = Issue.find_by_id(add)
-      next if issue.nil? # 削除されていたらパス
-      next if !issue.visible?
-      prj = issue.project_id
-      next if @restrict_project && prj != @restrict_project
-      if (@disp_issues & [add]).size==0 then #既存の表示項目に当該チケットが無かったら
-        # 追加する
-        @disp_count += 1
-        @disp_issues |= [add]
-        if @disp_prj_issues.key?(prj) then
-          @disp_prj_issues[prj].push([add,@disp_count])
-        else
-          @disp_prj_issues[prj] = [[add,@disp_count]]
-        end
-
-        if @this_uid==@crnt_uid then #本人ならDBに書き込んでしまう
-          UserIssueMonth.create(:uid=>@this_uid, :issue=>add, :odr=>@disp_count)
-        end
-      end
-    end
-
-    # この日のチケット作成を洗い出す
-    @worked_issues = []
-    next_date = @this_date+1
-    t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
-    t2 = Time.local(next_date.year, next_date.month, next_date.day)
-    issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
-        {:u=>@this_uid, :t1=>t1, :t2=>t2}])
-    issues.each do |issue|
-      next if !issue.visible?
-      @worked_issues |= [issue.id]
-    end
-    # この日のチケット操作を洗い出す
-    journals = Journal.find(:all, :conditions=>
-        ["journalized_type='Issue' and user_id=:u and created_on>=:t1 and created_on<:t2",
-        {:u=>@this_uid, :t1=>t1, :t2=>t2}])
-    journals.each do |j|
-      @worked_issues |= [j.journalized_id]
-    end
-
-    input_issues = @disp_issues.dup
-    @input_prj_issues = Hash.new
-    @disp_prj_issues.each do |k,v|
-      @input_prj_issues[k] = v.dup
-    end
-    @worked_issues.each do |i|
-      next if input_issues.include?(i) #既存の項目は追加しない
-      issue = Issue.find_by_id(i)
-      next if issue.nil? # 削除されていたらパス
-      next if !issue.visible?
-      p = issue.project_id
-      next if @restrict_project && p != @restrict_project #プロジェクト制限チェック
-      input_issues.push(i)
-      if @input_prj_issues.key?(p) then
-        @input_prj_issues[p].push([i, -1]) #既存ハッシュに要素追加
-      else
-        @input_prj_issues[p] = [[i, -1]] #新規ハッシュに配列を追加
-      end
-    end
-
-    # 各ユーザの表示プロジェクトに不足がないか確認
-    prj_odr = WtProjectOrders.find(:all, :conditions=>["uid=:u",{:u=>@this_uid}])
-    prj_odr_num = prj_odr.size
-    prjs = @input_prj_issues.keys # 表示すべき全Prjから
-    prj_odr.each do |po|
-      prjs.delete(po.dsp_prj) # 既存の表示Prjを削除すると、追加すべきPrjが残る
-    end
-    prjs.each do |prj| # 追加すべきPrjをDB登録
-      prj_odr_num += 1
-      WtProjectOrders.create(:uid=>@this_uid, :dsp_prj=>prj, :dsp_pos=>prj_odr_num)
-    end
-  end
-  
   def member_add_del_check
     #---------------------------------------- メンバーの増減をチェック
     members = Member.find(:all, :conditions=>
@@ -801,8 +706,12 @@ private
     # 月間工数表のデータを作成
     @month_pack = {:ref_prjs=>{}, :odr_prjs=>[],
                    :total=>0, :total_by_day=>{},
-                   :count_prjs=>0, :count_issues=>0,
-                   :prj_odr_max=>0, :issue_odr_max=>0}
+                   :count_prjs=>0, :count_issues=>0}
+
+    # 日毎工数のデータを作成
+    @day_pack = {:ref_prjs=>{}, :odr_prjs=>[],
+                 :total=>0, :total_by_day=>{},
+                 :count_prjs=>0, :count_issues=>0}
 
     # プロジェクト順の表示データを作成
     dsp_prjs = Project.find(:all, :joins=>"INNER JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id",
@@ -810,9 +719,10 @@ private
                           :conditions=>["wt_project_orders.uid=:u",{:u=>@this_uid}],
                           :order=>"wt_project_orders.dsp_pos")
     dsp_prjs.each do |prj|
-      make_pack_add_prj(@month_pack, prj, prj.dsp_pos)
-      @month_pack[:prj_odr_max] = prj.dsp_pos if @month_pack[:prj_odr_max].to_i < prj.dsp_pos.to_i
+      make_pack_prj(@month_pack, prj, prj.dsp_pos)
+      make_pack_prj(@day_pack, prj, prj.dsp_pos)
     end
+    @prj_odr_max = dsp_prjs.length
 
     # チケット順の表示データを作成
     dsp_issues = Issue.find(:all, :joins=>"INNER JOIN user_issue_months ON user_issue_months.issue=issues.id",
@@ -820,11 +730,12 @@ private
                             :conditions=>["user_issue_months.uid=:u",{:u=>@this_uid}],
                             :order=>"user_issue_months.odr")
     dsp_issues.each do |issue|
-      make_pack_add_prj(@month_pack, issue.project, -1)
-      prj_pack = @month_pack[:ref_prjs][issue.project_id]
-      make_pack_add_issue(prj_pack, issue, issue.odr)
-      @month_pack[:issue_odr_max] = issue.odr if @month_pack[:issue_odr_max].to_i < issue.odr.to_i
+      month_prj_pack = make_pack_prj(@month_pack, issue.project)
+      make_pack_issue(month_prj_pack, issue, issue.odr)
+      day_prj_pack = make_pack_prj(@day_pack, issue.project)
+      make_pack_issue(day_prj_pack, issue, issue.odr)
     end
+    @issue_odr_max = dsp_issues.length
 
     # 月内の工数を集計
     hours = TimeEntry.find(:all, :conditions =>
@@ -832,12 +743,10 @@ private
         {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
     hours.each do |hour|
       # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
-      make_pack_add_prj(@month_pack, hour.project, -1)
-      prj_pack = @month_pack[:ref_prjs][hour.project_id]
+      prj_pack = make_pack_prj(@month_pack, hour.project)
 
       # 表示項目に工数のチケットがあるかチェック→なければ項目追加
-      make_pack_add_issue(prj_pack, hour.issue, -1)
-      issue_pack = prj_pack[:ref_issues][hour.issue_id]
+      issue_pack = make_pack_issue(prj_pack, hour.issue)
 
       issue_pack[:count_hours] += 1
 
@@ -855,8 +764,46 @@ private
       prj_pack[:total_by_day][date] += work_time
       issue_pack[:total_by_day][date] ||= 0
       issue_pack[:total_by_day][date] += work_time
+
+      if date==@this_date then # 表示日の工数であれば項目追加
+        # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
+        day_prj_pack = make_pack_prj(@day_pack, hour.project)
+
+        # 表示項目に工数のチケットがあるかチェック→なければ項目追加
+        day_issue_pack = make_pack_issue(day_prj_pack, hour.issue, NO_ORDER)
+
+        day_issue_pack[:each_entries][hour.id] = hour # 工数エントリを追加
+        day_issue_pack[:total] += work_time
+        day_prj_pack[:total] += work_time
+        @day_pack[:total] += work_time
+      end
     end
 
+    # この日のチケット作成を洗い出す
+    next_date = @this_date+1
+    t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
+    t2 = Time.local(next_date.year, next_date.month, next_date.day)
+    issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
+        {:u=>@this_uid, :t1=>t1, :t2=>t2}])
+    issues.each do |issue|
+      prj_pack = make_pack_prj(@day_pack, issue.project)
+      issue_pack = make_pack_issue(prj_pack, issue)
+      issue_pack[:worked] = true;
+    end
+    # この日のチケット操作を洗い出す
+    issues = Issue.find(:all, :joins=>"INNER JOIN journals ON journals.journalized_id=issues.id",
+                        :conditions=>["journals.journalized_type='Issue' and
+                                       journals.user_id=:u and
+                                       journals.created_on>=:t1 and
+                                       journals.created_on<:t2",
+                                       {:u=>@this_uid, :t1=>t1, :t2=>t2}])
+    issues.each do |issue|
+      prj_pack = make_pack_prj(@day_pack, issue.project)
+      issue_pack = make_pack_issue(prj_pack, issue)
+      issue_pack[:worked] = true;
+    end
+
+    # 月間工数表から工数が無かった項目の削除と項目数のカウント
     @month_pack[:count_issues] = 0
     @month_pack[:odr_prjs].each do |prj_pack|
       prj_pack[:odr_issues].each do |issue_pack|
@@ -871,27 +818,32 @@ private
         @month_pack[:count_issues] += prj_pack[:count_issues]
       end
     end
-
   end
 
-  def make_pack_add_prj(pack, new_prj, odr)
+  def make_pack_prj(pack, new_prj, odr=NO_ORDER)
       # 表示項目に当該プロジェクトがあるかチェック→なければ項目追加
       unless pack[:ref_prjs].has_key?(new_prj.id) then
-        prj_pack = {:odr=>odr, :prj=>new_prj, :total=>0, :total_by_day=>{}, :ref_issues=>{}, :odr_issues=>[], :count_issues=>0}
+        prj_pack = {:odr=>odr, :prj=>new_prj,
+                    :total=>0, :total_by_day=>{},
+                    :ref_issues=>{}, :odr_issues=>[], :count_issues=>0}
         pack[:ref_prjs][new_prj.id] = prj_pack
         pack[:odr_prjs].push prj_pack
         pack[:count_prjs] += 1
       end
+      pack[:ref_prjs][new_prj.id]
   end
 
-  def make_pack_add_issue(prj_pack, new_issue, odr)
+  def make_pack_issue(prj_pack, new_issue, odr=NO_ORDER)
       # 表示項目に当該チケットがあるかチェック→なければ項目追加
       unless prj_pack[:ref_issues].has_key?(new_issue.id) then
-        issue_pack = {:odr=>odr, :issue=>new_issue, :total=>0, :total_by_day=>{}, :count_hours=>0}
+        issue_pack = {:odr=>odr, :issue=>new_issue,
+                      :total=>0, :total_by_day=>{},
+                      :count_hours=>0, :each_entries=>{}}
         prj_pack[:ref_issues][new_issue.id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
       end
+      prj_pack[:ref_issues][new_issue.id]
   end
 
   def order_normalization(table, params)
