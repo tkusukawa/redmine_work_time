@@ -191,20 +191,11 @@ private
                     :user=>@this_uid, :prj=>@restrict_project};
   end
 
-  def ticket_pos 
+  def ticket_pos
     # 重複削除と順序の正規化
-    tgts = UserIssueMonth.find(:all, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}])
-    unique = []
-    tgts.each do |tgt|
-      if unique.include?(tgt.issue) then
-        tgt.destroy
-      else
-        unique.push(tgt.issue)
-        if tgt.odr != unique.length then
-          tgt.odr = unique.length
-          tgt.save
-        end
-      end
+    if order_normalization(UserIssueMonth, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}]) then
+      @message = '<div style="background:#faa;">Warning: normalize UserIssueMonth</div>'
+      return
     end
 
     # 表示チケット順序変更求処理
@@ -237,18 +228,9 @@ private
 
   def prj_pos
     # 重複削除と順序の正規化
-    tgts = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}])
-    unique = []
-    tgts.each do |tgt|
-      if unique.include?(tgt.dsp_prj) then
-        tgt.destroy
-      else
-        unique.push(tgt.dsp_prj)
-        if tgt.dsp_pos != unique.length then
-          tgt.dsp_pos = unique.length
-          tgt.save
-        end
-      end
+    if order_normalization(WtProjectOrders, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]) then
+      @message = '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
+      return
     end
 
     # 表示プロジェクト順序変更求処理
@@ -636,6 +618,12 @@ private
   end
 
   def change_ticket_position
+    # 重複削除と順序の正規化
+    if order_normalization(WtTicketRelay, :order=>"position") then
+      @message = '<div style="background:#faa;">Warning: normalize WtTicketRelay</div>'
+      return
+    end
+
     ################################### チケット表示順序変更処理
     if params.key?("ticket_pos") && params[:ticket_pos]=~/^(.*)_(.*)$/ then
       if User.current.allowed_to?(:edit_work_time_total, @project) then
@@ -667,7 +655,14 @@ private
     end
   end
 
+
   def change_project_position
+    # 重複削除と順序の正規化
+    if order_normalization(WtProjectOrders, :order=>"dsp_pos", :conditions=>"uid=-1") then
+      @message = '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
+      return
+    end
+
     ################################### プロジェクト表示順序変更処理
     return if !params.key?("prj_pos"); # 位置変更パラメータが無ければパス
     return if !(params[:prj_pos]=~/^(.*)_(.*)$/); # パラメータの形式が正しくなければパス
@@ -899,4 +894,26 @@ private
       end
   end
 
+  def order_normalization(table, params)
+    raise "need table" unless table
+    order = params[:order]
+    raise "need :order" unless order
+    update = false
+
+    tgts = table.find(:all, params)
+    unique = []
+    tgts.each do |tgt|
+      if unique.include?(tgt[order]) then
+        tgt.destroy
+      else
+        unique.push(tgt[order])
+        if tgt[order] != unique.length then
+          tgt[order] = unique.length
+          tgt.save
+          update = true
+        end
+      end
+    end
+    update
+  end
 end

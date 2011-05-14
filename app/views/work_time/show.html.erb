@@ -20,6 +20,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 -->
 </script>
 
+<%= @message %>
 <div style="text-align:right;">
 <%= render :partial=>'select_project' %><br/>
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
@@ -35,7 +36,6 @@ function dup_ticket(ajax_url, insert_pos, id)
 <%end%>
 </div>
 
-<%= @message %>
 <h2><%=l(:wt_monthly_report)%> (<%=User.find_by_id(@this_uid)%>)</h2>
 <%= render :partial=>'user_month_table' %>
 
