@@ -15,21 +15,21 @@
     <% end %>
   </tr>
 <%
-day_total = 0;
-prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]);
+day_total = 0
+prj_odr = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}])
 
 prj_odr.each do |po|
- dsp_prj = po.dsp_prj;
- dsp_pos = po.dsp_pos;
- next if @input_prj_issues.key?(dsp_prj) == false;
- prj = Project.find(dsp_prj);
+ dsp_prj = po.dsp_prj
+ dsp_pos = po.dsp_pos
+ next if @input_prj_issues.key?(dsp_prj) == false
+ prj = Project.find(dsp_prj)
  next if !User.current.allowed_to?(:log_time, prj)
  prj_day_sum = TimeEntry.sum(:hours, :conditions=>
              ["user_id=:u and project_id=:p and spent_on=:d", 
-             {:u => @this_uid, :p=>dsp_prj, :d=>@this_date}]);
-  activities = [];
+             {:u => @this_uid, :p=>dsp_prj, :d=>@this_date}])
+  activities = []
   prj.activities.each do |act|
-    activities.push([act.name, act.id]);
+    activities.push([act.name, act.id])
   end
 %>
 <tr style="background:#000;color:#fff;">
@@ -48,19 +48,19 @@ prj_odr.each do |po|
 </tr>
 <%
  @input_prj_issues[dsp_prj].each do |dsp_issue|
-  issue_id = dsp_issue[0];
-  issue_odr = dsp_issue[1];
-  issue_color = @worked_issues.include?(issue_id) ? "#cfc" : "#fff";
-  issue = Issue.find_by_id(issue_id);
+  issue_id = dsp_issue[0]
+  issue_odr = dsp_issue[1]
+  issue_color = @worked_issues.include?(issue_id) ? "#cfc" : "#fff"
+  issue = Issue.find_by_id(issue_id)
   if issue.nil? || !issue.visible? then
-    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>";
+    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>"
   else
-    issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+    issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
   end
 
   time_entries = TimeEntry.find(:all, :conditions=>
              ["user_id=:u and issue_id=:i and spent_on=:d", 
-             {:u => @this_uid, :i=>issue_id, :d=>@this_date}]);
+             {:u => @this_uid, :i=>issue_id, :d=>@this_date}])
   if time_entries.size == 0 then
 %>
 <!-- 工数エントリなし -->
@@ -104,13 +104,13 @@ prj_odr.each do |po|
   </td>
   <%@custom_fields.each do |cf|
     def cf.custom_field
-      return self;
+      return self
     end
     def cf.value
-      return self.default_value;
+      return self.default_value
     end
     def cf.true?
-      return self.default_value;
+      return self.default_value
     end
   %>
      <td><%= custom_field_tag "new_time_entry["+issue_id.to_s+"][0]", cf %></td>
@@ -120,7 +120,7 @@ prj_odr.each do |po|
   else
     cost = time_entries.sum{|e| e.hours}
     time_entries.each do |t|
-    day_total += t.hours;
+    day_total += t.hours
 %>
 <!-- 工数エントリあり -->
 <tr id="time_entry_pos<%=t.id%>">
@@ -162,7 +162,7 @@ prj_odr.each do |po|
     <%= text_field_tag("time_entry["+t.id.to_s+"][comments]", t.comments, :size=>80)%>
   </td>
   <% @custom_fields.each do |cf|
-    cfv = t.custom_field_values.detect {|v| v.custom_field_id == cf.id};
+    cfv = t.custom_field_values.detect {|v| v.custom_field_id == cf.id}
   %>
      <td><%= custom_field_tag "time_entry["+t.id.to_s+"]", cfv %></td>
   <% end %>

@@ -5,10 +5,10 @@ issues = Issue.find(:all, :order=>"id DESC", :conditions =>
 issues.each do |issue|
   next if !issue.visible?
   if issue.closed? then
-    next if !params.key?(:all);
-    issueHtml = "<del>"+issue.to_s+"</del>";
+    next if !params.key?(:all)
+    issueHtml = "<del>"+issue.to_s+"</del>"
   else
-    issueHtml = issue.to_s;
+    issueHtml = issue.to_s
   end
 %>
 <input type="checkbox" name="selected"  value="<%=issue.id%>"/>
@@ -23,7 +23,7 @@ issues.each do |issue|
 <input type="button" onclick="JavaScript:tickets_selected();" value="<%=l(:wt_apply_checked)%>"/>
 
 <%if !params.key?(:all) then
-    url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'');%>
+    url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'')%>
   <br/>
   <a onclick="new Ajax.Updater('tickets', '<%=url%>', {asynchronous:true, method:'get'}); return false;" href="#">[display closed ticket]</a>
 <%end%>

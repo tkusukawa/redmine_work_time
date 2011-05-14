@@ -54,13 +54,13 @@ function checkKey(e)
   <option value=''><%=l(:wt_select_project)%></option>
   <option disabled="disabled">---</option>
 <%
-projects = Project.find(:all, :order=>"name");
+projects = Project.find(:all, :order=>"name")
 projects.each do |prj|
-  next unless prj.active?;
+  next unless prj.active?
   next if !User.current.allowed_to?(:log_time, prj)
   members = Member.find(:all, :conditions=>
-            ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}]);
-  next if members.size==0;
+            ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}])
+  next if members.size==0
 %>
   <option value="<%= url_for(:action=>"ajax_select_tickets", :prj=>prj.id) %>">
     <%= prj.name %> 

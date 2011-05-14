@@ -1,10 +1,10 @@
 <%
-year = params["year"];
-month = params["month"];
-day = params["day"];
-user_id = params["user"];
-date = Date.new(year.to_i,month.to_i,day.to_i);
-wday_name = l(:wt_week_day_names).split(',');
+year = params["year"]
+month = params["month"]
+day = params["day"]
+user_id = params["user"]
+date = Date.new(year.to_i,month.to_i,day.to_i)
+wday_name = l(:wt_week_day_names).split(',')
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>date,:u=>user_id}])
 if memo then
 %>

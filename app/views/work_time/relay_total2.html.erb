@@ -10,9 +10,9 @@
 </div>
 
 <h2><%=l(:wt_data_list)%>
-<%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year));%>
+<%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year))%>
 <%= @this_year %>-<%= @month_names[@this_month-1] %>
-<%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year));%>
+<%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year))%>
 </h2>
 
 <%
@@ -24,36 +24,36 @@ end
 <table border="1">
 <%
 #-------------------------------------- メンバーのループ
-members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}]);
+members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}])
 members.each do |mem|
-  user = User.find_by_id(mem.user_id);
-  next if user.nil?;
+  user = User.find_by_id(mem.user_id)
+  next if user.nil?
 
   #-------------------------------------- プロジェクトのループ
-  prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1");
+  prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
   prjs.each do |po|
-    dsp_prj = po.dsp_prj;
-    dsp_pos = po.dsp_pos;
-    next unless @r_prj_cost.key?(dsp_prj); # 値の無いプロジェクトはパス
-    next unless @r_prj_cost[dsp_prj].key?(-1); # 値の無いプロジェクトはパス
-    next if @r_prj_cost[dsp_prj][-1] == 0; # 値の無いプロジェクトはスパ
-    prj =Project.find(dsp_prj);
+    dsp_prj = po.dsp_prj
+    dsp_pos = po.dsp_pos
+    next unless @r_prj_cost.key?(dsp_prj) # 値の無いプロジェクトはパス
+    next unless @r_prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
+    next if @r_prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
+    prj =Project.find(dsp_prj)
 
     #-------------------------------------- チケットのループ
-    tickets = WtTicketRelay.find(:all, :order=>"position");
+    tickets = WtTicketRelay.find(:all, :order=>"position")
     tickets.each do |tic|
-      issue_id = tic.issue_id;
-      next unless @r_issue_cost.key?(issue_id); # 値の無いチケットはパス
-      next unless @r_issue_cost[issue_id].key?(-1); # 値の無いチケットはパス
-      next if @r_issue_cost[issue_id][-1] == 0; # 値の無いチケットはパス
-      next unless @r_issue_cost[issue_id].key?(mem.user_id); # 値の無いチケットはパス
-      next if @r_issue_cost[issue_id][mem.user_id] == 0; # 値の無いチケットはパス
+      issue_id = tic.issue_id
+      next unless @r_issue_cost.key?(issue_id) # 値の無いチケットはパス
+      next unless @r_issue_cost[issue_id].key?(-1) # 値の無いチケットはパス
+      next if @r_issue_cost[issue_id][-1] == 0 # 値の無いチケットはパス
+      next unless @r_issue_cost[issue_id].key?(mem.user_id) # 値の無いチケットはパス
+      next if @r_issue_cost[issue_id][mem.user_id] == 0 # 値の無いチケットはパス
 
-      issue = Issue.find_by_id(issue_id);
-      next if issue.nil?; # チケットが削除されていたらパス
-      next if issue.project_id != dsp_prj; # このプロジェクトに表示するチケットでない場合はパス
+      issue = Issue.find_by_id(issue_id)
+      next if issue.nil? # チケットが削除されていたらパス
+      next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
 
-      issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+      issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
 %>
 
 <tr>

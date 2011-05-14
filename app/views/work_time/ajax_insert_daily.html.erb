@@ -1,40 +1,40 @@
 <%
-uid = params[:user];
-year = params[:year];
-month = params[:month];
+uid = params[:user]
+year = params[:year]
+month = params[:month]
 add_issue_id = params[:add_issue]
-count = params[:count];
-month_str = sprintf("%04d-%02d", year, month);
+count = params[:count]
+month_str = sprintf("%04d-%02d", year, month)
 
 if uid!=User.current.id then
 
-  add_issue = Issue.find_by_id(add_issue_id);
+  add_issue = Issue.find_by_id(add_issue_id)
   if add_issue && add_issue.visible? then
-    issueHtml = add_issue.closed? ? "<del>"+add_issue.to_s+"</del>" : add_issue.to_s;
+    issueHtml = add_issue.closed? ? "<del>"+add_issue.to_s+"</del>" : add_issue.to_s
 
-    prj = Project.find(add_issue.project_id);
+    prj = Project.find(add_issue.project_id)
     log_time_allowed = User.current.allowed_to?(:log_time, prj)
-    activities = [];
+    activities = []
     prj.activities.each do |act|
-      activities.push([act.name, act.id]);
+      activities.push([act.name, act.id])
     end
 
     # 既存の表示項目を取得
-    disps = UserIssueMonth.find(:all, :conditions=>["uid=:u",{:u=>uid}]);
-    disp_count = 0;
+    disps = UserIssueMonth.find(:all, :conditions=>["uid=:u",{:u=>uid}])
+    disp_count = 0
     begin
-      disp_count += 1;
-      disp = disps.shift;
+      disp_count += 1
+      disp = disps.shift
       if disp==nil then # 同じチケットが最後まで無かったら
         # 表示項目を追加
         if log_time_allowed then
-          UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id, :odr=>disp_count+1);
+          UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id, :odr=>disp_count+1)
         end
-        break;
+        break
       end
-    end while disp.issue != add_issue_id.to_i; # 同じチケットが既にあったら追加しない
+    end while disp.issue != add_issue_id.to_i # 同じチケットが既にあったら追加しない
 
-    suffix = "["+add_issue_id+"]["+count+"]";
+    suffix = "["+add_issue_id+"]["+count+"]"
 %>
 <tr style="background:#ddf;" id="time_entry_pos<%=suffix%>">
   <td>
@@ -70,13 +70,13 @@ if uid!=User.current.id then
   </td>
   <%@custom_fields.each do |cf|
     def cf.custom_field
-      return self;
+      return self
     end
     def cf.value
-      return self.default_value;
+      return self.default_value
     end
     def cf.true?
-      return self.default_value;
+      return self.default_value
     end
   %>
      <td><%= custom_field_tag "new_time_entry"+suffix, cf %></td>

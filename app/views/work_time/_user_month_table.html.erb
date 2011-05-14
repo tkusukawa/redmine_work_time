@@ -1,10 +1,10 @@
 <%
-win_w = 35;    # 小窓の幅
-win_h = 30;    # 小窓の高さ
-win_hs = 20;   # 小さい小窓の高さ
+win_w = 35    # 小窓の幅
+win_h = 30    # 小窓の高さ
+win_hs = 20   # 小さい小窓の高さ
 
-box_w = 300;
-box_h = win_hs*3+win_h*@month_pack[:count_issues]+win_hs*@month_pack[:count_prjs]+20;
+box_w = 300
+box_h = win_hs*3+win_h*@month_pack[:count_issues]+win_hs*@month_pack[:count_prjs]+20
 %>
 
 <table width="100%" style="border:0;border-collapse:collapse;">
@@ -21,31 +21,31 @@ box_h = win_hs*3+win_h*@month_pack[:count_issues]+win_hs*@month_pack[:count_prjs
       </div>
       </div>
       <div style="text-align:right;position:absolute;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
-        <%= link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year));%>
+        <%= link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year))%>
       </div>
       <div style="text-align:left;position:absolute;top:1px;left:1px;">
-        <%= link_to("<<", @link_params.merge(:day=>@last_month.day, :month=>@last_month.month, :year=>@last_month.year));%>
+        <%= link_to("<<", @link_params.merge(:day=>@last_month.day, :month=>@last_month.month, :year=>@last_month.year))%>
       </div>
       </div>
 <%
-ofst_t = win_hs*3-5;
+ofst_t = win_hs*3-5
 
 @month_pack[:odr_prjs].each do |prj_pack|
   next if prj_pack[:count_issues] == 0
-  prj = prj_pack[:prj];
-  dsp_pos = prj_pack[:odr];
-  prj_ofst_t = ofst_t;
+  prj = prj_pack[:prj]
+  dsp_pos = prj_pack[:odr]
+  prj_ofst_t = ofst_t
 
-  ofst_t += win_hs;
+  ofst_t += win_hs
   prj_pack[:odr_issues].each do |issue_pack|
   next if issue_pack[:count_hours] == 0
-  issue_id = issue_pack[:issue].id;
-  issue_odr = issue_pack[:odr];
-  issue = issue_pack[:issue];
+  issue_id = issue_pack[:issue].id
+  issue_odr = issue_pack[:odr]
+  issue = issue_pack[:issue]
   if issue.nil? || !issue.visible? then
-    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>";
+    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>"
   else
-    issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+    issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
   end
 %>
     <div style="position:absolute;top:<%=ofst_t%>px;left:2px;">
@@ -65,7 +65,7 @@ ofst_t = win_hs*3-5;
       </div>
     </div>
 <%
-  ofst_t += win_h;
+  ofst_t += win_h
  end
 %>
   <div style="position:absolute;top:<%=prj_ofst_t%>px;left:2px;">
@@ -104,13 +104,13 @@ end
 (@first_date..@last_date).each do |date|
   day = date.day
   wday = date.wday
-  ofst_l = win_w*(day-1);
+  ofst_l = win_w*(day-1)
   holidayEntry = WtHolidays.find(:all, 
                   :conditions=>["holiday=:h and deleted_on is null",{:h=>date}])
   if holidayEntry.size == 0 then
     bcolor = @wday_color[wday]
   else
-    bcolor = "#fbc";
+    bcolor = "#fbc"
   end
   if day==@this_day then
     bcolor_day = "#cfc"
@@ -135,20 +135,20 @@ end
       </div>
     </div>
 <%
-ofst_t = win_hs*3-5;
-day_cost = 0;
+ofst_t = win_hs*3-5
+day_cost = 0
 
 @month_pack[:odr_prjs].each do |prj_pack|
   next if prj_pack[:count_issues] == 0
-  dsp_prj = prj_pack[:prj].id;
-  dsp_pos = prj_pack[:odr];
-  prj_ofst_t = ofst_t;
+  dsp_prj = prj_pack[:prj].id
+  dsp_pos = prj_pack[:odr]
+  prj_ofst_t = ofst_t
 
-  ofst_t += win_hs;
+  ofst_t += win_hs
   prj_pack[:odr_issues].each do |issue_pack|
     next if issue_pack[:count_hours] == 0
-    issue_id = issue_pack[:issue].id;
-    issue_odr = issue_pack[:odr];
+    issue_id = issue_pack[:issue].id
+    issue_odr = issue_pack[:odr]
 %>
     <div style="position:absolute;top:<%=ofst_t%>px;left:<%=ofst_l%>px;">
       <div style="background:<%=bcolor%>;font-size:0.8em;">
@@ -164,7 +164,7 @@ day_cost = 0;
       </div>
     </div>
 <%
-  ofst_t += win_h;
+  ofst_t += win_h
  end
 %>
   <div style="position:absolute;top:<%=prj_ofst_t%>px;left:<%=ofst_l%>px;">

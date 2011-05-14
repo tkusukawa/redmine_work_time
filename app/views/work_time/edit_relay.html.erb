@@ -13,9 +13,9 @@
 %>
 <br/>
 <h2><%=l(:wt_edit_relay)%> 
-<%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year));%>
+<%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year))%>
 <%= @this_year %>-<%= @month_names[@this_month-1] %>
-<%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year));%>
+<%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year))%>
 </h2>
 <table border="1" id="relay_table">
 <%= render :partial=>'relay_table' %>

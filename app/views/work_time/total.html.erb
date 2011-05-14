@@ -20,34 +20,34 @@ end
 <tr valign="top">
 <td>
 <div style="text-align:center;position:relative;top:1px;left:1px;font-size:2.0em;">
-<%= link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year));%>
-<%= @this_year %>-<%= @month_names[@this_month-1] %>
-<%= link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year));%>
+<%=link_to("<<", @link_params.merge(:month=>@last_month.month, :year=>@last_month.year))%>
+<%=@this_year %>-<%= @month_names[@this_month-1] %>
+<%=link_to(">>", @link_params.merge(:month=>@next_month.month, :year=>@next_month.year))%>
 </div>
 </td>
 <td style="background:#ddd;"></td>
 <%
-num = 1;
-members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}]);
-max = members.size;
+num = 1
+members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}])
+max = members.size
 members.each do |mem|
   if mem.position!=num then
-    mem.position=num; #posがずれていたら修正
-    mem.save;
+    mem.position=num #posがずれていたら修正
+    mem.save
   end
-  user = User.find_by_id(mem.user_id);
-  next if user.nil?;
+  user = User.find_by_id(mem.user_id)
+  next if user.nil?
 %>
 <td align="center">
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
 <a href="JavaScript:member_pos('<%=url_for(@link_params)%>', <%=mem.user_id%>,<%=mem.position%>,<%=max%>);"><%=mem.position%></a>
 <%end%>
 <div style="top:2px;width:56px;font-size:10px;">
-<%= link_to(user, @link_params.merge(:action=>"show", :user=>mem.user_id));%>
+<%= link_to(user, @link_params.merge(:action=>"show", :user=>mem.user_id))%>
 </div>
 </td>
 <%
-  num += 1;
+  num += 1
 end
 %>
 </tr>
@@ -71,19 +71,19 @@ end
 </tr>
 
 <%
-prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1");
+prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
 
-tickets = WtTicketRelay.find(:all, :order=>"position");
-tic_max = tickets.size;
+tickets = WtTicketRelay.find(:all, :order=>"position")
+tic_max = tickets.size
 
 #-------------------------------------- チケット行のループ
 prjs.each do |po|
- dsp_prj = po.dsp_prj;
- dsp_pos = po.dsp_pos;
- next unless @prj_cost.key?(dsp_prj); # 値の無いプロジェクトはパス
- next unless @prj_cost[dsp_prj].key?(-1); # 値の無いプロジェクトはパス
- next if @prj_cost[dsp_prj][-1] == 0; # 値の無いプロジェクトはスパ
- prj =Project.find(dsp_prj);
+ dsp_prj = po.dsp_prj
+ dsp_pos = po.dsp_pos
+ next unless @prj_cost.key?(dsp_prj) # 値の無いプロジェクトはパス
+ next unless @prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
+ next if @prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
+ prj =Project.find(dsp_prj)
 %>
 <tr style="background:#000;color:#fff;">
  <td>
@@ -108,16 +108,16 @@ end
 </tr>
 <%
 tickets.each do |tic|
-  issue_id = tic.issue_id;
-  next unless @issue_cost.key?(issue_id); # 値の無いチケットはパス
-  next unless @issue_cost[issue_id].key?(-1); # 値の無いチケットはパス
-  next if @issue_cost[issue_id][-1] == 0; # 値の無いチケットはパス
+  issue_id = tic.issue_id
+  next unless @issue_cost.key?(issue_id) # 値の無いチケットはパス
+  next unless @issue_cost[issue_id].key?(-1) # 値の無いチケットはパス
+  next if @issue_cost[issue_id][-1] == 0 # 値の無いチケットはパス
 
-  issue = Issue.find_by_id(issue_id);
-  next if issue.nil?; # チケットが削除されていたらパス
-  next if issue.project_id != dsp_prj; # このプロジェクトに表示するチケットでない場合はパス
+  issue = Issue.find_by_id(issue_id)
+  next if issue.nil? # チケットが削除されていたらパス
+  next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
 
-  issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s;
+  issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
 %>
 <tr>
 <td>
