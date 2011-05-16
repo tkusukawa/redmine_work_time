@@ -240,7 +240,7 @@ private
     return if @this_uid != @crnt_uid
 
     # 重複削除と順序の正規化
-    if order_normalization(UserIssueMonth, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}]) then
+    if order_normalization(UserIssueMonth, :issue, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}]) then
       @message = '<div style="background:#faa;">Warning: normalize UserIssueMonth</div>'
       return
     end
@@ -285,7 +285,7 @@ private
     return if @this_uid != @crnt_uid
 
     # 重複削除と順序の正規化
-    if order_normalization(WtProjectOrders, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]) then
+    if order_normalization(WtProjectOrders, :dsp_prj, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]) then
       @message = '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
       return
     end
@@ -569,7 +569,7 @@ private
 
   def change_ticket_position
     # 重複削除と順序の正規化
-    if order_normalization(WtTicketRelay, :order=>"position") then
+    if order_normalization(WtTicketRelay, :issue_id, :order=>"position") then
       @message = '<div style="background:#faa;">Warning: normalize WtTicketRelay</div>'
       return
     end
@@ -608,7 +608,7 @@ private
 
   def change_project_position
     # 重複削除と順序の正規化
-    if order_normalization(WtProjectOrders, :order=>"dsp_pos", :conditions=>"uid=-1") then
+    if order_normalization(WtProjectOrders, :dsp_prj, :order=>"dsp_pos", :conditions=>"uid=-1") then
       @message = '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
       return
     end
@@ -891,21 +891,23 @@ private
       prj_pack[:ref_issues][new_issue.id]
   end
 
-  def order_normalization(table, params)
+  # 重複削除と順序の正規化
+  def order_normalization(table, key_column, find_params)
     raise "need table" unless table
-    order = params[:order]
+    order = find_params[:order]
     raise "need :order" unless order
     update = false
 
-    tgts = table.find(:all, params)
-    unique = []
+    tgts = table.find(:all, find_params)
+    keys = []
     tgts.each do |tgt|
-      if unique.include?(tgt[order]) then
+      if keys.include?(tgt[key_column]) then
         tgt.destroy
+        update = true
       else
-        unique.push(tgt[order])
-        if tgt[order] != unique.length then
-          tgt[order] = unique.length
+        keys.push(tgt[key_column])
+        if tgt[order] != keys.length then
+          tgt[order] = keys.length
           tgt.save
           update = true
         end
