@@ -112,6 +112,9 @@ prj_pack[:odr_issues].each do |issue_pack|
     def cf.true?
       return self.default_value
     end
+    def cf.customized
+      nil
+    end
   %>
      <td><%= custom_field_tag "new_time_entry["+issue_id.to_s+"][0]", cf %></td>
   <% end %>
