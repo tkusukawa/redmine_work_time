@@ -76,6 +76,7 @@ prj_pack[:odr_issues].each do |issue_pack|
       <%=issueHtml%>
     </a>
     <%= print_issue_cost(issue) %>
+    <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue.id.to_s%>"
         href="JavaScript:update_done_ratio(
           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
@@ -84,12 +85,14 @@ prj_pack[:odr_issues].each do |issue_pack|
       [<%=issue.done_ratio%>&#37;]
     </a>
     &nbsp;&nbsp;&nbsp;
-
     <a style="position:absolute;bottom:1px;right:10px;" href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos[<%=issue_id%>][0]',
                                     <%=issue_id%>);">+</a>
-    <%if @this_uid==@crnt_uid && issue_odr>0 then%>
+      <%if issue_odr>0 then%>
       <a style="position:absolute;bottom:1px;right:3px;" href="<%=url_for(@link_params.merge(:ticket_del=>issue_id))%>">x</a>
+      <%end%>
+    <%else%>
+      [<%=issue.done_ratio%>&#37;]
     <%end%>
   </div>
   </td>
@@ -137,6 +140,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     </a>
 
     <%= print_issue_cost(issue) %>
+    <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue_id.to_s%>"
         href="JavaScript:update_done_ratio(
           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
@@ -149,8 +153,11 @@ prj_pack[:odr_issues].each do |issue_pack|
     <a style="position:absolute;bottom:1px;right:10px;" href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
                                    'time_entry_pos<%=hour_id%>',
                                     <%=issue_id%>);">+</a>
-    <%if @this_uid==@crnt_uid && issue_odr>0 then%>
-      <a style="position:absolute;bottom:1px;right:3px;" href="<%=url_for(@link_params.merge(:ticket_del=>issue_id))%>">x</a>
+      <%if issue_odr>0 then%>
+        <a style="position:absolute;bottom:1px;right:3px;" href="<%=url_for(@link_params.merge(:ticket_del=>issue_id))%>">x</a>
+      <%end%>
+    <%else%>
+      [<%=issue.done_ratio%>&#37;]
     <%end%>
   </div>
   </td>
