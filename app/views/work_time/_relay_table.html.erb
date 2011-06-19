@@ -80,7 +80,7 @@ prjs.each do |po|
       <%=tic.position%>
     </a>
 <%end%>
-    <%= link_to(issueHtml, :controller=>"issues", :action=>"show", :id=>issue.id) %>
+    <%= link_to(issueHtml, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
     <%= print_issue_cost(issue) %>
   </td>
   <td><%=cost%></td>

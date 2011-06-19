@@ -52,8 +52,6 @@ members.each do |mem|
       issue = Issue.find_by_id(issue_id)
       next if issue.nil? # チケットが削除されていたらパス
       next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
-
-      issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
 %>
 
 <tr>
