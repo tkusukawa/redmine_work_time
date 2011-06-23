@@ -66,8 +66,10 @@ function dup_ticket(ajax_url, insert_pos, id)
 
 <br/>
 <h2>
-  <%= @this_year %>/<%= @this_month%>/<%=@this_day%> (<%=@wday_name[@this_date.wday]%>)
-  <%=User.find_by_id(@this_uid)%>
+  <%=link_to(@this_year.to_s+'/'+@this_month.to_s+'/'+@this_day.to_s+
+    '('+@wday_name[@this_date.wday]+') '+User.find_by_id(@this_uid).to_s,
+    @link_params.merge(:anchor=>"memo"))
+  %>
 </h2>
 <div id="memo">
 

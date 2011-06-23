@@ -20,7 +20,11 @@ class WorkTimeController < ApplicationController
     set_holiday
     @custom_fields = TimeEntryCustomField.find(:all)
     @link_params.merge!(:action=>"index")
-    render "show"
+    if !params.key?(:user) then
+      redirect_to @link_params
+    else
+      render "show"
+    end
   end
 
   def show
@@ -37,6 +41,9 @@ class WorkTimeController < ApplicationController
     set_holiday
     @custom_fields = TimeEntryCustomField.find(:all)
     @link_params.merge!(:action=>"show")
+    if !params.key?(:user) then
+      redirect_to @link_params
+    end
   end
 
   def total
