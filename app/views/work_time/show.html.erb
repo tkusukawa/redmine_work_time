@@ -44,7 +44,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 <h2>
   <%=l(:wt_daily_report)%>
 </h2>
-<% form_tag :action => @link_params[:action] do %>
+<% form_tag @link_params do %>
 <%= hidden_field_tag('year', @this_year) %>
 <%= hidden_field_tag('month', @this_month) %>
 <%= hidden_field_tag('day', @this_day) %>
