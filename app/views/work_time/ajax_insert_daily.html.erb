@@ -29,7 +29,9 @@
   <td>
     <%= text_field_tag("new_time_entry"+@suffix+"[comments]", "", :size=>80)%>
   </td>
-  <%@custom_fields.each do |cf|%>
+  <%@custom_fields.each do |cf|
+    def cf.customized; nil; end;
+  %>
      <td><%= custom_field_tag "new_time_entry"+@suffix, cf %></td>
   <% end %>
 </tr>

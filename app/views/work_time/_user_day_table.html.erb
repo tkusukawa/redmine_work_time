@@ -168,6 +168,7 @@ prj_pack[:odr_issues].each do |issue_pack|
   </td>
   <% @custom_fields.each do |cf|
     cfv = hour.custom_field_values.detect {|v| v.custom_field_id == cf.id}
+    def cf.customized; nil; end;
   %>
      <td><%= custom_field_tag "time_entry["+hour_id.to_s+"]", cfv %></td>
   <% end %>
