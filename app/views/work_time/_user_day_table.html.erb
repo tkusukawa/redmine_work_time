@@ -21,8 +21,6 @@
   dsp_prj = prj.id
   dsp_pos = prj_pack[:odr]
 
-  next if !User.current.allowed_to?(:log_time, prj)
-
   activities = []
   prj.activities.each do |act|
     activities.push([act.name, act.id])
