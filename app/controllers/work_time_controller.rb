@@ -771,6 +771,7 @@ private
                           :conditions=>["wt_project_orders.uid=:u",{:u=>@this_uid}],
                           :order=>"wt_project_orders.dsp_pos")
     dsp_prjs.each do |prj|
+      next if @restrict_project && @restrict_project!=prj.id
       make_pack_prj(@month_pack, prj, prj.dsp_pos)
       make_pack_prj(@day_pack, prj, prj.dsp_pos)
     end
@@ -782,6 +783,7 @@ private
                             :conditions=>["user_issue_months.uid=:u",{:u=>@this_uid}],
                             :order=>"user_issue_months.odr")
     dsp_issues.each do |issue|
+      next if @restrict_project && @restrict_project!=issue.project.id
       month_prj_pack = make_pack_prj(@month_pack, issue.project)
       make_pack_issue(month_prj_pack, issue, issue.odr)
       day_prj_pack = make_pack_prj(@day_pack, issue.project)
@@ -794,6 +796,7 @@ private
         ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
         {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
     hours.each do |hour|
+      next if @restrict_project && @restrict_project!=hour.project.id
       # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
       prj_pack = make_pack_prj(@month_pack, hour.project)
 
@@ -838,6 +841,7 @@ private
     issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
         {:u=>@this_uid, :t1=>t1, :t2=>t2}])
     issues.each do |issue|
+      next if @restrict_project && @restrict_project!=issue.project.id
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;
@@ -850,6 +854,7 @@ private
                                        journals.created_on<:t2",
                                        {:u=>@this_uid, :t1=>t1, :t2=>t2}])
     issues.each do |issue|
+      next if @restrict_project && @restrict_project!=issue.project.id
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;
