@@ -35,7 +35,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 <%end%>
 </div>
 
-<h2><%=l(:wt_monthly_report)%> (<%=User.find_by_id(@this_uid)%>)</h2>
+<h2><%=l(:wt_monthly_report)%> (<%=@this_user%>)</h2>
 <%= render :partial=>'user_month_table' %>
 
 <br/>
@@ -66,7 +66,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 <br/>
 <h2>
   <%=link_to(@this_year.to_s+'/'+@this_month.to_s+'/'+@this_day.to_s+
-    '('+@wday_name[@this_date.wday]+') '+User.find_by_id(@this_uid).to_s,
+    '('+@wday_name[@this_date.wday]+') '+@this_user.to_s,
     @link_params.merge(:anchor=>"memo"))
   %>
 </h2>

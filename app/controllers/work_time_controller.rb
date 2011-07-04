@@ -219,6 +219,7 @@ private
     # ************************************* 値の準備
     @crnt_uid = User.current.id
     @this_uid = (params.key?(:user) && User.current.allowed_to?(:view_work_time_other_member, @project)) ? params[:user].to_i : @crnt_uid
+    @this_user = User.find_by_id(@this_uid)
 
     @today = Date.today
     @this_year = params.key?(:year) ? params[:year].to_i : @today.year
@@ -842,6 +843,7 @@ private
         {:u=>@this_uid, :t1=>t1, :t2=>t2}])
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
+      next if !@this_user.allowed_to?(:log_time, issue.project)
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;
@@ -855,6 +857,7 @@ private
                                        {:u=>@this_uid, :t1=>t1, :t2=>t2}])
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
+      next if !@this_user.allowed_to?(:log_time, issue.project)
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;
