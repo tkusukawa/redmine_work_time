@@ -410,26 +410,12 @@ private
 
   def hour_update_check_error(obj, issue_id)
     return "" if obj.errors.empty?
-    p obj
-    str = "ERROR:#"+issue_id.to_s+"<br>"
-    obj.errors.each do |attr, msg|
-      next if msg.nil?
-      if attr == "base"
-        str += msg
-      else
-        str += "&#171; " + l("field_#{attr}") + " &#187; " + msg + "<br>" unless attr == "custom_values"
-      end
+    str = l("field_issue")+"#"+issue_id.to_s+"<br>"
+    fm = obj.errors.full_messages
+    fm.each do |msg|
+        str += msg+"<br>"
     end
-    # retrieve custom values error messages
-    if obj.errors[:custom_values] then
-      obj.custom_values.each do |v|
-        v.errors.each do |attr, msg|
-          next if msg.nil?
-          str += "&#171; " + v.custom_field.name + " &#187; " + msg + "<br>"
-        end
-      end
-    end
-    return str
+    str
   end
 
   def member_add_del_check
