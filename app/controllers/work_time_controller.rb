@@ -880,16 +880,17 @@ private
   end
 
   def make_pack_issue(prj_pack, new_issue, odr=NO_ORDER)
+      id = new_issue.nil? ? -1 : new_issue.id
       # 表示項目に当該チケットがあるかチェック→なければ項目追加
-      unless prj_pack[:ref_issues].has_key?(new_issue.id) then
+      unless prj_pack[:ref_issues].has_key?(id) then
         issue_pack = {:odr=>odr, :issue=>new_issue,
                       :total=>0, :total_by_day=>{},
                       :count_hours=>0, :each_entries=>{}}
-        prj_pack[:ref_issues][new_issue.id] = issue_pack
+        prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
       end
-      prj_pack[:ref_issues][new_issue.id]
+      prj_pack[:ref_issues][id]
   end
 
   # 重複削除と順序の正規化

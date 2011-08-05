@@ -46,7 +46,7 @@
 <%
 prj_pack[:odr_issues].each do |issue_pack|
   issue = issue_pack[:issue]
-  issue_id = issue.id
+  issue_id = issue.nil? ? -1 : issue.id
   issue_odr = issue_pack[:odr].to_i
   issue_color = issue_pack[:worked] ? "#cfc" : "#fff"
   issue = Issue.find_by_id(issue_id)
@@ -126,6 +126,7 @@ prj_pack[:odr_issues].each do |issue_pack|
 <tr id="time_entry_pos<%=hour_id%>">
   <td style="background:<%=issue_color%>;">
   <div style="position:relative;width:300px;">
+  <%if !issue.nil? then%>
     <%if @this_uid==@crnt_uid then%>
     <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);">
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
@@ -153,6 +154,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%else%>
       [<%=issue.done_ratio%>&#37;]
     <%end%>
+  <%end%>
   </div>
   </td>
   <td>
