@@ -64,14 +64,12 @@ function dup_ticket(ajax_url, insert_pos, id)
 <%end%>
 
 <br/>
-<h2>
+<h2 id="memo">
   <%=link_to(@this_year.to_s+'/'+@this_month.to_s+'/'+@this_day.to_s+
     '('+@wday_name[@this_date.wday]+') '+@this_user.to_s,
     @link_params.merge(:anchor=>"memo"))
   %>
 </h2>
-<div id="memo">
-
 
 <%#------------------------------------------- Wiki表示#%>
 <%
@@ -113,6 +111,5 @@ d = memo.day
 
 <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params.merge(:anchor=>"memo")} %>
 
-</div>
 <%end%>
 
