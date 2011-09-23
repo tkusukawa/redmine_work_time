@@ -419,33 +419,66 @@ private
   end
 
   def member_add_del_check
-    #---------------------------------------- メンバーの増減をチェック
-    members = Member.find(:all, :conditions=>
-    ["project_id=:prj", {:prj=>@project.id}])
-    members.each do |mem| # 現メンバーの中で
-      user = User.find_by_id(mem.user_id)
-      next if user.nil?
-      if user.active? then # アクティブで
-        odr = WtMemberOrder.find(:first, :conditions=>["user_id=:u and prj_id=:p", {:u=>mem.user_id, :p=>@project.id}])
-        if !odr then # 未登録の者を追加
-          n = WtMemberOrder.new(:user_id=>mem.user_id, :position=>WtMemberOrder.find(:all).size+1,:prj_id=>@project.id)
-          n.save
-        end
+    # プロジェクトのメンバーを取得
+    mem = Member.find(:all, :conditions=>
+                          ["project_id=:prj", {:prj=>@project.id}])
+    # メンバーの順序を取得
+    odr = WtMemberOrder.find(:all, :conditions=>["prj_id=:p", {:p=>@project.id}])
+    
+    # 当月のユーザ毎の工数入力数を取得
+    entry_count = TimeEntry.find_by_sql("
+      select user_id, count(hours) as cnt from time_entries
+      where spent_on>=#{@first_date} and spent_on<=#{@last_date}
+      group by user_id")
+    cnt_by_uid = {}
+    entry_count.each do |ec|
+      cnt_by_uid[ec.user_id] = ec.cnt
+    end
+
+    # メンバー順序のuser_idによるハッシュを作成
+    odr_by_uid = {}
+    pos_max = 0
+    odr.each do |o|
+      odr_by_uid[o.user_id] = o
+      pos_max = o.position if pos_max < o.position
+    end
+
+    # メンバーの増加をチェック
+    mem_by_uid = {}
+    mem.each do |m|
+      mem_by_uid[m.user_id] = m
+      if odr_by_uid.has_key?(m.user_id) then
+        odr_by_uid.delete(m.user_id) # 要削除リストから外す
+      else
+        # 順序情報に無いものがあれば順序情報に追加する
+        pos_max += 1
+        n = WtMemberOrder.new(:user_id=>m.user_id,
+                              :position=>pos_max,
+                              :prj_id=>@project.id)
+        n.save
       end
     end
 
+    # プロジェクトメンバから無くなっていたものを順序情報から消す
+    odr_by_uid.each do |k,v|
+      v.destroy
+    end
+
+    # 最終順序情報の作成
     @members = []
-    WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}]).each do |mo| # 登録されている者の中で
-      mem = Member.find(:first, :conditions=>["user_id=:u and project_id=:p", {:u=>mo.user_id, :p=>@project.id}])
-      if !mem then # 登録されていないものは削除
-        mo.destroy
-      else # 登録されていても
-        user = User.find_by_id(mo.user_id)
-        if user.nil? || !(user.active?) then # アクティブでないものは
-          mo.destroy # 削除
-        else
-          @members.push([user.id,user.to_s])
-        end
+    odr.each do |o|
+      user = mem_by_uid[o.user_id].user
+      mem_by_uid.delete(user.id) # 要追加リストから外す
+      if user.active? || (cnt_by_uid.has_key?(user.id) && cnt_by_uid[user.id]!=0) then
+        @members.push([user.id, user.to_s])
+      end
+    end
+
+    # 残った要追加リストの内容を追加
+    mem_by_uid.each do |k,v|
+      user = v.user
+      if user.active? || (cnt_by_uid.has_key?(user.id) and cnt_by_uid[user.id]!=0) then
+        @members.push([user.id, user.to_s])
       end
     end
   end
