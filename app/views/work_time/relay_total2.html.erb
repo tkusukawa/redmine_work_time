@@ -24,10 +24,8 @@ end
 <table border="1">
 <%
 #-------------------------------------- メンバーのループ
-members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}])
-members.each do |mem|
-  user = User.find_by_id(mem.user_id)
-  next if user.nil?
+@members.each do |mem_info|
+  user = mem_info[1]
 
   #-------------------------------------- プロジェクトのループ
   prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
