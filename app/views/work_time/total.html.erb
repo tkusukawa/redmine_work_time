@@ -27,27 +27,20 @@ end
 </td>
 <td style="background:#ddd;"></td>
 <%
-num = 1
-members = WtMemberOrder.find(:all, :order=>"position", :conditions=>["prj_id=:p",{:p=>@project.id}])
-max = members.size
-members.each do |mem|
-  if mem.position!=num then
-    mem.position=num #posがずれていたら修正
-    mem.save
-  end
-  user = User.find_by_id(mem.user_id)
-  next if user.nil?
+max = @members.size
+@members.each do |mem_info|
+  pos=mem_info[0]
+  user=mem_info[1]
 %>
 <td align="center">
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
-<a href="JavaScript:member_pos('<%=url_for(@link_params)%>', <%=mem.user_id%>,<%=mem.position%>,<%=max%>);"><%=mem.position%></a>
+<a href="JavaScript:member_pos('<%=url_for(@link_params)%>', <%=user.id%>,<%=pos%>,<%=max%>);"><%=pos%></a>
 <%end%>
 <div style="top:2px;width:56px;font-size:10px;">
-<%= link_to(user, @link_params.merge(:action=>"show", :user=>mem.user_id))%>
+<%= link_to(user, @link_params.merge(:action=>"show", :user=>user.id))%>
 </div>
 </td>
 <%
-  num += 1
 end
 %>
 </tr>
@@ -60,10 +53,11 @@ end
 </td>
 <%
 #---------------------------------------各人の合計を表示
-members.each do |mo|
+@members.each do |mem_info|
+  user=mem_info[1]
 %>
 <td style="background:#ddd;">
-<%= (@member_cost.key?(mo.user_id) && @member_cost[mo.user_id] !=0 ) ? @member_cost[mo.user_id] : "&nbsp;"%>
+<%= (@member_cost.key?(user.id) && @member_cost[user.id] !=0 ) ? @member_cost[user.id] : "&nbsp;"%>
 </td>
 <%
 end
@@ -96,8 +90,9 @@ prjs.each do |po|
  </td>
  <td> <%=(@prj_cost[dsp_prj])[-1]%> </td>
 <%
-members.each do |mo|
-  uid=mo.user_id
+@members.each do |mem_info|
+  user=mem_info[1]
+  uid=user.id
 %>
   <td>
     <%= @prj_cost[dsp_prj].key?(uid) ? (@prj_cost[dsp_prj])[uid] : "&nbsp;"%>
@@ -135,11 +130,12 @@ tickets.each do |tic|
 </td>
 
 <%
-members.each do |mo|
+@members.each do |mem_info|
+  user=mem_info[1]
 %>
 <td>
-<% if @issue_cost.key?(issue_id) && @issue_cost[issue_id].key?(mo.user_id) then %>
-<%= (@issue_cost[issue_id])[mo.user_id] %>
+<% if @issue_cost.key?(issue_id) && @issue_cost[issue_id].key?(user.id) then %>
+<%= (@issue_cost[issue_id])[user.id] %>
 <%else%>
 &nbsp;
 <%end%>

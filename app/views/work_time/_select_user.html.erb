@@ -5,9 +5,10 @@
   <option disabled="disabled">---</option>
 <%
 @members.each do |mem|
+  user=mem[1]
 %>
-  <option value="<%= url_for(link_params.merge(:user=>mem[0]));%>">
-    <%=mem[1]%>
+  <option value="<%= url_for(link_params.merge(:user=>user.id));%>">
+    <%=user.to_s%>
   </option>
 <%
 end

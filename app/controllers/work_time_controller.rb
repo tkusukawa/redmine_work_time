@@ -50,11 +50,11 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    member_add_del_check
     add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
+    member_add_del_check
     calc_total
     @link_params.merge!(:action=>"total")
   end
@@ -63,11 +63,11 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    member_add_del_check
     add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
+    member_add_del_check
     calc_total
     @link_params.merge!(:action=>"edit_relay")
   end
@@ -76,11 +76,11 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    member_add_del_check
     add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
+    member_add_del_check
     calc_total
     @link_params.merge!(:action=>"relay_total")
   end
@@ -89,11 +89,11 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    member_add_del_check
     add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
+    member_add_del_check
     calc_total
     @link_params.merge!(:action=>"relay_total2")
   end
@@ -173,11 +173,11 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    member_add_del_check
     add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
+    member_add_del_check
     calc_total
     @link_params.merge!(:action=>"edit_relay")
     render(:layout=>false)
@@ -422,65 +422,64 @@ private
     # プロジェクトのメンバーを取得
     mem = Member.find(:all, :conditions=>
                           ["project_id=:prj", {:prj=>@project.id}])
+    mem_by_uid = {}
+    mem.each do |m|
+      mem_by_uid[m.user_id] = m
+    end
+
     # メンバーの順序を取得
-    odr = WtMemberOrder.find(:all, :conditions=>["prj_id=:p", {:p=>@project.id}])
-    
+    odr = WtMemberOrder.find(:all,
+                             :conditions=>["prj_id=:p", {:p=>@project.id}],
+                             :order=>"position")
+
     # 当月のユーザ毎の工数入力数を取得
-    entry_count = TimeEntry.find_by_sql("
-      select user_id, count(hours) as cnt from time_entries
-      where spent_on>=#{@first_date} and spent_on<=#{@last_date}
-      group by user_id")
+    entry_count = TimeEntry.find(:all, 
+      :select=>"user_id, count(hours)as cnt",
+      :conditions=>["spent_on>=:first_date and spent_on<=:last_date",
+                    {:first_date=>@first_date, :last_date=>@last_date}],
+      :group=>"user_id")
     cnt_by_uid = {}
     entry_count.each do |ec|
       cnt_by_uid[ec.user_id] = ec.cnt
     end
 
-    # メンバー順序のuser_idによるハッシュを作成
-    odr_by_uid = {}
-    pos_max = 0
-    odr.each do |o|
-      odr_by_uid[o.user_id] = o
-      pos_max = o.position if pos_max < o.position
-    end
-
-    # メンバーの増加をチェック
-    mem_by_uid = {}
-    mem.each do |m|
-      mem_by_uid[m.user_id] = m
-      if odr_by_uid.has_key?(m.user_id) then
-        odr_by_uid.delete(m.user_id) # 要削除リストから外す
-      else
-        # 順序情報に無いものがあれば順序情報に追加する
-        pos_max += 1
-        n = WtMemberOrder.new(:user_id=>m.user_id,
-                              :position=>pos_max,
-                              :prj_id=>@project.id)
-        n.save
-      end
-    end
-
-    # プロジェクトメンバから無くなっていたものを順序情報から消す
-    odr_by_uid.each do |k,v|
-      v.destroy
-    end
-
-    # 最終順序情報の作成
     @members = []
+    pos = 1
+    # 順序情報にあってメンバーに無いものをチェック
     odr.each do |o|
-      user = mem_by_uid[o.user_id].user
-      mem_by_uid.delete(user.id) # 要追加リストから外す
-      if user.active? || (cnt_by_uid.has_key?(user.id) && cnt_by_uid[user.id]!=0) then
-        @members.push([user.id, user.to_s])
+      if mem_by_uid.has_key?(o.user_id) then
+        user=mem_by_uid[o.user_id].user
+        # 順位の確認と修正
+        if o.position != pos then
+          o.position=pos
+          o.save
+        end
+        # 表示メンバーに追加
+        if user.active? || cnt_by_uid.has_key?(user.id) then
+          @members.push([pos, user])
+        end
+        pos += 1
+        # 順序情報に存在したメンバーを削っていく
+        mem_by_uid.delete(o.user_id)
+      else
+        # メンバーに無い順序情報は削除する
+        o.destroy
       end
     end
 
-    # 残った要追加リストの内容を追加
+    # 残ったメンバーを順序情報に加える
     mem_by_uid.each do |k,v|
       user = v.user
-      if user.active? || (cnt_by_uid.has_key?(user.id) and cnt_by_uid[user.id]!=0) then
-        @members.push([user.id, user.to_s])
+      n = WtMemberOrder.new(:user_id=>user.id,
+                              :position=>pos,
+                              :prj_id=>@project.id)
+      n.save
+      if user.active? || cnt_by_uid.has_key?(user.id) then
+        @members.push([pos, user])
       end
+      pos += 1
     end
+    
   end
 
   def update_daily_memo # 日ごとメモの更新
