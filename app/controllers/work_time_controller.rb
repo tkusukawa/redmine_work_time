@@ -470,6 +470,7 @@ private
     # 残ったメンバーを順序情報に加える
     mem_by_uid.each do |k,v|
       user = v.user
+      next if user.nil?
       n = WtMemberOrder.new(:user_id=>user.id,
                               :position=>pos,
                               :prj_id=>@project.id)
