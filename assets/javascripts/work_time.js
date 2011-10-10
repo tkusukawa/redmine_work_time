@@ -36,7 +36,7 @@ function set_ticket_relay(pop_url, rep_url, child)
   var parent = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   if(parent!=null) {
       //location.replace(rep_url+"&ticket_relay="+child+"_"+id);
-      new Ajax.Updater('relay_table', 
+      new Ajax.Updater('ticket'+child,
                        rep_url+"&ticket_relay="+child+"_"+parent, 
                        {asynchronous:true, method:'get'});
   }
