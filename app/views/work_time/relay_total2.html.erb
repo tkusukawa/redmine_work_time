@@ -44,8 +44,8 @@ end
       next unless @r_issue_cost.key?(issue_id) # 値の無いチケットはパス
       next unless @r_issue_cost[issue_id].key?(-1) # 値の無いチケットはパス
       next if @r_issue_cost[issue_id][-1] == 0 # 値の無いチケットはパス
-      next unless @r_issue_cost[issue_id].key?(mem.user_id) # 値の無いチケットはパス
-      next if @r_issue_cost[issue_id][mem.user_id] == 0 # 値の無いチケットはパス
+      next unless @r_issue_cost[issue_id].key?(user.id) # 値の無いチケットはパス
+      next if @r_issue_cost[issue_id][user.id] == 0 # 値の無いチケットはパス
 
       issue = Issue.find_by_id(issue_id)
       next if issue.nil? # チケットが削除されていたらパス
@@ -56,7 +56,7 @@ end
 <td><%=user%></td>
 <td><%=prj%></td>
 <td><%=issue.subject%></td>
-<td><%=@r_issue_cost[issue_id][mem.user_id]%></td>
+<td><%=@r_issue_cost[issue_id][user.id]%></td>
 </tr>
 
 <%
