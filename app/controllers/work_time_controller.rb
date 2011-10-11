@@ -174,11 +174,6 @@ class WorkTimeController < ApplicationController
     authorize
     prepare_values
     add_ticket_relay
-    change_member_position
-    change_ticket_position
-    change_project_position
-    member_add_del_check
-    calc_total
     @link_params.merge!(:action=>"edit_relay")
     render(:layout=>false)
   end
@@ -533,9 +528,9 @@ private
   def add_ticket_relay
     ################################### チケット付け替え関係処理
     if params.key?("ticket_relay") && params[:ticket_relay]=~/^(.*)_(.*)$/ then
+      child_id = $1.to_i
+      parent_id = $2.to_i
       if User.current.allowed_to?(:edit_work_time_total, @project) then
-        child_id = $1.to_i
-        parent_id = $2.to_i
 
         anc_id = parent_id
         while anc_id != 0 do
@@ -558,6 +553,12 @@ private
       else
         @message = '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
         return
+      end
+      @issue_id = child_id
+      if parent_id != 0 && !((parent = Issue.find_by_id(parent_id)).nil?) then
+        @parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s
+      else
+        @parentHtml = ""
       end
     end
   end
