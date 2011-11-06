@@ -76,6 +76,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
 if memo then # この日のメモがある場合
 %>
+<div id="memo-wiki">
 <div class="wiki" style="background:#ffb;">
   <%=textilizable(memo.description) %>
   <div style="text-align:right;">
@@ -93,7 +94,7 @@ d = memo.day
 <%end%>
 
 <%if @this_uid==@crnt_uid then%>
-[<a href="#" onclick="JavaScript:new Ajax.Updater('memo',
+[<a href="#" onclick="JavaScript:new Ajax.Updater('memo-wiki',
   '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
   {asynchronous:true, method:'get'}); return false;">
   <%=l(:wt_edit_memo)%>
@@ -107,6 +108,7 @@ d = memo.day
 %>
 [<%= link_to(l(:wt_next_memo), @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year))%>]
 <%end%>
+</div>
 <br/>
 
 <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params.merge(:anchor=>"memo")} %>
