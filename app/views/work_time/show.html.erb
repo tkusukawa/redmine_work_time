@@ -72,11 +72,11 @@ function dup_ticket(ajax_url, insert_pos, id)
 </h2>
 
 <%#------------------------------------------- Wiki表示#%>
+<div id="memo-wiki">
 <%
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
 if memo then # この日のメモがある場合
 %>
-<div id="memo-wiki">
 <div class="wiki" style="background:#ffb;">
   <%=textilizable(memo.description) %>
   <div style="text-align:right;">
