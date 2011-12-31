@@ -111,7 +111,9 @@ d = memo.day
 </div>
 <br/>
 
-<%= render :partial=>'select_user', :locals=>{:link_params=>@link_params.merge(:anchor=>"memo")} %>
+<%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
+  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params.merge(:anchor=>"memo")} %>
+<%end%>
 
 <%end%>
 

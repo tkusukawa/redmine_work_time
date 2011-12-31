@@ -779,11 +779,13 @@ private
     # 月間工数表のデータを作成
     @month_pack = {:ref_prjs=>{}, :odr_prjs=>[],
                    :total=>0, :total_by_day=>{},
+                   :other=>0, :other_by_day=>{},
                    :count_prjs=>0, :count_issues=>0}
 
     # 日毎工数のデータを作成
     @day_pack = {:ref_prjs=>{}, :odr_prjs=>[],
                  :total=>0, :total_by_day=>{},
+                 :other=>0, :other_by_day=>{},
                  :count_prjs=>0, :count_issues=>0}
 
     # プロジェクト順の表示データを作成
@@ -818,40 +820,58 @@ private
         {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
     hours.each do |hour|
       next if @restrict_project && @restrict_project!=hour.project.id
-      # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
-      prj_pack = make_pack_prj(@month_pack, hour.project)
-
-      # 表示項目に工数のチケットがあるかチェック→なければ項目追加
-      issue_pack = make_pack_issue(prj_pack, hour.issue)
-
-      issue_pack[:count_hours] += 1
-
-      # 合計時間の計算
       work_time = hour.hours
-      @month_pack[:total] += work_time
-      prj_pack[:total] += work_time
-      issue_pack[:total] += work_time
-      
-      # 日毎の合計時間の計算
-      date = hour.spent_on
-      @month_pack[:total_by_day][date] ||= 0
-      @month_pack[:total_by_day][date] += work_time
-      prj_pack[:total_by_day][date] ||= 0
-      prj_pack[:total_by_day][date] += work_time
-      issue_pack[:total_by_day][date] ||= 0
-      issue_pack[:total_by_day][date] += work_time
-
-      if date==@this_date then # 表示日の工数であれば項目追加
+      if hour.issue.visible? then
         # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
-        day_prj_pack = make_pack_prj(@day_pack, hour.project)
+        prj_pack = make_pack_prj(@month_pack, hour.project)
 
         # 表示項目に工数のチケットがあるかチェック→なければ項目追加
-        day_issue_pack = make_pack_issue(day_prj_pack, hour.issue, NO_ORDER)
+        issue_pack = make_pack_issue(prj_pack, hour.issue)
 
-        day_issue_pack[:each_entries][hour.id] = hour # 工数エントリを追加
-        day_issue_pack[:total] += work_time
-        day_prj_pack[:total] += work_time
-        @day_pack[:total] += work_time
+        issue_pack[:count_hours] += 1
+
+        # 合計時間の計算
+        @month_pack[:total] += work_time
+        prj_pack[:total] += work_time
+        issue_pack[:total] += work_time
+
+        # 日毎の合計時間の計算
+        date = hour.spent_on
+        @month_pack[:total_by_day][date] ||= 0
+        @month_pack[:total_by_day][date] += work_time
+        prj_pack[:total_by_day][date] ||= 0
+        prj_pack[:total_by_day][date] += work_time
+        issue_pack[:total_by_day][date] ||= 0
+        issue_pack[:total_by_day][date] += work_time
+
+        if date==@this_date then # 表示日の工数であれば項目追加
+          # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
+          day_prj_pack = make_pack_prj(@day_pack, hour.project)
+
+          # 表示項目に工数のチケットがあるかチェック→なければ項目追加
+          day_issue_pack = make_pack_issue(day_prj_pack, hour.issue, NO_ORDER)
+
+          day_issue_pack[:each_entries][hour.id] = hour # 工数エントリを追加
+          day_issue_pack[:total] += work_time
+          day_prj_pack[:total] += work_time
+          @day_pack[:total] += work_time
+        end
+      else
+        # 合計時間の計算
+        @month_pack[:total] += work_time
+        @month_pack[:other] += work_time
+
+        # 日毎の合計時間の計算
+        date = hour.spent_on
+        @month_pack[:total_by_day][date] ||= 0
+        @month_pack[:total_by_day][date] += work_time
+        @month_pack[:other_by_day][date] ||= 0
+        @month_pack[:other_by_day][date] += work_time
+
+        if date==@this_date then # 表示日の工数であれば項目追加
+          @day_pack[:total] += work_time
+          @day_pack[:other] += work_time
+        end
       end
     end
 
@@ -864,6 +884,7 @@ private
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
       next if !@this_user.allowed_to?(:log_time, issue.project)
+      next if !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;
@@ -878,6 +899,7 @@ private
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
       next if !@this_user.allowed_to?(:log_time, issue.project)
+      next if !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;

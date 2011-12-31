@@ -10,6 +10,7 @@ prjs = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_ord
                           :order=>"pos,name")
 prjs.each do |prj|
   next unless prj.active?
+  next if !prj.visible?
 %>
   <option value="<%= url_for(@link_params.merge(:prj=>prj.id));%>"> <%=prj.name%> </option>
 <%end%>

@@ -42,6 +42,7 @@ projects = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project
                           :order=>"pos,name")
 projects.each do |prj|
   next unless prj.active?
+  next if !prj.visible?
 %>
   <option value="<%= url_for(:action=>"ajax_select_ticket", :prj=>prj.id) %>">
     <%= prj.name %> 
