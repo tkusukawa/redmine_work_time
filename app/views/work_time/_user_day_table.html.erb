@@ -181,8 +181,9 @@ prj_pack[:odr_issues].each do |issue_pack|
  end
 end
 %>
+<% if @day_pack[:other]!=0 then %>
 <tr style="background:#000;color:#fff;">
-  <td>other</td>
+  <td>private</td>
   <td><%=sprintf("%1.1f", @day_pack[:other])%></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
@@ -190,6 +191,7 @@ end
      <td>&nbsp;</td>
   <% end %>
 </tr>
+<% end %>
 <tr align="center" id="time_input_table_bottom" style="background:#ddd;">
   <td>&nbsp;</td>
   <td><%=sprintf("%1.1f", @day_pack[:total])%></td>

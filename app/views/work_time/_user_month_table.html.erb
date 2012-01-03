@@ -4,7 +4,10 @@ win_h = 30    # 小窓の高さ
 win_hs = 20   # 小さい小窓の高さ
 
 box_w = 300
-box_h = win_hs*4+win_h*@month_pack[:count_issues]+win_hs*@month_pack[:count_prjs]+20
+box_h = win_hs*3+win_h*@month_pack[:count_issues]+win_hs*@month_pack[:count_prjs]+20
+if @month_pack[:other]!=0 then
+  box_h += win_hs
+end
 %>
 
 <table width="100%" style="border:0;border-collapse:collapse;">
@@ -88,16 +91,18 @@ ofst_t = win_hs*3-5
 <%
 end
 %>
+    <%if @month_pack[:other]!=0 then%>
       <div style="position:absolute;top:<%=ofst_t%>px;left:2px;">
         <div style="background:#000;color:#fff;font-size:1.0em;">
           <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
-            other
+            private
               <div style="position:absolute;top:1px;right:10px;">
                 <%=sprintf("%1.1f", @month_pack[:other])%>
               </div>
           </div>
         </div>
       </div>
+    <%end%>
       <div style="position:absolute;bottom:10px;right:10px;">
         <%=sprintf("%1.1f", @month_pack[:total])%>
       </div>
@@ -206,6 +211,7 @@ end
       </div>
     </div>
 <!--otherの時間表示-->
+<%if @month_pack[:other]!=0 then%>
   <div style="position:absolute;top:<%=ofst_t%>px;left:<%=ofst_l%>px;">
     <div style="background:#000;color:#fff;font-size:0.8em;">
       <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
@@ -215,6 +221,7 @@ end
       </div>
     </div>
   </div>
+<%end%>
 
 <%end%>
     </div>
