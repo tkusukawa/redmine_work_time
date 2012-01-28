@@ -181,7 +181,7 @@ class WorkTimeController < ApplicationController
   def popup_update_done_ratio # 進捗％更新ポップアップ
     issue_id = params[:issue_id]
     @issue = Issue.find_by_id(issue_id)
-    if @issue.closed? || !@issue.visible? then
+    if @issue.nil? || @issue.closed? || !@issue.visible? then
       next if !params.key?(:all)
       @issueHtml = "<del>"+@issue.to_s+"</del>"
     else
@@ -368,8 +368,7 @@ private
     if params["new_time_entry"] then
       params["new_time_entry"].each do |issue_id, valss|
         issue = Issue.find_by_id(issue_id)
-        next if issue.nil?
-        next if !issue.visible?
+        next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
           next if vals['hours'] == ""
@@ -821,7 +820,7 @@ private
     hours.each do |hour|
       next if @restrict_project && @restrict_project!=hour.project.id
       work_time = hour.hours
-      if hour.issue.visible? then
+      if hour.issue && hour.issue.visible? then
         # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
         prj_pack = make_pack_prj(@month_pack, hour.project)
 
@@ -884,7 +883,7 @@ private
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
       next if !@this_user.allowed_to?(:log_time, issue.project)
-      next if !issue.visible?
+      next if issue.nil? || !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
       issue_pack[:worked] = true;

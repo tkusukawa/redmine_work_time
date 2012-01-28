@@ -2,7 +2,7 @@
 issues = Issue.find(:all, :order=>"id DESC", :conditions =>
                      ["project_id=:p",{:p=>params[:prj]}])
 issues.each do |issue|
-  next if !issue.visible?
+  next if issue.nil? || !issue.visible?
   if issue.closed? then
     next if !params.key?(:all)
     issueHtml = "<del>"+issue.to_s+"</del>"
