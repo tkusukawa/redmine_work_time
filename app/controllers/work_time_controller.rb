@@ -182,8 +182,9 @@ class WorkTimeController < ApplicationController
     issue_id = params[:issue_id]
     @issue = Issue.find_by_id(issue_id)
     if @issue.nil? || @issue.closed? || !@issue.visible? then
-      next if !params.key?(:all)
-      @issueHtml = "<del>"+@issue.to_s+"</del>"
+      if params.key?(:all)
+        @issueHtml = "<del>"+@issue.to_s+"</del>"
+      end
     else
       @issueHtml = @issue.to_s
     end
