@@ -105,6 +105,9 @@ class WorkTimeController < ApplicationController
           csv_data << "#{user},#{parent_issue.project},#{parent_issue.subject},#{prj},#{issue.to_s},#{@issue_cost[issue_id][user.id]}\n"
         end
       end
+      if @issue_cost.has_key?(-1) && @issue_cost[-1].has_key?(user.id) then
+        csv_data << "#{user},private,private,private,private,#{@issue_cost[-1][user.id]}\n"
+      end
     end
     send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
   end
@@ -177,6 +180,9 @@ class WorkTimeController < ApplicationController
           
           csv_data << "#{user},#{prj},#{issue.subject},#{@r_issue_cost[issue_id][user.id]}\n"
         end
+      end
+      if @r_issue_cost.has_key?(-1) && @r_issue_cost[-1].has_key?(user.id) then
+        csv_data << "#{user},private,private,private,private,#{@r_issue_cost[-1][user.id]}\n"
       end
     end
     send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
@@ -793,7 +799,6 @@ private
 
       issue = Issue.find_by_id(iid)
       next if issue.nil? # チケットが削除されていたらパス
-      next if !issue.visible?
       pid = issue.project_id
       # プロジェクト限定の対象でなければパス
       next if @restrict_project && pid != @restrict_project
@@ -810,7 +815,6 @@ private
         while true do
           parent_issue = Issue.find_by_id(parent_iid)
           break if parent_issue.nil? # チケットが削除されていたらそこまで
-          break if !parent_issue.visible?
 
           if !(relay.key?(parent_iid)) then
             # まだ登録されていないチケットの場合、追加処理を行う
@@ -839,7 +843,11 @@ private
         end
         @issue_parent[iid] = parent_iid
       end
-
+      
+      if !Issue.find_by_id(iid).visible? then
+        iid = -1
+        pid = -1
+      end
       @issue_cost[iid] ||= Hash.new
       (@issue_cost[iid])[uid] ||= 0
       (@issue_cost[iid])[uid] += cost
@@ -852,6 +860,10 @@ private
       (@prj_cost[pid])[-1] ||= 0
       (@prj_cost[pid])[-1] += cost
 
+      if !Issue.find_by_id(parent_iid).visible? then
+        parent_iid = -1
+        parent_pid = -1
+      end
       @r_issue_cost[parent_iid] ||= Hash.new
       (@r_issue_cost[parent_iid])[uid] ||= 0
       (@r_issue_cost[parent_iid])[-1] ||= 0

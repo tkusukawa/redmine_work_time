@@ -149,9 +149,24 @@ end
 
 </tr>
 <%
- end
+  end
 end
+if @prj_cost.has_key?(-1) then
 %>
+<tr style="background:#000;color:#fff;">
+ <td>private</td>
+ <td> <%=(@prj_cost[-1])[-1]%> </td>
+<%
+@members.each do |mem_info|
+  user=mem_info[1]
+  uid=user.id
+%>
+  <td>
+    <%= @prj_cost[-1].key?(uid) ? (@prj_cost[-1])[uid] : "&nbsp;"%>
+  </td>
+<%end%>
+</tr>
+<%end%>
 </table>
 
 <div align="right">
