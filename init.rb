@@ -8,7 +8,7 @@ Redmine::Plugin.register :redmine_work_time do
   
   project_module :work_time do
     permission :view_work_time_tab, {:work_time =>
-            [:show,:total,:edit_relay,:relay_total,:relay_total2,:popup_select_ticket,:ajax_select_ticket,:popup_select_tickets,:ajax_select_tickets,:ajax_insert_daily,:ajax_memo_edit,:ajax_relay_table]}
+            [:show,:total,:total_data,:edit_relay,:relay_total,:relay_total_data,:popup_select_ticket,:ajax_select_ticket,:popup_select_tickets,:ajax_select_tickets,:ajax_insert_daily,:ajax_memo_edit,:ajax_relay_table]}
     permission :view_work_time_other_member, {}
     permission :edit_work_time_total, {}
   end

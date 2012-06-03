@@ -24,3 +24,4 @@ ja:
   wt_data_list: "データリスト"
   wt_input_ticket_numbers: "またはチケット番号を入力"
   wt_delete_closed_tickets: "終了チケット削除"
+  wt_data_download: "データダウンロード"

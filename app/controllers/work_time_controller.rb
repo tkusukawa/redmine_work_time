@@ -59,6 +59,56 @@ class WorkTimeController < ApplicationController
     @link_params.merge!(:action=>"total")
   end
 
+  def total_data
+    find_project
+    authorize
+    prepare_values
+    add_ticket_relay
+    change_member_position
+    change_ticket_position
+    change_project_position
+    member_add_del_check
+    calc_total
+    
+    csv_data = "user,relayed project,relayed ticket,project,ticket,spend time\n"
+    #-------------------------------------- メンバーのループ
+    @members.each do |mem_info|
+      user = mem_info[1]
+
+      #-------------------------------------- プロジェクトのループ
+      prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
+      prjs.each do |po|
+        dsp_prj = po.dsp_prj
+        dsp_pos = po.dsp_pos
+        next unless @prj_cost.key?(dsp_prj) # 値の無いプロジェクトはパス
+        next unless @prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
+        next if @prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
+        prj =Project.find(dsp_prj)
+        
+        #-------------------------------------- チケットのループ
+        tickets = WtTicketRelay.find(:all, :order=>"position")
+        tickets.each do |tic|
+          issue_id = tic.issue_id
+          next unless @issue_cost.key?(issue_id) # 値の無いチケットはパス
+          next unless @issue_cost[issue_id].key?(-1) # 値の無いチケットはパス
+          next if @issue_cost[issue_id][-1] == 0 # 値の無いチケットはパス
+          next unless @issue_cost[issue_id].key?(user.id) # 値の無いチケットはパス
+          next if @issue_cost[issue_id][user.id] == 0 # 値の無いチケットはパス
+
+          issue = Issue.find_by_id(issue_id)
+          next if issue.nil? # チケットが削除されていたらパス
+          next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
+
+          parent_issue = Issue.find_by_id(@issue_parent[issue_id])
+          next if parent_issue.nil? # チケットが削除されていたらパス
+
+          csv_data << "#{user},#{parent_issue.project},#{parent_issue.subject},#{prj},#{issue.to_s},#{@issue_cost[issue_id][user.id]}\n"
+        end
+      end
+    end
+    send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
+  end
+
   def edit_relay
     find_project
     authorize
@@ -85,7 +135,7 @@ class WorkTimeController < ApplicationController
     @link_params.merge!(:action=>"relay_total")
   end
 
-  def relay_total2
+  def relay_total_data
     find_project
     authorize
     prepare_values
@@ -95,7 +145,41 @@ class WorkTimeController < ApplicationController
     change_project_position
     member_add_del_check
     calc_total
-    @link_params.merge!(:action=>"relay_total2")
+    
+    csv_data = "user,project,ticket,spend time\n"
+    #-------------------------------------- メンバーのループ
+    @members.each do |mem_info|
+      user = mem_info[1]
+
+      #-------------------------------------- プロジェクトのループ
+      prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
+      prjs.each do |po|
+        dsp_prj = po.dsp_prj
+        dsp_pos = po.dsp_pos
+        next unless @r_prj_cost.key?(dsp_prj) # 値の無いプロジェクトはパス
+        next unless @r_prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
+        next if @r_prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
+        prj =Project.find(dsp_prj)
+        
+        #-------------------------------------- チケットのループ
+        tickets = WtTicketRelay.find(:all, :order=>"position")
+        tickets.each do |tic|
+          issue_id = tic.issue_id
+          next unless @r_issue_cost.key?(issue_id) # 値の無いチケットはパス
+          next unless @r_issue_cost[issue_id].key?(-1) # 値の無いチケットはパス
+          next if @r_issue_cost[issue_id][-1] == 0 # 値の無いチケットはパス
+          next unless @r_issue_cost[issue_id].key?(user.id) # 値の無いチケットはパス
+          next if @r_issue_cost[issue_id][user.id] == 0 # 値の無いチケットはパス
+
+          issue = Issue.find_by_id(issue_id)
+          next if issue.nil? # チケットが削除されていたらパス
+          next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
+          
+          csv_data << "#{user},#{prj},#{issue.subject},#{@r_issue_cost[issue_id][user.id]}\n"
+        end
+      end
+    end
+    send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
   end
 
   def popup_select_ticket # チケット選択ウィンドウの内容を返すアクション
@@ -680,6 +764,7 @@ private
     WtMemberOrder.find(:all, :conditions=>["prj_id=:p",{:p=>@project.id}]).each do |i|
       @member_cost[i.user_id] = 0
     end
+    @issue_parent = Hash.new
     @issue_cost = Hash.new
     @r_issue_cost = Hash.new
     relay = Hash.new
@@ -716,37 +801,43 @@ private
       @total_cost += cost
       @member_cost[uid] += cost
 
-      # 親チケットを探索する
-      parent_iid = iid
-      while true do
-        parent_issue = Issue.find_by_id(parent_iid)
-        break if parent_issue.nil? # チケットが削除されていたらそこまで
-        break if !parent_issue.visible?
+      if @issue_parent.has_key?(iid) then # 付け替え先チケットは調査済み？
+        # 調査済みなら以前の調査結果をセット
+        parent_iid = @issue_parent[iid]
+      else
+        # 未調査なら親チケットを探索する
+        parent_iid = iid
+        while true do
+          parent_issue = Issue.find_by_id(parent_iid)
+          break if parent_issue.nil? # チケットが削除されていたらそこまで
+          break if !parent_issue.visible?
 
-        if !(relay.key?(parent_iid)) then
-          # まだ登録されていないチケットの場合、追加処理を行う
-          relay[parent_iid] = 0
-          @issue_cost[parent_iid] = Hash.new
-          @r_issue_cost[parent_iid] = Hash.new
-          WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0)
+          if !(relay.key?(parent_iid)) then
+            # まだ登録されていないチケットの場合、追加処理を行う
+            relay[parent_iid] = 0
+            @issue_cost[parent_iid] = Hash.new
+            @r_issue_cost[parent_iid] = Hash.new
+            WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0)
+          end
+
+          parent_pid = parent_issue.project_id
+          if !(@prj_cost.key?(parent_pid)) then
+            # まだ登録されていないプロジェクトの場合、追加処理を行う
+            @prj_cost[parent_pid] = Hash.new
+            @r_prj_cost[parent_pid] = Hash.new
+            WtProjectOrders.create(:uid=>-1, :dsp_prj=>parent_pid, :dsp_pos=>@prj_cost.size)
+          end
+
+          (@issue_cost[parent_iid])[uid] ||= 0
+          (@issue_cost[parent_iid])[-1] ||= 0
+          (@prj_cost[parent_pid])[uid] ||= 0
+          (@prj_cost[parent_pid])[-1] ||= 0
+
+          break if relay[parent_iid] == 0
+          # このチケットに親チケットがある場合は、その親チケットについて同じ処理を繰り返す
+          parent_iid = relay[parent_iid]
         end
-
-        parent_pid = parent_issue.project_id
-        if !(@prj_cost.key?(parent_pid)) then
-          # まだ登録されていないプロジェクトの場合、追加処理を行う
-          @prj_cost[parent_pid] = Hash.new
-          @r_prj_cost[parent_pid] = Hash.new
-          WtProjectOrders.create(:uid=>-1, :dsp_prj=>parent_pid, :dsp_pos=>@prj_cost.size)
-        end
-
-        (@issue_cost[parent_iid])[uid] ||= 0
-        (@issue_cost[parent_iid])[-1] ||= 0
-        (@prj_cost[parent_pid])[uid] ||= 0
-        (@prj_cost[parent_pid])[-1] ||= 0
-
-        break if relay[parent_iid] == 0
-        # このチケットに親チケットがある場合は、その親チケットについて同じ処理を繰り返す
-        parent_iid = relay[parent_iid]
+        @issue_parent[iid] = parent_iid
       end
 
       @issue_cost[iid] ||= Hash.new
@@ -973,4 +1064,5 @@ private
     end
     update
   end
+
 end

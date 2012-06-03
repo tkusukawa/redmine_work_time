@@ -24,3 +24,4 @@ po:
   wt_data_list: "Data list"
   wt_input_ticket_numbers: "or input ticket numbers"
   wt_delete_closed_tickets: "delete closed tickets"
+  wt_data_download: "data download"
