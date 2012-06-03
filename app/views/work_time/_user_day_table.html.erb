@@ -18,6 +18,7 @@
 @day_pack[:odr_prjs].each do |prj_pack|
   next if prj_pack[:ref_issues].length==0
   prj = prj_pack[:prj]
+  next if !prj.visible?
   dsp_prj = prj.id
   dsp_pos = prj_pack[:odr]
 
