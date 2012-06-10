@@ -8,7 +8,7 @@ zh:
   wt_each_member_report: "成员报告"
   wt_raw_total: "月度报告(not relayed)"
   wt_edit_relay: "Ticket Relay 编辑器"
-  wt_relay_total: "Tikect Relayed 月度报告"
+  wt_relay_total: "Ticket Relayed 月度报告"
   wt_ticket: "Ticket"
   wt_add_ticket: "新增ticket"
   wt_no_permission: "无权限"
