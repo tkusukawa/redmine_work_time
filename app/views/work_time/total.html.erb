@@ -60,7 +60,7 @@ end
   user=mem_info[1]
 %>
 <td style="background:#ddd;">
-<%= (@member_cost.key?(user.id) && @member_cost[user.id] !=0 ) ? @member_cost[user.id] : "&nbsp;"%>
+<%= (@member_cost.key?(user.id) && @member_cost[user.id] !=0 ) ? @member_cost[user.id] : " "%>
 </td>
 <%
 end
@@ -98,7 +98,7 @@ prjs.each do |po|
   uid=user.id
 %>
   <td>
-    <%= @prj_cost[dsp_prj].key?(uid) ? (@prj_cost[dsp_prj])[uid] : "&nbsp;"%>
+    <%= @prj_cost[dsp_prj].key?(uid) ? (@prj_cost[dsp_prj])[uid] : " "%>
   </td>
 <%
 end
@@ -162,7 +162,7 @@ if @prj_cost.has_key?(-1) then
   uid=user.id
 %>
   <td>
-    <%= @prj_cost[-1].key?(uid) ? (@prj_cost[-1])[uid] : "&nbsp;"%>
+    <%= @prj_cost[-1].key?(uid) ? (@prj_cost[-1])[uid] : " "%>
   </td>
 <%end%>
 </tr>
