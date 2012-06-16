@@ -70,7 +70,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check
     calc_total
     
-    csv_data = "user,relayed project,relayed ticket,project,ticket,spend time\n"
+    tsv_data = "user\trelayed project\trelayed ticket\tproject\tticket\tspend time\n"
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
       user = mem_info[1]
@@ -102,14 +102,14 @@ class WorkTimeController < ApplicationController
           parent_issue = Issue.find_by_id(@issue_parent[issue_id])
           next if parent_issue.nil? # チケットが削除されていたらパス
 
-          csv_data << "#{user},#{parent_issue.project},#{parent_issue.subject},#{prj},#{issue.to_s},#{@issue_cost[issue_id][user.id]}\n"
+          tsv_data << "#{user}\t#{parent_issue.project}\t#{parent_issue.subject}\t#{prj}\t#{issue.to_s}\t#{@issue_cost[issue_id][user.id]}\n"
         end
       end
       if @issue_cost.has_key?(-1) && @issue_cost[-1].has_key?(user.id) then
-        csv_data << "#{user},private,private,private,private,#{@issue_cost[-1][user.id]}\n"
+        tsv_data << "#{user}\tprivate\tprivate\tprivate\tprivate\t#{@issue_cost[-1][user.id]}\n"
       end
     end
-    send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
+    send_data tsv_data, :type=>"text/tsv", :filename=>"monthly_report.tsv"
   end
 
   def edit_relay
@@ -149,7 +149,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check
     calc_total
     
-    csv_data = "user,project,ticket,spend time\n"
+    tsv_data = "user\tproject\tticket\tspend time\n"
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
       user = mem_info[1]
@@ -178,14 +178,14 @@ class WorkTimeController < ApplicationController
           next if issue.nil? # チケットが削除されていたらパス
           next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
           
-          csv_data << "#{user},#{prj},#{issue.subject},#{@r_issue_cost[issue_id][user.id]}\n"
+          tsv_data << "#{user}\t#{prj}\t#{issue.subject}\t#{@r_issue_cost[issue_id][user.id]}\n"
         end
       end
       if @r_issue_cost.has_key?(-1) && @r_issue_cost[-1].has_key?(user.id) then
-        csv_data << "#{user},private,private,private,private,#{@r_issue_cost[-1][user.id]}\n"
+        tsv_data << "#{user}\tprivate\tprivate\t#{@r_issue_cost[-1][user.id]}\n"
       end
     end
-    send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
+    send_data tsv_data, :type=>"text/tsv", :filename=>"monthly_report.tsv"
   end
 
   def popup_select_ticket # チケット選択ウィンドウの内容を返すアクション
