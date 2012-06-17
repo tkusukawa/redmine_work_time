@@ -73,7 +73,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     </a>
     <%end%>
 
-    <%= link_to(issueHtml, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
+    <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
     <%= print_issue_cost(issue) %>
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue.id.to_s%>"
@@ -135,7 +135,7 @@ prj_pack[:odr_issues].each do |issue_pack|
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
     </a>
     <%end%>
-    <%= link_to(issueHtml, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
+    <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
 
     <%= print_issue_cost(issue) %>
     <%if @this_uid==@crnt_uid then%>

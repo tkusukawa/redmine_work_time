@@ -124,7 +124,7 @@ tickets.each do |tic|
       <%=tic.position%>
     </a>
 <%end%>
-  <%= link_to(issueHtml, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
+  <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
   <%= print_issue_cost(issue) %>
 </td>
 

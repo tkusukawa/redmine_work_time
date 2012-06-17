@@ -80,12 +80,12 @@ prjs.each do |po|
       <%=tic.position%>
     </a>
 <%end%>
-    <%= link_to(issueHtml, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
+    <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
     <%= print_issue_cost(issue) %>
   </td>
   <td><%=cost.html_safe%></td>
   <td><%=r_cost.html_safe%></td>
-  <td id="ticket<%=issue_id%>"> => <%=parentHtml%>
+  <td id="ticket<%=issue_id%>"> => <%=parentHtml.html_safe%>
 <%
 if User.current.allowed_to?(:edit_work_time_total, @project) then
   if parent != "" then

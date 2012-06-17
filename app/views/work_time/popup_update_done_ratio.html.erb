@@ -30,7 +30,7 @@ function checkKey(e)
   <body onLoad="document.forms[0].elements[0].focus();">
     <h2><%=l(:label_update_issue_done_ratios)%></h2>
     <a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>@issue.id)%>', window, '');" href="#">
-      <%= @issueHtml %>
+      <%= @issueHtml.html_safe %>
     </a>
     <% if @issue.estimated_hours then %>
       <%= print_issue_cost(@issue) %>

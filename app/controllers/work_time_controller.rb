@@ -500,7 +500,7 @@ private
     fm.each do |msg|
         str += msg+"<br>"
     end
-    str
+    str.html_safe
   end
 
   def member_add_del_check

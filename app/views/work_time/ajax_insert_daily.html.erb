@@ -4,7 +4,7 @@
   <div style="position:relative;width:300px;">
     <%=@add_issue.project.name%>
     <br/>
-    <%= link_to(@issueHtml, {:controller=>"issues", :action=>"show", :id=>@add_issue.id}, :popup=>true) %>
+    <%= link_to(@issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>@add_issue.id}, :popup=>true) %>
     <%= print_issue_cost(@add_issue) %>
         <a name="<%='done_ratio'+@add_issue.id.to_s%>"
         href="JavaScript:update_done_ratio(
