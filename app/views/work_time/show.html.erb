@@ -19,7 +19,7 @@ function dup_ticket(ajax_url, insert_pos, id)
 -->
 </script>
 
-<%= @message %>
+<%= @message.html_safe %>
 <div style="text-align:right;">
 <%= render :partial=>'select_project' %><br/>
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
