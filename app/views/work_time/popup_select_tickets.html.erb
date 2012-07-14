@@ -8,11 +8,7 @@ function ticket_inputed()
 {
   var vals = document.forms[0].elements[0].value;
   var tickets = vals.split(',');
-  var issue_ids = new Array;
-  while((val=tickets.shift())) {
-    issue_ids.push(val);
-  }
-  returnValue=issue_ids;
+  returnValue=tickets;
   close();
 }
 

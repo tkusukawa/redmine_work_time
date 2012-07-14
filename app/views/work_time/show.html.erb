@@ -5,8 +5,8 @@ var add_ticket_count = 1;
 function add_ticket(pop_url, ajax_url)
 {
   var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
-  while((id = tickets.shift())) {
-      new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.Before, method:'get'});
+  for(i=0; i<tickets.length;i++) {
+      new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count, {insertion:Insertion.Before, method:'get'});
       add_ticket_count ++;
   }
 }
