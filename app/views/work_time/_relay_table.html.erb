@@ -49,7 +49,7 @@ prjs.each do |po|
       parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s
     end
   else
-    parent = ""
+    parentHtml = ""
   end
 
   if @issue_cost.key?(issue_id) && 
@@ -88,7 +88,7 @@ prjs.each do |po|
   <td id="ticket<%=issue_id%>"> => <%=parentHtml%>
 <%
 if User.current.allowed_to?(:edit_work_time_total, @project) then
-  if parent != "" then
+  if parentHtml != "" then
 %>
 <a href="JavaScript:set_ticket_relay('<%=url_for(:action=>"popup_select_ticket")%>',
                                   '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',

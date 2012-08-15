@@ -265,6 +265,7 @@ class WorkTimeController < ApplicationController
   end
 
   def ajax_relay_table
+    @message = ""
     find_project
     authorize
     prepare_values
@@ -619,9 +620,11 @@ private
 
   def add_ticket_relay
     ################################### チケット付け替え関係処理
+    @parentHtml = ""
     if params.key?("ticket_relay") && params[:ticket_relay]=~/^(.*)_(.*)$/ then
       child_id = $1.to_i
       parent_id = $2.to_i
+      @issue_id = child_id
       if User.current.allowed_to?(:edit_work_time_total, @project) then
 
         anc_id = parent_id
@@ -646,11 +649,8 @@ private
         @message += '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
         return
       end
-      @issue_id = child_id
       if parent_id != 0 && !((parent = Issue.find_by_id(parent_id)).nil?) then
         @parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s
-      else
-        @parentHtml = ""
       end
     end
   end
