@@ -112,7 +112,7 @@ class WorkTimeController < ApplicationController
         csv_data << "\"#{user}\",\"private\",\"private\",\"private\",\"private\",#{@issue_cost[-1][user.id]}\n"
       end
     end
-    send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report_raw.csv"
+    send_data csv_data, :type=>"text/csv", :filename=>"monthly_report_raw.csv"
   end
 
   def edit_relay
@@ -190,7 +190,7 @@ class WorkTimeController < ApplicationController
         csv_data << "\"#{user}\",\"private\",\"private\",#{@r_issue_cost[-1][user.id]}\n"
       end
     end
-    send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report.csv"
+    send_data csv_data, :type=>"text/csv", :filename=>"monthly_report.csv"
   end
 
   def popup_select_ticket # チケット選択ウィンドウの内容を返すアクション
