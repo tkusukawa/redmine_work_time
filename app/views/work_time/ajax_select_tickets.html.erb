@@ -25,5 +25,15 @@ issues.each do |issue|
 <%if !params.key?(:all) then
     url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'')%>
   <br/>
-  <a onclick="new Ajax.Updater('tickets', '<%=url%>', {asynchronous:true, method:'get'}); return false;" href="#">[display closed ticket]</a>
+  <a href="#" onclick="JavaScript:alert('HERE:ajax_select_tickets.28');
+    jQuery.ajax({
+      url:'<%=url%>',
+      data:{asynchronous:true, method:'get'},
+      success:function(response){
+        jQuery('#tickets').html(response);
+      }
+    });
+    return false;">
+    [display closed ticket]
+  </a>
 <%end%>

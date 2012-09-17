@@ -35,10 +35,14 @@ function set_ticket_relay(pop_url, rep_url, child)
 {
   var parent = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   if(parent!=null) {
-      //location.replace(rep_url+"&ticket_relay="+child+"_"+id);
-      new Ajax.Updater('ticket'+child,
-                       rep_url+"&ticket_relay="+child+"_"+parent, 
-                       {asynchronous:true, method:'get'});
+    alert('HERE:work_time.38');
+    jQuery.ajax({
+      url:rep_url+"&ticket_relay="+child+"_"+parent,
+      data:{asynchronous:true, method:'get'},
+      success:function(response){
+        jQuery('#ticket'+child).html(response);
+      }
+    });
   }
 }
 
@@ -47,9 +51,14 @@ function update_done_ratio(pop_url, rep_url, issue_id)
   var done_ratio = showModalDialog(pop_url+"&issue_id="+issue_id,
         window, "dialogWidth:500px;dialogHeight:150px");
   if(done_ratio!=null){
-    new Ajax.Updater('done_ratio'+issue_id,
-                     rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
-                     {asynchronous:true, method:'get'});
+    alert('HERE:work_time.54');
+    jQuery.ajax({
+      url:rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
+      data:{asynchronous:true, method:'get'},
+      success:function(response){
+        jQuery('#done_ratio'+issue_id).html(response);
+      }
+    });
 
     var drs = document.getElementsByName("done_ratio"+issue_id);
     for(var i = 0; i < drs.length; i++) {

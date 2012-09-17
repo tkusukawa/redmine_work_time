@@ -6,15 +6,29 @@ function add_ticket(pop_url, ajax_url)
 {
   var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   for(i=0; i<tickets.length;i++) {
-      new Ajax.Updater('time_input_table_bottom', ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count, {insertion:Insertion.Before, method:'get'});
+      alert('HERE:show.9');
+      jQuery.ajax({
+        url:ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
+        data:{asynchronous:true, method:'get'},
+        success:function(response){
+          jQuery('#time_input_table_bottom').before(response);
+        }
+      });
       add_ticket_count ++;
   }
 }
 
 function dup_ticket(ajax_url, insert_pos, id)
 {
-    new Ajax.Updater( insert_pos, ajax_url+"&add_issue="+id+"&count="+add_ticket_count, {insertion:Insertion.After, method:'get'});
-      add_ticket_count ++;
+  alert('HERE:show.23');
+  jQuery.ajax({
+    url:ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
+    data:{asynchronous:true, method:'get'},
+    success:function(response){
+      jQuery('#'+insert_pos).after(response);
+    }
+  });
+  add_ticket_count ++;
 }
 -->
 </script>
@@ -94,9 +108,15 @@ d = memo.day
 <%end%>
 
 <%if @this_uid==@crnt_uid then%>
-[<a href="#" onclick="JavaScript:new Ajax.Updater('memo-wiki',
-  '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
-  {asynchronous:true, method:'get'}); return false;">
+[<a href="#" onclick="JavaScript:alert('HERE:show.111');
+  jQuery.ajax({
+    url:'<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
+    data:{asynchronous:true, method:'get'},
+    success: function(response){
+      jQuery('#memo-wiki').html(response);
+    }
+  });
+  return false;">
   <%=l(:wt_edit_memo)%>
 </a>]
 <%end%>

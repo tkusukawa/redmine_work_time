@@ -1,5 +1,5 @@
 <%if @add_issue then%>
-<tr style="background:#ddf;" id="time_entry_pos<%=@suffix%>">
+<tr style="background:#ddf;" id="time_entry_pos<%=@add_issue_id%>_<%=@add_count%>">
   <td>
   <div style="position:relative;width:300px;">
     <%=@add_issue.project.name%>
@@ -16,23 +16,23 @@
 
     <a style="position:absolute;bottom:1px;right:10px;"
        href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry_pos<%=@suffix%>',
+                                   'time_entry_pos<%=@add_issue_id%>_<%=@add_count%>',
                                     <%=@add_issue.id%>);">+</a>
   </div>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry"+@suffix+"[hours]", "", :size=>5) %>
+    <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= select_tag "new_time_entry"+@suffix+"[activity_id]", options_for_select(@activities), :required => true %>
+    <%= select_tag "new_time_entry["+@add_issue_id+"]["+@add_count+"][activity_id]", options_for_select(@activities), :required => true %>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry"+@suffix+"[comments]", "", :size=>80)%>
+    <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][comments]", "", :size=>80)%>
   </td>
   <%@custom_fields.each do |cf|
     def cf.customized; nil; end;
   %>
-     <td><%= custom_field_tag "new_time_entry"+@suffix, cf %></td>
+     <td><%= custom_field_tag "new_time_entry["+@add_issue_id+"]["+@add_count+"]", cf %></td>
   <% end %>
 </tr>
 <%end%>

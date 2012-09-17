@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>select tickets</title>
-<%=javascript_include_tag "prototype" %>
+<%= javascript_heads %>
 <script type="text/javascript">
 <!--
 function ticket_inputed()
@@ -46,7 +46,16 @@ function checkKey(e)
 <body onLoad="document.forms[0].elements[0].focus();">
 <h2><%=l(:wt_ticket)%></h2>
 
-<select onchange="if (this.value != '') {new Ajax.Updater('tickets', this.value, {asynchronous:true, method:'get'}); return false;}">
+<select onchange="JavaScript:if (this.value != '') {
+  alert('HERE:popup_select_tickets.50');
+  jQuery.ajax({
+    url:this.value,
+    data:{asynchronous:true, method:'get'},
+    success:function(response){
+      jQuery('#tickets').html(response);
+    }
+  });
+  return false;}">
   <option value=''><%=l(:wt_select_project)%></option>
   <option disabled="disabled">---</option>
 <%

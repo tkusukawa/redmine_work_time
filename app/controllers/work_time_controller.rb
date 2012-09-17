@@ -214,10 +214,10 @@ class WorkTimeController < ApplicationController
     prepare_values
 
     uid = params[:user]
-    add_issue_id = params[:add_issue]
-    count = params[:count]
+    @add_issue_id = params[:add_issue]
+    @add_count = params[:count]
     if @this_uid==@crnt_uid then
-      add_issue = Issue.find_by_id(add_issue_id)
+      add_issue = Issue.find_by_id(@add_issue_id)
       if add_issue && add_issue.visible? then
         prj = add_issue.project
         if User.current.allowed_to?(:log_time, prj) then
@@ -226,8 +226,6 @@ class WorkTimeController < ApplicationController
           else
             @issueHtml = add_issue.to_s
           end
-
-          @suffix = "["+add_issue_id+"]["+count+"]"
 
           @activities = []
           prj.activities.each do |act|
@@ -249,9 +247,9 @@ class WorkTimeController < ApplicationController
 
           @add_issue = add_issue
 
-          unless UserIssueMonth.exists?(["uid=:u and issue=:i",{:u=>uid, :i=>add_issue_id}]) then
+          unless UserIssueMonth.exists?(["uid=:u and issue=:i",{:u=>uid, :i=>@add_issue_id}]) then
             # 既存のレコードが存在していなければ追加
-            UserIssueMonth.create(:uid=>uid, :issue=>add_issue_id,
+            UserIssueMonth.create(:uid=>uid, :issue=>@add_issue_id,
               :odr=>UserIssueMonth.count(:conditions=>["uid=:u",{:u=>uid}])+1)
           end
         end

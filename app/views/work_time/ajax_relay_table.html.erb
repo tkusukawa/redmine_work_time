@@ -9,9 +9,15 @@ if User.current.allowed_to?(:edit_work_time_total, @project) then
 <a href="JavaScript:set_ticket_relay('<%=url_for(:action=>"popup_select_ticket")%>',
                                   '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',
                                   <%=@issue_id%>);">[<%=l(:button_change)%>]</a>
-<a href="#" onclick="JavaScript:new Ajax.Updater('ticket'+<%=@issue_id%>,
-  '<%=url_for(@link_params.merge(:action=>"ajax_relay_table", :ticket_relay=>@issue_id.to_s+"_0"))%>',
-  {asynchronous:true, method:'get'}); return false;">
+<a href="#" onclick="JavaScript:alert('HERE:ajax_relay_table.12');
+  jQuery.ajax({
+    url:'<%=url_for(@link_params.merge(:action=>"ajax_relay_table", :ticket_relay=>@issue_id.to_s+"_0"))%>',
+    data:{asynchronous:true, method:'get'},
+    success:function(response){
+      jQuery('#ticket'+<%=@issue_id%>).html(response);
+    }
+  });
+  return false;">
 [<%=l(:button_delete)%>]
 </a>
 
