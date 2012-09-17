@@ -35,7 +35,6 @@ function set_ticket_relay(pop_url, rep_url, child)
 {
   var parent = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   if(parent!=null) {
-    alert('HERE:work_time.38');
     jQuery.ajax({
       url:rep_url+"&ticket_relay="+child+"_"+parent,
       data:{asynchronous:true, method:'get'},
@@ -51,7 +50,6 @@ function update_done_ratio(pop_url, rep_url, issue_id)
   var done_ratio = showModalDialog(pop_url+"&issue_id="+issue_id,
         window, "dialogWidth:500px;dialogHeight:150px");
   if(done_ratio!=null){
-    alert('HERE:work_time.54');
     jQuery.ajax({
       url:rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
       data:{asynchronous:true, method:'get'},

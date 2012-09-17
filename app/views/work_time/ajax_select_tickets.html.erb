@@ -25,7 +25,7 @@ issues.each do |issue|
 <%if !params.key?(:all) then
     url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'')%>
   <br/>
-  <a href="#" onclick="JavaScript:alert('HERE:ajax_select_tickets.28');
+  <a href="#" onclick="JavaScript:
     jQuery.ajax({
       url:'<%=url%>',
       data:{asynchronous:true, method:'get'},

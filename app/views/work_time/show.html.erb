@@ -6,7 +6,6 @@ function add_ticket(pop_url, ajax_url)
 {
   var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   for(i=0; i<tickets.length;i++) {
-      alert('HERE:show.9');
       jQuery.ajax({
         url:ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
         data:{asynchronous:true, method:'get'},
@@ -20,7 +19,6 @@ function add_ticket(pop_url, ajax_url)
 
 function dup_ticket(ajax_url, insert_pos, id)
 {
-  alert('HERE:show.23');
   jQuery.ajax({
     url:ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
     data:{asynchronous:true, method:'get'},
@@ -108,7 +106,7 @@ d = memo.day
 <%end%>
 
 <%if @this_uid==@crnt_uid then%>
-[<a href="#" onclick="JavaScript:alert('HERE:show.111');
+[<a href="#" onclick="JavaScript:
   jQuery.ajax({
     url:'<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
     data:{asynchronous:true, method:'get'},

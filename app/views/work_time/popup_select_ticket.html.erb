@@ -34,7 +34,6 @@ function checkKey(e)
 <h2><%=l(:wt_ticket)%></h2>
 
 <select onchange="JavaScript:if (this.value != '') {
-  alert('HERE:popup_select_ticket.37');
   jQuery.ajax({
     url:this.value,
     data:{asynchronous:true, method:'get'},
