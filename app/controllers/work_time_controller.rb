@@ -30,6 +30,7 @@ class WorkTimeController < ApplicationController
 
   def show
     @message = ""
+    require_login || return
     find_project
     authorize
     prepare_values
