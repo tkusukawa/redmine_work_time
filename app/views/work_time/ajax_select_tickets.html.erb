@@ -12,28 +12,29 @@ issues.each do |issue|
   end
 %>
 <input type="checkbox" name="selected"  value="<%=issue.id%>"/>
-<input type="button" onclick="JavaScript:ticket_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
+<input type="button" onclick="JavaScript:tickets_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
 <%=issueHtml.html_safe%>
-<a onclick="JavaScript:showModalDialog('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>', window, '');" href="#">
-  ？
+<a href="#"
+  onclick="JavaScript:
+    showModalDialog(
+      '<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>',
+      window,
+      '');
+    return false;">
+  &#63;
 </a>
 <br/>
 <%end%>
 </form>
-<input type="button" onclick="JavaScript:tickets_selected();" value="<%=l(:wt_apply_checked)%>"/>
+<input type="button" onclick="JavaScript:tickets_checked();" value="<%=l(:wt_apply_checked)%>"/>
 
 <%if !params.key?(:all) then
     url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'')%>
   <br/>
-  <a href="#" onclick="JavaScript:
-    jQuery.ajax({
-      url:'<%=url%>',
-      data:{asynchronous:true, method:'get'},
-      success:function(response){
-        jQuery('#tickets').html(response);
-      }
-    });
-    return false;">
+  <a href="#" 
+    onclick="JavaScript:
+      ajax_select_tickets('<%=url%>');
+      return false;">
     [display closed ticket]
   </a>
 <%end%>

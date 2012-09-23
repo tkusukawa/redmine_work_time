@@ -6,25 +6,33 @@
 if User.current.allowed_to?(:edit_work_time_total, @project) then
   if @parentHtml != "" then
 %>
-<a href="JavaScript:set_ticket_relay('<%=url_for(:action=>"popup_select_ticket")%>',
-                                  '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',
-                                  <%=@issue_id%>);">[<%=l(:button_change)%>]</a>
-<a href="#" onclick="JavaScript:
-  jQuery.ajax({
-    url:'<%=url_for(@link_params.merge(:action=>"ajax_relay_table", :ticket_relay=>@issue_id.to_s+"_0"))%>',
-    data:{asynchronous:true, method:'get'},
-    success:function(response){
-      jQuery('#ticket'+<%=@issue_id%>).html(response);
-    }
-  });
-  return false;">
-[<%=l(:button_delete)%>]
-</a>
-
+  <a href="#"
+    onclick="JavaScript:
+      set_ticket_relay(
+        '<%=url_for(:action=>"popup_select_ticket")%>',
+        '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',
+        <%=@issue_id%>);
+      return false;">
+    [<%=l(:button_change)%>]
+  </a>
+  <a href="#"
+    onclick="JavaScript:
+      del_ticket_relay(
+        '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',
+        <%=@issue_id%>);
+      return false;">
+    [<%=l(:button_delete)%>]
+  </a>
 <%else%>
-<a href="JavaScript:set_ticket_relay('<%=url_for(:action=>"popup_select_ticket")%>',
-                                  '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',
-                                  <%=@issue_id%>);">[<%=l(:button_add)%>]</a>
+  <a href="#"
+    onclick="JavaScript:
+      set_ticket_relay(
+        '<%=url_for(:action=>"popup_select_ticket")%>',
+        '<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>',
+        <%=@issue_id%>);
+      return false;">
+    [<%=l(:button_add)%>]
+  </a>
 <%
   end
 end

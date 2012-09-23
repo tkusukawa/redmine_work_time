@@ -37,7 +37,16 @@ max = @members.size
 %>
 <td align="center">
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
-<a href="JavaScript:member_pos('<%=url_for(@link_params)%>', <%=user.id%>,<%=pos%>,<%=max%>);"><%=pos%></a>
+<a href="#"
+  onclick="JavaScript:
+    member_pos(
+      '<%=url_for(@link_params)%>',
+      <%=user.id%>,
+      <%=pos%>,
+      <%=max%>);
+    return false;">
+  <%=pos%>
+</a>
 <%end%>
 <div style="top:2px;width:56px;font-size:10px;">
 <%= link_to(user, @link_params.merge(:action=>"show", :user=>user.id))%>
@@ -85,7 +94,14 @@ prjs.each do |po|
 <tr style="background:#000;color:#fff;">
  <td>
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
-    <a href="JavaScript:prj_pos('<%=url_for(@link_params)%>', <%=dsp_prj%>,<%=dsp_pos%>,<%=prjs.size%>);">
+    <a href="#"
+      onclick="JavaScript:
+        prj_pos(
+          '<%=url_for(@link_params)%>',
+          <%=dsp_prj%>,
+          <%=dsp_pos%>,
+          <%=prjs.size%>);
+        return false;">
       <%=dsp_pos%>
     </a>
 <%end%>
@@ -120,7 +136,14 @@ tickets.each do |tic|
 <tr>
 <td>
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
-    <a href="JavaScript:ticket_pos('<%=url_for(@link_params)%>', <%=issue_id%>,<%=tic.position%>,<%=tic_max%>);">
+    <a href="#"
+      onclick="JavaScript:
+        ticket_pos(
+          '<%=url_for(@link_params)%>',
+          <%=issue_id%>,
+          <%=tic.position%>,
+          <%=tic_max%>);
+        return false;">
       <%=tic.position%>
     </a>
 <%end%>

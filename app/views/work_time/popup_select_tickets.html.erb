@@ -2,58 +2,14 @@
 <head>
 <title>select tickets</title>
 <%= javascript_heads %>
-<script type="text/javascript">
-<!--
-function ticket_inputed()
-{
-  var vals = document.forms[0].elements[0].value;
-  var tickets = vals.split(',');
-  returnValue=tickets;
-  close();
-}
-
-function ticket_selected(issue_id)
-{
-  returnValue = [issue_id];
-  close();
-}
-
-function tickets_selected()
-{
-  var issue_ids = new Array;
-  for(i=0; e = document.forms[0].elements[i]; i++) {
-    if(e.checked)
-      issue_ids.push(e.value);
-  }
-  returnValue = issue_ids;
-  close();
-}
-
-function checkKey(e)
-{
-  if (!e) var e = window.event;
-  if(e.keyCode == 13) {
-    ticket_inputed();
-    return false;
-  }
-  else
-    return e;
-}
--->
-</script>
+<%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
 </head>
 
 <body onLoad="document.forms[0].elements[0].focus();">
 <h2><%=l(:wt_ticket)%></h2>
 
 <select onchange="JavaScript:if (this.value != '') {
-  jQuery.ajax({
-    url:this.value,
-    data:{asynchronous:true, method:'get'},
-    success:function(response){
-      jQuery('#tickets').html(response);
-    }
-  });
+  ajax_select_tickets(this.value);
   return false;}">
   <option value=''><%=l(:wt_select_project)%></option>
   <option disabled="disabled">---</option>
@@ -79,8 +35,8 @@ end
 <div id="tickets">
 <%=l(:wt_input_ticket_numbers)%>
   <form action="">
-    <input type="text" size=32 onKeyPress="return checkKey(event);"/>
-    <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();"/>
+    <input type="text" id="input_ids" size=32 onKeyPress="return checkKey(event,tickets_inputed);"/>
+    <input type="button" value="<%=l(:button_apply)%>" onclick="tickets_inputed();"/>
   </form>
 </div>
 </body>

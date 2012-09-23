@@ -56,7 +56,14 @@ ofst_t = win_hs*3-5
         <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_h-2%>px;">
           <%if !issue.nil? then%>
             <%if @this_uid==@crnt_uid then%>
-              <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);">
+              <a href="#"
+                onclick="JavaScript:
+                  ticket_pos(
+                    '<%=url_for(@link_params) %>',
+                    <%=issue_id%>,
+                    <%=issue_odr%>,
+                    <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
+                  return false;">
                 <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
               </a>
             <%end%>
@@ -77,7 +84,14 @@ ofst_t = win_hs*3-5
     <div style="background:#000;color:#fff;font-size:1.0em;">
       <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
 <%if @this_uid==@crnt_uid then%>
-        <a href="JavaScript:prj_pos('<%=url_for(@link_params) %>',<%=prj.id%>,<%=dsp_pos%>,<%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);">
+        <a href="#"
+          onclick="JavaScript:
+            prj_pos(
+              '<%=url_for(@link_params) %>',
+              <%=prj.id%>,
+              <%=dsp_pos%>,
+              <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
+            return false;">
           <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>
         </a>
 <%end%>

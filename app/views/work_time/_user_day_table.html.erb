@@ -33,7 +33,14 @@
   <td>
       <%if @this_uid==@crnt_uid then%>
 
-        <a href="JavaScript:prj_pos('<%=url_for(@link_params) %>',<%=dsp_prj%>,<%=dsp_pos%>,<%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);">
+        <a href="#"
+          onclick="JavaScript:
+            prj_pos(
+              '<%=url_for(@link_params) %>',
+              <%=dsp_prj%>,
+              <%=dsp_pos%>,
+              <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
+            return false;">
           <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>
         </a>
      <%end%>
@@ -68,7 +75,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   <td style="background:<%=issue_color%>;">
   <div style="position:relative;width:300px;">
     <%if @this_uid==@crnt_uid then%>
-    <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);">
+    <a href="#"
+      onclick="JavaScript:
+        ticket_pos(
+          '<%=url_for(@link_params) %>',
+          <%=issue_id%>,
+          <%=issue_odr%>,
+          <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
+        return false;">
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
     </a>
     <%end%>
@@ -77,16 +91,26 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= print_issue_cost(issue) %>
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue.id.to_s%>"
-        href="JavaScript:update_done_ratio(
-          '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-          '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
-          <%=issue_id%>);">
+        href="#"
+        onclick="JavaScript:
+          update_done_ratio(
+            '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+            '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+            <%=issue_id%>);
+          return false;">
       [<%=issue.done_ratio%>&#37;]
     </a>
     &nbsp;&nbsp;&nbsp;
-    <a style="position:absolute;bottom:1px;right:10px;" href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry_pos<%=issue_id%>_0',
-                                    <%=issue_id%>);">+</a>
+    <a style="position:absolute;bottom:1px;right:10px;"
+       href="#"
+       onclick="JavaScript:
+           dup_ticket(
+             '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+             'time_entry_pos<%=issue_id%>_0',
+             <%=issue_id%>);
+           return false;">
+      +
+    </a>
       <%if issue_odr>0 then%>
       <a style="position:absolute;bottom:1px;right:3px;" href="<%=url_for(@link_params.merge(:ticket_del=>issue_id))%>">x</a>
       <%end%>
@@ -131,7 +155,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   <div style="position:relative;width:300px;">
   <%if !issue.nil? then%>
     <%if @this_uid==@crnt_uid then%>
-    <a href="JavaScript:ticket_pos('<%=url_for(@link_params) %>',<%=issue_id%>,<%=issue_odr%>,<%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);">
+    <a href="#"
+      onclick="JavaScript:
+        ticket_pos(
+          '<%=url_for(@link_params) %>',
+          <%=issue_id%>,
+          <%=issue_odr%>,
+          <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
+        return false;">
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
     </a>
     <%end%>
@@ -140,17 +171,27 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= print_issue_cost(issue) %>
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue_id.to_s%>"
-        href="JavaScript:update_done_ratio(
-          '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-          '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
-          <%=issue_id%>);">
+        href="#"
+        onclick="JavaScript:
+          update_done_ratio(
+            '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+            '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+            <%=issue_id%>);
+          return false;">
       [<%=issue.done_ratio%>&#37;]
     </a>
     &nbsp;&nbsp;&nbsp;
 
-    <a style="position:absolute;bottom:1px;right:10px;" href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry_pos<%=hour_id%>',
-                                    <%=issue_id%>);">+</a>
+    <a style="position:absolute;bottom:1px;right:10px;"
+       href="#"
+       onclick="JavaScript:
+           dup_ticket(
+             '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+             'time_entry_pos<%=hour_id%>',
+             <%=issue_id%>);
+           return false;">
+      +
+    </a>
       <%if issue_odr>0 then%>
         <a style="position:absolute;bottom:1px;right:3px;" href="<%=url_for(@link_params.merge(:ticket_del=>issue_id))%>">x</a>
       <%end%>

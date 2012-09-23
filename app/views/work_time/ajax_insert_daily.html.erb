@@ -6,18 +6,27 @@
     <br/>
     <%= link_to(@issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>@add_issue.id}, :popup=>true) %>
     <%= print_issue_cost(@add_issue) %>
-        <a name="<%='done_ratio'+@add_issue.id.to_s%>"
-        href="JavaScript:update_done_ratio(
-          '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-          '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
-          <%=@add_issue.id%>);">
+    <a name="<%='done_ratio'+@add_issue.id.to_s%>"
+       href="#"
+       onclick="JavaScript:
+         update_done_ratio(
+           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+           '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+           <%=@add_issue.id%>);
+         return false;">
       [<%=@add_issue.done_ratio%>&#37;]
     </a>
 
     <a style="position:absolute;bottom:1px;right:10px;"
-       href="JavaScript:dup_ticket('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-                                   'time_entry_pos<%=@add_issue_id%>_<%=@add_count%>',
-                                    <%=@add_issue.id%>);">+</a>
+       href="#"
+       onclick="JavaScript:
+         dup_ticket(
+           '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+           'time_entry_pos<%=@add_issue_id%>_<%=@add_count%>',
+           <%=@add_issue.id%>);
+         return false;">
+      +
+    </a>
   </div>
   </td>
   <td>
