@@ -35,13 +35,20 @@ function set_ticket_relay(pop_url, rep_url, child)
 {
   var parent = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
   if(parent!=null) {
-    jQuery.ajax({
-      url:rep_url+"&ticket_relay="+child+"_"+parent,
-      data:{asynchronous:true, method:'get'},
-      success:function(response){
-        jQuery('#ticket'+child).html(response);
-      }
-    });
+    if( typeof jQuery == "function" ) {
+      jQuery.ajax({
+        url:rep_url+"&ticket_relay="+child+"_"+parent,
+        data:{asynchronous:true, method:'get'},
+        success:function(response){
+          jQuery('#ticket'+child).html(response);
+        }
+      });
+    }
+    else {
+      new Ajax.Updater('ticket'+child,
+        rep_url+"&ticket_relay="+child+"_"+parent,
+        {asynchronous:true, method:'get'});
+    }
   }
 }
 
@@ -50,13 +57,20 @@ function update_done_ratio(pop_url, rep_url, issue_id)
   var done_ratio = showModalDialog(pop_url+"&issue_id="+issue_id,
         window, "dialogWidth:500px;dialogHeight:150px");
   if(done_ratio!=null){
-    jQuery.ajax({
-      url:rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
-      data:{asynchronous:true, method:'get'},
-      success:function(response){
-        jQuery('#done_ratio'+issue_id).html(response);
-      }
-    });
+    if( typeof jQuery == "function" ) {
+      jQuery.ajax({
+        url:rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
+        data:{asynchronous:true, method:'get'},
+        success:function(response){
+          jQuery('#done_ratio'+issue_id).html(response);
+        }
+      });
+    }
+    else {
+      new Ajax.Updater('done_ratio'+issue_id,
+        rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
+        {asynchronous:true, method:'get'});
+    }
 
     var drs = document.getElementsByName("done_ratio"+issue_id);
     for(var i = 0; i < drs.length; i++) {
@@ -67,6 +81,7 @@ function update_done_ratio(pop_url, rep_url, issue_id)
 
 function del_ticket_relay(rep_url, child)
 {
+  if( typeof jQuery == "function" ) {
     jQuery.ajax({
         url:rep_url+"&ticket_relay="+child+"_0",
         data:{asynchronous:true, method:'get'
@@ -75,6 +90,12 @@ function del_ticket_relay(rep_url, child)
         jQuery('#ticket'+child).html(response);
       }
     });
+  }
+  else {
+    new Ajax.Updater('ticket'+child,
+      rep_url+"&ticket_relay="+child+"_0",
+      {asynchronous:true, method:'get'});
+  }
 }
 
 function checkKey(e, finish_func)
@@ -90,6 +111,7 @@ function checkKey(e, finish_func)
 
 function ajax_select_tickets(rep_url)
 {
+  if( typeof jQuery == "function" ) {
     jQuery.ajax({
       url:rep_url,
       data:{asynchronous:true, method:'get'},
@@ -97,6 +119,12 @@ function ajax_select_tickets(rep_url)
         jQuery('#tickets').html(response);
       }
     });
+  }
+  else {
+    new Ajax.Updater('tickets',
+      rep_url,
+      {asynchronous:true, method:'get'});
+  }
 }
 
 //------------------------------------------------- for show.html.erb
@@ -105,19 +133,27 @@ function add_ticket(pop_url, ajax_url)
 {
     var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
     for(i=0; i<tickets.length;i++) {
+      if( typeof jQuery == "function" ) {
         jQuery.ajax({
           url:ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
           data:{asynchronous:true, method:'get'},
           success:function(response){
             jQuery('#time_input_table_bottom').before(response);
           }
-       });
+        });
+      }
+      else {
+        new Ajax.Updater('time_input_table_bottom',
+          ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
+          {insertion:Insertion.Before, method:'get'});
+      }
       add_ticket_count ++;
     }
 }
 
 function dup_ticket(ajax_url, insert_pos, id)
 {
+  if( typeof jQuery == "function" ) {
     jQuery.ajax({
       url:ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
       data:{asynchronous:true, method:'get'},
@@ -125,11 +161,18 @@ function dup_ticket(ajax_url, insert_pos, id)
         jQuery('#'+insert_pos).after(response);
       }
     });
+  }
+  else {
+    new Ajax.Updater( insert_pos,
+      ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
+      {insertion:Insertion.After, method:'get'});
+  }
   add_ticket_count ++;
 }
 
 function edit_memo(ajax_url)
 {
+  if( typeof jQuery == "function" ) {
     jQuery.ajax({
       url:ajax_url,
       data:{asynchronous:true, method:'get'},
@@ -137,6 +180,12 @@ function edit_memo(ajax_url)
         jQuery('#memo-wiki').html(response);
       }
     });
+  }
+  else {
+    new Ajax.Updater('memo-wiki',
+      ajax_url,
+      {asynchronous:true, method:'get'});
+  }
 }
 
 //---------------------------------------- for popup_update_done_ratio.html.erb
