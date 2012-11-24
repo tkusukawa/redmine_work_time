@@ -10,6 +10,10 @@ if @month_pack[:other]!=0 then
 end
 %>
 
+<h2><%=l(:wt_monthly_report)%> (<%=@this_user%>)</h2>
+<div style="text-align:right;">
+[<%= link_to(l(:wt_data_download), @link_params.merge(:action=>"member_monthly_data")) %>]
+</div>
 <table width="100%" style="border:0;border-collapse:collapse;">
 <tr>
   <!-- ************************************************ 左側を表示 -->
