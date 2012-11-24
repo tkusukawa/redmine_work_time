@@ -25,3 +25,5 @@ ko:
   wt_data_list: "데이터 목록"
   wt_input_ticket_numbers: "또는 티켓 번호를 입력하세요."
   wt_delete_closed_tickets: "완료된 티켓 삭제"
+  wt_data_download: "데이터 다운로드"
+  

@@ -25,3 +25,5 @@ pt-BR:
   wt_data_list: "Lista de data"
   wt_input_ticket_numbers: "ou inclua o número da tarefa"
   wt_delete_closed_tickets: "delete closed tickets"
+  wt_data_download: "data download"
+  

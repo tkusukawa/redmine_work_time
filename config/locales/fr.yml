@@ -24,3 +24,4 @@ fr:
   wt_data_list: "Liste brute"
   wt_input_ticket_numbers: "ou entrez le numéro de la demande"
   wt_delete_closed_tickets: "Supprimer les demandes fermées"
+  wt_data_download: "les données téléchargent"
