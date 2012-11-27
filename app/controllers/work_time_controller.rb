@@ -873,7 +873,7 @@ private
         @issue_parent[iid] = parent_iid
       end
       
-      if !Issue.find_by_id(iid).visible? then
+      if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible? then
         iid = -1
         pid = -1
       end
@@ -889,7 +889,7 @@ private
       (@prj_cost[pid])[-1] ||= 0
       (@prj_cost[pid])[-1] += cost
 
-      if !Issue.find_by_id(parent_iid).visible? then
+      if !Issue.find_by_id(parent_iid) || !Issue.find_by_id(parent_iid).visible? then
         parent_iid = -1
         parent_pid = -1
       end
