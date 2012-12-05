@@ -63,7 +63,7 @@ if memo then # この日のメモがある場合
 <div class="wiki" style="background:#ffb;">
   <%=textilizable(memo.description) %>
   <div style="text-align:right;">
-    (update:<%=memo.updated_on.strftime("%y/%m/%d %H:%M")%>)
+    (update:<%=memo.updated_on.localtime.strftime("%y/%m/%d %H:%M")%>)
   </div>
 </div>
 <%end%>
