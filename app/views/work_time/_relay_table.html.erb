@@ -62,7 +62,7 @@ prjs.each do |po|
   if @issue_cost.key?(issue_id) && 
      @issue_cost[issue_id].key?(-1) && 
      @issue_cost[issue_id][-1]!=0 then
-    cost=sprintf("%.2f",@issue_cost[issue_id][-1])
+    cost=sprintf("%.2f",@issue_cost[issue_id][-1].round(2))
   else
     cost="&nbsp"
   end
@@ -71,9 +71,9 @@ prjs.each do |po|
      @r_issue_cost[issue_id].key?(-1) && 
      @r_issue_cost[issue_id][-1]!=0 then
     if @issue_cost[issue_id][-1]!=@r_issue_cost[issue_id][-1] then
-      r_cost=sprintf("<b>%.2f</b>",@r_issue_cost[issue_id][-1])
+      r_cost=sprintf("<b>%.2f</b>",@r_issue_cost[issue_id][-1].round(2))
     else
-      r_cost=sprintf("%.2f",@r_issue_cost[issue_id][-1])
+      r_cost=sprintf("%.2f",@r_issue_cost[issue_id][-1].round(2))
     end
   else
     r_cost="&nbsp"
