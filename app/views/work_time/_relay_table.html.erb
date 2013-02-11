@@ -26,8 +26,8 @@ prjs.each do |po|
 <%end%>
    <%=prj.name%>
   </td>
-  <td> <%=sprintf('%1.2f', @prj_cost[dsp_prj][-1])%> </td>
-  <td><b><%=sprintf('%1.2f', @r_prj_cost[dsp_prj][-1]) if @r_prj_cost[dsp_prj][-1]%></b></td>
+  <td style="text-align:right;"> <%=sprintf('%1.2f', @prj_cost[dsp_prj][-1])%> </td>
+  <td style="text-align:right;"><b><%=sprintf('%1.2f', @r_prj_cost[dsp_prj][-1]) if @r_prj_cost[dsp_prj][-1]%></b></td>
   <td>&nbsp</td>
 </tr>
 <%
@@ -96,8 +96,8 @@ prjs.each do |po|
     <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
     <%= print_issue_cost(issue) %>
   </td>
-  <td><%=cost.html_safe%></td>
-  <td><%=r_cost.html_safe%></td>
+  <td style="text-align:right;"><%=cost.html_safe%></td>
+  <td style="text-align:right;"><%=r_cost.html_safe%></td>
   <td id="ticket<%=issue_id%>"> => <%=parentHtml.html_safe%>
 <%
 if User.current.allowed_to?(:edit_work_time_total, @project) then
