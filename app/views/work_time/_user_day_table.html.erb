@@ -46,7 +46,7 @@
      <%end%>
         <%=prj.name%>
   </td>
-  <td><%=sprintf("%1.1f", prj_pack[:total].round(2))%></td>
+  <td><%=sprintf("%1.1f", prj_pack[:total])%></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>
@@ -226,7 +226,7 @@ end
 <% if @day_pack[:other]!=0 then %>
 <tr style="background:#000;color:#fff;">
   <td>private</td>
-  <td><%=sprintf("%1.1f", @day_pack[:other].round(2))%></td>
+  <td><%=sprintf("%1.1f", @day_pack[:other])%></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>
@@ -236,7 +236,7 @@ end
 <% end %>
 <tr align="center" id="time_input_table_bottom" style="background:#ddd;">
   <td>&nbsp;</td>
-  <td><%=sprintf("%1.1f", @day_pack[:total].round(2))%></td>
+  <td><%=sprintf("%1.1f", @day_pack[:total])%></td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>

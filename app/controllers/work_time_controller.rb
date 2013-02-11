@@ -799,20 +799,21 @@ private
     WtMemberOrder.find(:all, :conditions=>["prj_id=:p",{:p=>@project.id}]).each do |i|
       @member_cost[i.user_id] = 0
     end
-    @issue_parent = Hash.new
+    @issue_parent = Hash.new # clear cash
     @issue_cost = Hash.new
     @r_issue_cost = Hash.new
     relay = Hash.new
     WtTicketRelay.find(:all).each do |i|
       relay[i.issue_id] = i.parent
-      @issue_cost[i.issue_id] = Hash.new
-      @r_issue_cost[i.issue_id] = Hash.new
     end
     @prj_cost = Hash.new
     @r_prj_cost = Hash.new
     WtProjectOrders.find(:all, :conditions=>"uid=-1").each do |i|
-      @prj_cost[i.dsp_prj] = Hash.new
-      @r_prj_cost[i.dsp_prj] = Hash.new
+      pid = i.dsp_prj
+      @prj_cost[pid] = Hash.new
+      @prj_cost[pid][-1] = 0
+      @r_prj_cost[pid] = Hash.new
+      @r_prj_cost[pid][-1] = 0
     end
 
     #当月の時間記録を抽出
@@ -835,76 +836,72 @@ private
       @total_cost += cost
       @member_cost[uid] += cost
 
-      if @issue_parent.has_key?(iid) then # 付け替え先チケットは調査済み？
-        # 調査済みなら以前の調査結果をセット
-        parent_iid = @issue_parent[iid]
-      else
-        # 未調査なら親チケットを探索する
-        parent_iid = iid
-        while true do
-          parent_issue = Issue.find_by_id(parent_iid)
-          break if parent_issue.nil? # チケットが削除されていたらそこまで
+      parent_iid = get_parent_issue(relay, iid)
 
-          if !(relay.key?(parent_iid)) then
-            # まだ登録されていないチケットの場合、追加処理を行う
-            relay[parent_iid] = 0
-            @issue_cost[parent_iid] = Hash.new
-            @r_issue_cost[parent_iid] = Hash.new
-            WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0)
-          end
-
-          parent_pid = parent_issue.project_id
-          if !(@prj_cost.key?(parent_pid)) then
-            # まだ登録されていないプロジェクトの場合、追加処理を行う
-            @prj_cost[parent_pid] = Hash.new
-            @r_prj_cost[parent_pid] = Hash.new
-            WtProjectOrders.create(:uid=>-1, :dsp_prj=>parent_pid, :dsp_pos=>@prj_cost.size)
-          end
-
-          (@issue_cost[parent_iid])[uid] ||= 0
-          (@issue_cost[parent_iid])[-1] ||= 0
-          (@prj_cost[parent_pid])[uid] ||= 0
-          (@prj_cost[parent_pid])[-1] ||= 0
-
-          break if relay[parent_iid] == 0
-          # このチケットに親チケットがある場合は、その親チケットについて同じ処理を繰り返す
-          parent_iid = relay[parent_iid]
-        end
-        @issue_parent[iid] = parent_iid
+      if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible?
+        iid = -1 # private
+        pid = -1 # private
       end
-      
-      if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible? then
-        iid = -1
-        pid = -1
-      end
-      @issue_cost[iid] ||= Hash.new
+      (@issue_cost[iid])[-1] += cost
       (@issue_cost[iid])[uid] ||= 0
       (@issue_cost[iid])[uid] += cost
-      (@issue_cost[iid])[-1] ||= 0
-      (@issue_cost[iid])[-1] += cost
 
-      @prj_cost[pid] ||= Hash.new
+      (@prj_cost[pid])[-1] += cost
       (@prj_cost[pid])[uid] ||= 0
       (@prj_cost[pid])[uid] += cost
-      (@prj_cost[pid])[-1] ||= 0
-      (@prj_cost[pid])[-1] += cost
 
-      if !Issue.find_by_id(parent_iid) || !Issue.find_by_id(parent_iid).visible? then
+      parent_issue = Issue.find_by_id(parent_iid)
+      if parent_issue && parent_issue.visible?
+        parent_pid = parent_issue.project_id
+      else
         parent_iid = -1
         parent_pid = -1
       end
-      @r_issue_cost[parent_iid] ||= Hash.new
-      (@r_issue_cost[parent_iid])[uid] ||= 0
-      (@r_issue_cost[parent_iid])[-1] ||= 0
-      @r_prj_cost[parent_pid] ||= Hash.new
-      (@r_prj_cost[parent_pid])[uid] ||= 0
-      (@r_prj_cost[parent_pid])[-1] ||= 0
 
-      (@r_issue_cost[parent_iid])[uid] += cost
       (@r_issue_cost[parent_iid])[-1] += cost
-      (@r_prj_cost[parent_pid])[uid] += cost
+      (@r_issue_cost[parent_iid])[uid] ||= 0
+      (@r_issue_cost[parent_iid])[uid] += cost
+
       (@r_prj_cost[parent_pid])[-1] += cost
+      (@r_prj_cost[parent_pid])[uid] ||= 0
+      (@r_prj_cost[parent_pid])[uid] += cost
     end
+  end
+
+  def get_parent_issue(relay, iid)
+    @issue_parent ||= Hash.new
+    return @issue_parent[iid] if @issue_parent.has_key?(iid)
+    issue = Issue.find_by_id(iid)
+    return 0 if issue.nil? # issueが削除されていたらそこまで
+
+    if relay.has_key?(iid)
+      parent_id = relay[iid]
+      if parent_id != 0 && parent_id != iid
+        parent_id = get_parent_issue(relay, parent_id)
+      end
+      parent_id = iid if parent_id == 0
+    else
+      # 関連が登録されていない場合は登録する
+      WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0)
+      parent_id = iid
+    end
+
+    # iid に対する初めての処理
+    pid = issue.project_id
+    unless @prj_cost.has_key?(pid)
+      WtProjectOrders.create(:uid=>-1, :dsp_prj=>pid, :dsp_pos=>@prj_cost.size)
+      @prj_cost[pid] ||= Hash.new
+      @prj_cost[pid][-1] ||= 0
+      @r_prj_cost[pid] ||= Hash.new
+      @r_prj_cost[pid][-1] ||= 0
+    end
+
+    @issue_cost[iid] ||= Hash.new
+    @issue_cost[iid][-1] ||= 0
+    @r_issue_cost[iid] ||= Hash.new
+    @r_issue_cost[iid][-1] ||= 0
+
+    @issue_parent[iid] = parent_id # return
   end
 
   def make_pack

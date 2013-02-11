@@ -26,8 +26,8 @@ prjs.each do |po|
 <%end%>
    <%=prj.name%>
   </td>
-  <td> <%=@prj_cost[dsp_prj][-1]%> </td>
-  <td><b><%=@r_prj_cost[dsp_prj][-1]%></b></td>
+  <td> <%=sprintf('%1.2f', @prj_cost[dsp_prj][-1])%> </td>
+  <td><b><%=sprintf('%1.2f', @r_prj_cost[dsp_prj][-1]) if @r_prj_cost[dsp_prj][-1]%></b></td>
   <td>&nbsp</td>
 </tr>
 <%
@@ -62,7 +62,7 @@ prjs.each do |po|
   if @issue_cost.key?(issue_id) && 
      @issue_cost[issue_id].key?(-1) && 
      @issue_cost[issue_id][-1]!=0 then
-    cost=sprintf("%.2f",@issue_cost[issue_id][-1].round(2))
+    cost=sprintf("%.2f",@issue_cost[issue_id][-1])
   else
     cost="&nbsp"
   end
@@ -71,9 +71,9 @@ prjs.each do |po|
      @r_issue_cost[issue_id].key?(-1) && 
      @r_issue_cost[issue_id][-1]!=0 then
     if @issue_cost[issue_id][-1]!=@r_issue_cost[issue_id][-1] then
-      r_cost=sprintf("<b>%.2f</b>",@r_issue_cost[issue_id][-1].round(2))
+      r_cost=sprintf("<b>%.2f</b>",@r_issue_cost[issue_id][-1])
     else
-      r_cost=sprintf("%.2f",@r_issue_cost[issue_id][-1].round(2))
+      r_cost=sprintf("%.2f",@r_issue_cost[issue_id][-1])
     end
   else
     r_cost="&nbsp"
