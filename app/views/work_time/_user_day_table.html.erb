@@ -8,7 +8,9 @@
       </div>
     </td>
     <td><%=l(:work_time)%></td>
+    <td><%=l(:field_remaining_hours)%></td>
     <td><%=l(:field_activity)%></td>
+    <td><%=l(:field_status)%></td>
     <td><%=l(:field_comments)%></td>
     <% @custom_fields.each do |cf| %>
        <td><%= cf.name %></td>
@@ -47,6 +49,8 @@
         <%=prj.name%>
   </td>
   <td><%=sprintf("%1.1f", prj_pack[:total])%></td>
+  <td><%=sprintf("%1.1f", prj_pack[:total_remain]) if prj_pack[:total_remain]%></td>
+  <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>
@@ -123,7 +127,13 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
   </td>
   <td>
+    <%= text_field_tag("time_entry["+issue_id.to_s+"][0][remaining_hours]", issue.remaining_hours, :size=>5) %>
+  </td>
+  <td>
     <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", options_for_select(activities,activity_default), :required => true %>
+  </td>
+  <td>
+    TODO: Status
   </td>
   <td>
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][comments]", "", :size=>80)%>
@@ -205,7 +215,13 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5) %>
   </td>
   <td>
+    <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue.remaining_hours, :size=>5) %>
+  </td>
+  <td>
     <%= select_tag "time_entry["+hour_id.to_s+"][activity_id]", options_for_select(activities, hour.activity_id), :required => true %>
+  </td>
+  <td>
+    TODO: Status
   </td>
   <td>
     <%= text_field_tag("time_entry["+hour_id.to_s+"][comments]", hour.comments, :size=>80)%>
@@ -227,6 +243,8 @@ end
 <tr style="background:#000;color:#fff;">
   <td>private</td>
   <td><%=sprintf("%1.1f", @day_pack[:other])%></td>
+  <td><%=sprintf("%1.1f", @day_pack[:other_remain]) if @day_pack[:other_remain]%></td>
+  <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>
@@ -237,6 +255,8 @@ end
 <tr align="center" id="time_input_table_bottom" style="background:#ddd;">
   <td>&nbsp;</td>
   <td><%=sprintf("%1.1f", @day_pack[:total])%></td>
+  <td><%=sprintf("%1.1f", @day_pack[:total_remain]) if @day_pack[:total_remain]%></td>
+  <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <% @custom_fields.each do |cf| %>

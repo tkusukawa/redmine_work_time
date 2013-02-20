@@ -907,13 +907,13 @@ private
   def make_pack
     # 月間工数表のデータを作成
     @month_pack = {:ref_prjs=>{}, :odr_prjs=>[],
-                   :total=>0, :total_by_day=>{},
+                   :total=>0, :total_remain=>nil, :total_by_day=>{},
                    :other=>0, :other_by_day=>{},
                    :count_prjs=>0, :count_issues=>0}
 
     # 日毎工数のデータを作成
     @day_pack = {:ref_prjs=>{}, :odr_prjs=>[],
-                 :total=>0, :total_by_day=>{},
+                 :total=>0, :total_remain=>nil, :total_by_day=>{},
                  :other=>0, :other_by_day=>{},
                  :count_prjs=>0, :count_issues=>0}
 
@@ -945,11 +945,13 @@ private
 
     # 月内の工数を集計
     hours = TimeEntry.find(:all, :conditions =>
-        ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
-        {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
+          ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
+          {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}],
+        :include => [:issue])
     hours.each do |hour|
       next if @restrict_project && @restrict_project!=hour.project.id
       work_time = hour.hours
+      remain_time = hour.issue.remaining_hours
       if hour.issue && hour.issue.visible? then
         # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
         prj_pack = make_pack_prj(@month_pack, hour.project)
@@ -961,8 +963,11 @@ private
 
         # 合計時間の計算
         @month_pack[:total] += work_time
+        @month_pack[:total_remain] = sum_or_nil(@month_pack[:total_remain], remain_time)
         prj_pack[:total] += work_time
+        prj_pack[:total_remain] = sum_or_nil(prj_pack[:total_remain], remain_time)
         issue_pack[:total] += work_time
+        issue_pack[:total_remain] = sum_or_nil(issue_pack[:total_remain], remain_time)
 
         # 日毎の合計時間の計算
         date = hour.spent_on
@@ -982,12 +987,16 @@ private
 
           day_issue_pack[:each_entries][hour.id] = hour # 工数エントリを追加
           day_issue_pack[:total] += work_time
+          day_issue_pack[:total_remain] = sum_or_nil(day_issue_pack[:total_remain], remain_time)
           day_prj_pack[:total] += work_time
+          day_prj_pack[:total_remain] = sum_or_nil(day_prj_pack[:total_remain], remain_time)
           @day_pack[:total] += work_time
+          @day_pack[:total_remain] = sum_or_nil(@day_pack[:total_remain], remain_time)
         end
       else
         # 合計時間の計算
         @month_pack[:total] += work_time
+        @month_pack[:total_remain] = sum_or_nil(@month_pack[:total_remain], remain_time)
         @month_pack[:other] += work_time
 
         # 日毎の合計時間の計算
@@ -999,7 +1008,9 @@ private
 
         if date==@this_date then # 表示日の工数であれば項目追加
           @day_pack[:total] += work_time
+          @day_pack[:total_remain] = sum_or_nil(@day_pack[:total_remain], remain_time)
           @day_pack[:other] += work_time
+          @day_pack[:other_remain] = sum_or_nil(@day_pack[:other_remain], remain_time)
         end
       end
     end
@@ -1055,7 +1066,7 @@ private
       # 表示項目に当該プロジェクトがあるかチェック→なければ項目追加
       unless pack[:ref_prjs].has_key?(new_prj.id) then
         prj_pack = {:odr=>odr, :prj=>new_prj,
-                    :total=>0, :total_by_day=>{},
+                    :total=>0, :total_remain=>nil, :total_by_day=>{},
                     :ref_issues=>{}, :odr_issues=>[], :count_issues=>0}
         pack[:ref_prjs][new_prj.id] = prj_pack
         pack[:odr_prjs].push prj_pack
@@ -1069,13 +1080,25 @@ private
       # 表示項目に当該チケットがあるかチェック→なければ項目追加
       unless prj_pack[:ref_issues].has_key?(id) then
         issue_pack = {:odr=>odr, :issue=>new_issue,
-                      :total=>0, :total_by_day=>{},
+                      :total=>0, :total_remain=>nil, :total_by_day=>{},
                       :count_hours=>0, :each_entries=>{}}
         prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
       end
       prj_pack[:ref_issues][id]
+  end
+
+  def sum_or_nil(v1, v2)
+    if v2 == nil
+      v1
+    else
+      if v1 == nil
+        v2
+      else
+        v1 + v2
+      end
+    end
   end
 
   # 重複削除と順序の正規化
