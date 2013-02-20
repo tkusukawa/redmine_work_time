@@ -211,7 +211,7 @@ class WorkTimeController < ApplicationController
           issue = Issue.find_by_id(issue_id)
           next if issue.nil? # チケットが削除されていたらパス
           next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
-          
+
           csv_data << "\"#{user}\",\"#{prj}\",\"#{issue.subject}\",#{@r_issue_cost[issue_id][user.id]}\n"
         end
       end
