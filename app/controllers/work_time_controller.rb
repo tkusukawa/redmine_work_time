@@ -882,7 +882,7 @@ private
       parent_id = iid if parent_id == 0
     else
       # 関連が登録されていない場合は登録する
-      WtTicketRelay.create(:issue_id=>parent_iid, :position=>relay.size, :parent=>0)
+      WtTicketRelay.create(:issue_id=>iid, :position=>relay.size, :parent=>0)
       parent_id = iid
     end
 
