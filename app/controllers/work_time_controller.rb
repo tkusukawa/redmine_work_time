@@ -492,16 +492,19 @@ private
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
-          next if vals['hours'] == ""
-          if !vals['activity_id'] then
-            @message += '<div style="background:#faa;">Error: Issue'+issue_id+': No Activities!</div><br>'
-             next
+          tm_vals = vals.slice! :remaining_hours
+          next if tm_vals['hours'].empty? && vals['remaining_hours'].empty?
+          if !tm_vals['activity_id'] then
+            apend_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
+            next
           end
-          new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
-          new_entry.attributes = vals
-          new_entry.save
-          msg = hour_update_check_error(new_entry, issue.id)
-          @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != ""
+          if !tm_vals['hours'].empty?
+            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
+            new_entry.attributes = tm_vals
+            new_entry.save
+            append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
+          end
+          append_error_message_html(@message, issue_update(issue_id, vals))
         end
       end
     end
@@ -510,17 +513,31 @@ private
     if params["time_entry"] then
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find(id)
-        if vals["hours"] == "" then
+        issue_id = tm.issue.id
+        tm_vals = vals.slice! :remaining_hours
+        if tm_vals["hours"].empty? then
           # 工数指定が空文字の場合は工数項目を削除
           tm.destroy
         else
-          tm.attributes = vals
+          tm.attributes = tm_vals
           tm.save
-          msg = hour_update_check_error(tm, tm.issue.id)
-          @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != ""
+          append_error_message_html(@message, hour_update_check_error(tm, issue_id))
         end
+        append_error_message_html(@message, issue_update(issue_id, vals))
       end
     end
+  end
+
+  def issue_update(issue_id, vals)
+    issue = Issue.find_by_id(issue_id)
+    return 'Error: Issue'+issue_id+': Private!' if issue.nil? || !issue.visible?
+    issue.attributes = vals
+    issue.save
+    hour_update_check_error(issue, issue_id)
+  end
+
+  def append_error_message_html(html, msg)
+    @message += '<div style="background:#faa;">' + msg + '</div><br>' if !msg.empty?
   end
 
   def hour_update_check_error(obj, issue_id)

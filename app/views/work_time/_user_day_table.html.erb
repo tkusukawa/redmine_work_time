@@ -127,7 +127,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= text_field_tag("time_entry["+issue_id.to_s+"][0][remaining_hours]", issue.remaining_hours, :size=>5) %>
+    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue.remaining_hours, :size=>5) %>
   </td>
   <td>
     <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", options_for_select(activities,activity_default), :required => true %>
