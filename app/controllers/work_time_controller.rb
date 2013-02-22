@@ -861,9 +861,9 @@ private
         parent_iid = -1
         parent_pid = -1
         @r_issue_cost[parent_iid] ||= Hash.new
-        @r_issue_cost[iid][-1] ||= 0
+        @r_issue_cost[parent_iid][-1] ||= 0
         @r_prj_cost[parent_iid] ||= Hash.new
-        @r_prj_cost[iid][-1] ||= 0
+        @r_prj_cost[parent_iid][-1] ||= 0
       end
 
       (@r_issue_cost[parent_iid])[-1] += cost
