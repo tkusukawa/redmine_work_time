@@ -492,19 +492,19 @@ private
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
-          tm_vals = vals.slice! :remaining_hours
-          next if tm_vals['hours'].empty? && vals['remaining_hours'].empty?
-          if !tm_vals['activity_id'] then
+          tm_vals = vals.slice! :remaining_hours, :status_id
+          next if tm_vals[:hours].empty? && vals[:remaining_hours].empty?
+          if !tm_vals[:activity_id] then
             apend_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
             next
           end
-          if !tm_vals['hours'].empty?
+          if !tm_vals[:hours].empty?
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
             new_entry.attributes = tm_vals
             new_entry.save
             append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
           end
-          append_error_message_html(@message, issue_update(issue_id, vals))
+          append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals)) 
         end
       end
     end
@@ -514,8 +514,8 @@ private
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find(id)
         issue_id = tm.issue.id
-        tm_vals = vals.slice! :remaining_hours
-        if tm_vals["hours"].empty? then
+        tm_vals = vals.slice! :remaining_hours, :status_id
+        if tm_vals[:hours].empty? then
           # 工数指定が空文字の場合は工数項目を削除
           tm.destroy
         else
@@ -523,20 +523,23 @@ private
           tm.save
           append_error_message_html(@message, hour_update_check_error(tm, issue_id))
         end
-        append_error_message_html(@message, issue_update(issue_id, vals))
+        append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
       end
     end
   end
 
-  def issue_update(issue_id, vals)
+  def issue_update_to_remain_and_more(issue_id, vals)
     issue = Issue.find_by_id(issue_id)
     return 'Error: Issue'+issue_id+': Private!' if issue.nil? || !issue.visible?
+    return if vals[:remaining_hours].nil? || vals[:remaining_hours].empty?
+    return if vals[:status_id].nil? || vals[:status_id].empty?
     issue.attributes = vals
     issue.save
     hour_update_check_error(issue, issue_id)
   end
 
   def append_error_message_html(html, msg)
+    return !msg
     @message += '<div style="background:#faa;">' + msg + '</div><br>' if !msg.empty?
   end
 

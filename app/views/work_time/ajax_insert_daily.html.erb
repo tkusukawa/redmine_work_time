@@ -44,7 +44,7 @@
   %>
      <%= @add_issue.status %>
   <% else %>
-    <%= select_tag "time_entry["+@add_issue_id.to_s+"][0][status_id]", options_for_select(@add_issue.new_statuses_allowed_to(User.current), @add_issue.status), :required => true %>
+    <%= select_tag "new_time_entry["+@add_issue_id.to_s+"][0][status_id]", options_for_select(@add_issue.new_statuses_allowed_to(User.current), @add_issue.status), :required => true %>
   <% end %>
   </td>
   <td>
