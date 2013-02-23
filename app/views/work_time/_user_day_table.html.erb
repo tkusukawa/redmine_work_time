@@ -127,7 +127,11 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue.remaining_hours, :size=>5) %>
+    <% if issue_pack[:cnt_childrens] != 0 || issue.closed? %>
+      <%= issue.remaining_hours %>
+    <% else %>
+      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue.remaining_hours, :size=>5) %>
+    <% end %>
   </td>
   <td>
     <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", options_for_select(activities,activity_default) %>
@@ -219,7 +223,11 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5) %>
   </td>
   <td>
-    <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue.remaining_hours, :size=>5) %>
+    <% if issue_pack[:cnt_childrens] != 0 || hour.issue.closed? %>
+      <%= hour.issue.remaining_hours %>
+    <% else %>
+      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue.remaining_hours, :size=>5) %>
+    <% end %>
   </td>
   <td>
     <%= select_tag "time_entry["+hour_id.to_s+"][activity_id]", options_for_select(activities, hour.activity_id), :required => true %>

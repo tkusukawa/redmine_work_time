@@ -246,6 +246,9 @@ class WorkTimeController < ApplicationController
     @add_count = params[:count]
     if @this_uid==@crnt_uid then
       add_issue = Issue.find_by_id(@add_issue_id)
+      @add_issue_childrens_cnt = Issue.count(
+          :conditions => ["parent_id = " + add_issue.id.to_s]
+      )
       if add_issue && add_issue.visible? then
         prj = add_issue.project
         if User.current.allowed_to?(:log_time, prj) then
@@ -492,19 +495,21 @@ private
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
-          tm_vals = vals.slice! :remaining_hours, :status_id
-          next if tm_vals[:hours].empty? && vals[:remaining_hours].empty?
+          tm_vals = vals.slice! "remaining_hours", "status_id"
+          next if tm_vals["hours"].blank? && vals["remaining_hours"].blank?
           if !tm_vals[:activity_id] then
-            apend_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
+            append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
             next
           end
-          if !tm_vals[:hours].empty?
+          if !tm_vals["hours"].blank? then
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
             new_entry.attributes = tm_vals
             new_entry.save
             append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
           end
-          append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals)) 
+          if !vals["remaining_hours"].blank? then
+            append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
+          end
         end
       end
     end
@@ -514,8 +519,8 @@ private
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find(id)
         issue_id = tm.issue.id
-        tm_vals = vals.slice! :remaining_hours, :status_id
-        if tm_vals[:hours].empty? then
+        tm_vals = vals.slice! "remaining_hours", "status_id"
+        if tm_vals["hours"].blank? then
           # 工数指定が空文字の場合は工数項目を削除
           tm.destroy
         else
@@ -523,7 +528,9 @@ private
           tm.save
           append_error_message_html(@message, hour_update_check_error(tm, issue_id))
         end
-        append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
+        if !vals["remaining_hours"].blank? then
+          append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
+        end
       end
     end
   end
@@ -531,8 +538,7 @@ private
   def issue_update_to_remain_and_more(issue_id, vals)
     issue = Issue.find_by_id(issue_id)
     return 'Error: Issue'+issue_id+': Private!' if issue.nil? || !issue.visible?
-    return if vals[:remaining_hours].nil? || vals[:remaining_hours].empty?
-    return if vals[:status_id].nil? || vals[:status_id].empty?
+    return if vals[:remaining_hours].blank? || vals[:remaining_hours].blank?
     issue.attributes = vals
     issue.save
     hour_update_check_error(issue, issue_id)
@@ -927,15 +933,19 @@ private
   def make_pack
     # 月間工数表のデータを作成
     @month_pack = {:ref_prjs=>{}, :odr_prjs=>[],
-                   :total=>0, :total_remain=>nil, :total_by_day=>{},
+                   :total=>0, :total_remain=>nil, :total_by_day=>{}, :total_remain_by_day=>{},
                    :other=>0, :other_by_day=>{},
                    :count_prjs=>0, :count_issues=>0}
+    @month_pack[:total_by_day].default = 0
+    @month_pack[:total_remain_by_day].default = 0
 
     # 日毎工数のデータを作成
     @day_pack = {:ref_prjs=>{}, :odr_prjs=>[],
-                 :total=>0, :total_remain=>nil, :total_by_day=>{},
+                 :total=>0, :total_remain=>nil, :total_by_day=>{}, :total_remain_by_day=>{},
                  :other=>0, :other_by_day=>{},
                  :count_prjs=>0, :count_issues=>0}
+    @day_pack[:total_by_day].default = 0
+    @day_pack[:total_remain_by_day].default = 0
 
     # プロジェクト順の表示データを作成
     dsp_prjs = Project.find(:all, :joins=>"INNER JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id",
@@ -991,12 +1001,12 @@ private
 
         # 日毎の合計時間の計算
         date = hour.spent_on
-        @month_pack[:total_by_day][date] ||= 0
         @month_pack[:total_by_day][date] += work_time
-        prj_pack[:total_by_day][date] ||= 0
+        @month_pack[:total_remain_by_day][date] = sum_or_nil(@month_pack[:total_remain_by_day][date], remain_time)
         prj_pack[:total_by_day][date] += work_time
-        issue_pack[:total_by_day][date] ||= 0
+        prj_pack[:total_remain_by_day][date] = sum_or_nil(prj_pack[:total_remain_by_day][date], remain_time)
         issue_pack[:total_by_day][date] += work_time
+        issue_pack[:total_remain_by_day][date] = sum_or_nil(issue_pack[:total_remain_by_day][date], remain_time)
 
         if date==@this_date then # 表示日の工数であれば項目追加
           # 表示項目に工数のプロジェクトがあるかチェック→なければ項目追加
@@ -1086,11 +1096,13 @@ private
       # 表示項目に当該プロジェクトがあるかチェック→なければ項目追加
       unless pack[:ref_prjs].has_key?(new_prj.id) then
         prj_pack = {:odr=>odr, :prj=>new_prj,
-                    :total=>0, :total_remain=>nil, :total_by_day=>{},
+                    :total=>0, :total_remain=>nil, :total_by_day=>{}, :total_remain_by_day=>{},
                     :ref_issues=>{}, :odr_issues=>[], :count_issues=>0}
         pack[:ref_prjs][new_prj.id] = prj_pack
         pack[:odr_prjs].push prj_pack
         pack[:count_prjs] += 1
+        prj_pack[:total_by_day].default = 0
+        prj_pack[:total_remain_by_day].default = 0
       end
       pack[:ref_prjs][new_prj.id]
   end
@@ -1100,11 +1112,18 @@ private
       # 表示項目に当該チケットがあるかチェック→なければ項目追加
       unless prj_pack[:ref_issues].has_key?(id) then
         issue_pack = {:odr=>odr, :issue=>new_issue,
-                      :total=>0, :total_remain=>nil, :total_by_day=>{},
-                      :count_hours=>0, :each_entries=>{}}
+                      :total=>0, :total_remain=>nil, :total_by_day=>{}, :total_remain_by_day=>{},
+                      :count_hours=>0, :each_entries=>{},
+                      :cnt_childrens=>0}
         prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
+        issue_pack[:total_by_day].default = 0
+        issue_pack[:total_remain_by_day].default = 0
+        cnt_childrens = Issue.count(
+            :conditions => ["parent_id = " + new_issue.id.to_s]
+        )
+        issue_pack[:cnt_childrens] = cnt_childrens
       end
       prj_pack[:ref_issues][id]
   end

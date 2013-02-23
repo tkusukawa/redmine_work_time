@@ -33,7 +33,11 @@
     <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][hours]", "", :size=>5) %>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][remaining_hours]", @add_issue.remaining_hours, :size=>5) %>
+    <% if @add_issue_children_cnt != 0 || @add_issue.closed?  %>
+      <%= @add_issue.remaining_hours %>
+    <% else %>
+        <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][remaining_hours]", @add_issue.remaining_hours, :size=>5) %>
+    <% end %>
   </td>
   <td>
     <%= select_tag "new_time_entry["+@add_issue_id+"]["+@add_count+"][activity_id]", options_for_select(@activities), :required => true %>
