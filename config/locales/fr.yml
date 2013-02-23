@@ -16,7 +16,7 @@ fr:
   wt_set_holiday: "Placer cette date en vacances"
   wt_del_holiday: "Retirer cette date de vacances"
   wt_apply_checked: "Appliquer pour toutes les cases cochées"
-  wt_select_project: "Choisir un projet"
+  wt_select_project: "Restreint un projet"
   wt_select_user: "Choisir un utilisateur"
   wt_edit_memo: "Editer la note"
   wt_pre_memo: "Note précédente"

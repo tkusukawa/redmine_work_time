@@ -16,7 +16,7 @@ en:
   wt_set_holiday: "set holiday on this date"
   wt_del_holiday: "del holiday on this date"
   wt_apply_checked: "apply all checked"
-  wt_select_project: "Select project..."
+  wt_select_project: "Restrict project..."
   wt_select_user: "Select user..."
   wt_edit_memo: "Edit memo"
   wt_pre_memo: "pre. memo"
