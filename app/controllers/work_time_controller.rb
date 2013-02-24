@@ -510,7 +510,7 @@ private
           if !tm_vals["hours"].blank? then
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
-            if !tm.changed? then
+            if !new_entry.changed? then
               new_entry.save
               append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
             end
