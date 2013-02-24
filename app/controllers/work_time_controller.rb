@@ -246,7 +246,7 @@ class WorkTimeController < ApplicationController
     @add_count = params[:count]
     if @this_uid==@crnt_uid then
       add_issue = Issue.find_by_id(@add_issue_id)
-      @add_issue_childrens_cnt = Issue.count(
+      @add_issue_children_cnt = Issue.count(
           :conditions => ["parent_id = " + add_issue.id.to_s]
       )
       if add_issue && add_issue.visible? then
