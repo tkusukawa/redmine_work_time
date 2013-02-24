@@ -362,6 +362,12 @@ private
     @link_params = {:controller=>"work_time", :id=>@project,
                     :year=>@this_year, :month=>@this_month, :day=>@this_day,
                     :user=>@this_uid, :prj=>@restrict_project}
+    @is_registerd_backlog = false
+    begin
+      Redmine::Plugin.find :redmine_backlogs
+      @is_registerd_backlog = true
+    rescue Exception => exception
+    end
   end
 
   def ticket_pos
@@ -503,9 +509,11 @@ private
           end
           if !tm_vals["hours"].blank? then
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
-            new_entry.attributes = tm_vals
-            new_entry.save
-            append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
+            new_entry.safe_attributes = tm_vals
+            if !tm.changed? then
+              new_entry.save
+              append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
+            end
           end
           if !vals["remaining_hours"].blank? then
             append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
@@ -524,9 +532,11 @@ private
           # 工数指定が空文字の場合は工数項目を削除
           tm.destroy
         else
-          tm.attributes = tm_vals
-          tm.save
-          append_error_message_html(@message, hour_update_check_error(tm, issue_id))
+          tm.safe_attributes = tm_vals
+          if !tm.changed? then
+            tm.save
+            append_error_message_html(@message, hour_update_check_error(tm, issue_id))
+          end
         end
         if !vals["remaining_hours"].blank? then
           append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
@@ -538,15 +548,18 @@ private
   def issue_update_to_remain_and_more(issue_id, vals)
     issue = Issue.find_by_id(issue_id)
     return 'Error: Issue'+issue_id+': Private!' if issue.nil? || !issue.visible?
-    return if vals[:remaining_hours].blank? || vals[:remaining_hours].blank?
-    issue.attributes = vals
+    return if vals["remaining_hours"].blank? && vals["status_id"].blank?
+    journal = issue.init_journal(User.current)
+    # update "0.0" is changed
+    vals["remaining_hours"] = 0 if vals["remaining_hours"] == "0.0"
+    issue.safe_attributes = vals
+    return if !issue.changed?
     issue.save
     hour_update_check_error(issue, issue_id)
   end
 
   def append_error_message_html(html, msg)
-    return !msg
-    @message += '<div style="background:#faa;">' + msg + '</div><br>' if !msg.empty?
+    @message += '<div style="background:#faa;">' + msg + '</div><br>' if !msg.blank?
   end
 
   def hour_update_check_error(obj, issue_id)

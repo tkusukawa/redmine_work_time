@@ -8,7 +8,9 @@
       </div>
     </td>
     <td><%=l(:work_time)%></td>
+    <% if @is_registerd_backlog then %>
     <td><%=l(:field_remaining_hours)%></td>
+    <% end %>
     <td><%=l(:field_activity)%></td>
     <td><%=l(:field_status)%></td>
     <td><%=l(:field_comments)%></td>
@@ -49,7 +51,9 @@
         <%=prj.name%>
   </td>
   <td><%=sprintf("%1.1f", prj_pack[:total])%></td>
-  <td><%=sprintf("%1.1f", prj_pack[:total_remain]) if prj_pack[:total_remain]%></td>
+  <% if @is_registerd_backlog then %>
+  <td>&nbsp;</td>
+  <% end %>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
@@ -126,18 +130,20 @@ prj_pack[:odr_issues].each do |issue_pack|
   <td>
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
   </td>
+  <% if @is_registerd_backlog then %>
   <td>
-    <% if issue_pack[:cnt_childrens] != 0 || issue.closed? %>
-      <%= issue.remaining_hours %>
+    <% if issue_pack[:cnt_childrens] != 0 || issue.closed? then %>
+      <%= issue[:remaining_hours] %>
     <% else %>
-      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue.remaining_hours, :size=>5) %>
+      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue[:remaining_hours], :size=>5) %>
     <% end %>
   </td>
+  <% end %>
   <td>
     <%= select_tag "new_time_entry["+issue_id.to_s+"][0][activity_id]", options_for_select(activities,activity_default) %>
   </td>
   <td>
-    <% if issue.new_statuses_allowed_to(User.current).length == 0 %>
+    <% if issue.new_statuses_allowed_to(User.current).length == 0 then %>
       <%= issue.status %>
     <% else %>
       <%= select_tag "new_time_entry["+issue_id.to_s+"][0][status_id]", options_for_select(issue.new_statuses_allowed_to(User.current).collect {|p| [p.name, p.id]}, issue.status_id), :required => true %>
@@ -222,18 +228,20 @@ prj_pack[:odr_issues].each do |issue_pack|
   <td>
     <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5) %>
   </td>
+  <% if @is_registerd_backlog then %>
   <td>
-    <% if issue_pack[:cnt_childrens] != 0 || hour.issue.closed? %>
-      <%= hour.issue.remaining_hours %>
+    <% if issue_pack[:cnt_childrens] != 0 || hour.issue.closed? then %>
+      <%= hour.issue[:remaining_hours] %>
     <% else %>
-      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue.remaining_hours, :size=>5) %>
+      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue[:remaining_hours], :size=>5) %>
     <% end %>
   </td>
+  <% end %>
   <td>
     <%= select_tag "time_entry["+hour_id.to_s+"][activity_id]", options_for_select(activities, hour.activity_id), :required => true %>
   </td>
   <td>
-    <% if issue.new_statuses_allowed_to(User.current).length == 0 %>
+    <% if issue.new_statuses_allowed_to(User.current).length == 0 then %>
       <%= issue.status %>
     <% else %>
       <%= select_tag "time_entry["+hour_id.to_s+"][status_id]", options_for_select(issue.new_statuses_allowed_to(User.current).collect {|p| [p.name, p.id]}, issue.status_id), :required => true %>
@@ -271,7 +279,9 @@ end
 <tr align="center" id="time_input_table_bottom" style="background:#ddd;">
   <td>&nbsp;</td>
   <td><%=sprintf("%1.1f", @day_pack[:total])%></td>
-  <td><%=sprintf("%1.1f", @day_pack[:total_remain]) if @day_pack[:total_remain]%></td>
+  <% if @is_registerd_backlog then %>
+  <td>&nbsp;</td>
+  <% end %>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
