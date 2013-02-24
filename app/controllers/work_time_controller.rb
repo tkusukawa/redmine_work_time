@@ -515,7 +515,7 @@ private
               append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
             end
           end
-          if !vals["remaining_hours"].blank? then
+          if vals["remaining_hours"].present? || vals["status_id"].present? then
             append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
           end
         end
@@ -538,7 +538,7 @@ private
             append_error_message_html(@message, hour_update_check_error(tm, issue_id))
           end
         end
-        if !vals["remaining_hours"].blank? then
+        if vals["remaining_hours"].present? || vals["status_id"].present? then
           append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
         end
       end
