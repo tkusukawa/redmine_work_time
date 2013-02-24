@@ -211,7 +211,7 @@ class WorkTimeController < ApplicationController
           issue = Issue.find_by_id(issue_id)
           next if issue.nil? # チケットが削除されていたらパス
           next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
-          
+
           csv_data << "\"#{user}\",\"#{prj}\",\"#{issue.subject}\",#{@r_issue_cost[issue_id][user.id]}\n"
         end
       end
@@ -246,6 +246,9 @@ class WorkTimeController < ApplicationController
     @add_count = params[:count]
     if @this_uid==@crnt_uid then
       add_issue = Issue.find_by_id(@add_issue_id)
+      @add_issue_children_cnt = Issue.count(
+          :conditions => ["parent_id = " + add_issue.id.to_s]
+      )
       if add_issue && add_issue.visible? then
         prj = add_issue.project
         if User.current.allowed_to?(:log_time, prj) then
@@ -359,6 +362,12 @@ private
     @link_params = {:controller=>"work_time", :id=>@project,
                     :year=>@this_year, :month=>@this_month, :day=>@this_day,
                     :user=>@this_uid, :prj=>@restrict_project}
+    @is_registerd_backlog = false
+    begin
+      Redmine::Plugin.find :redmine_backlogs
+      @is_registerd_backlog = true
+    rescue Exception => exception
+    end
   end
 
   def ticket_pos
@@ -492,16 +501,23 @@ private
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
-          next if vals['hours'] == ""
-          if !vals['activity_id'] then
-            @message += '<div style="background:#faa;">Error: Issue'+issue_id+': No Activities!</div><br>'
-             next
+          tm_vals = vals.slice! "remaining_hours", "status_id"
+          next if tm_vals["hours"].blank? && vals["remaining_hours"].blank?
+          if !tm_vals[:activity_id] then
+            append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
+            next
           end
-          new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
-          new_entry.attributes = vals
-          new_entry.save
-          msg = hour_update_check_error(new_entry, issue.id)
-          @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != ""
+          if !tm_vals["hours"].blank? then
+            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
+            new_entry.safe_attributes = tm_vals
+            if new_entry.changed? then
+              new_entry.save
+              append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
+            end
+          end
+          if !vals["remaining_hours"].blank? then
+            append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
+          end
         end
       end
     end
@@ -510,17 +526,40 @@ private
     if params["time_entry"] then
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find(id)
-        if vals["hours"] == "" then
+        issue_id = tm.issue.id
+        tm_vals = vals.slice! "remaining_hours", "status_id"
+        if tm_vals["hours"].blank? then
           # 工数指定が空文字の場合は工数項目を削除
           tm.destroy
         else
-          tm.attributes = vals
-          tm.save
-          msg = hour_update_check_error(tm, tm.issue.id)
-          @message += '<div style="background:#faa;">'+msg+'</div><br>' if msg != ""
+          tm.safe_attributes = tm_vals
+          if tm.changed? then
+            tm.save
+            append_error_message_html(@message, hour_update_check_error(tm, issue_id))
+          end
+        end
+        if !vals["remaining_hours"].blank? then
+          append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
         end
       end
     end
+  end
+
+  def issue_update_to_remain_and_more(issue_id, vals)
+    issue = Issue.find_by_id(issue_id)
+    return 'Error: Issue'+issue_id+': Private!' if issue.nil? || !issue.visible?
+    return if vals["remaining_hours"].blank? && vals["status_id"].blank?
+    journal = issue.init_journal(User.current)
+    # update "0.0" is changed
+    vals["remaining_hours"] = 0 if vals["remaining_hours"] == "0.0"
+    issue.safe_attributes = vals
+    return if !issue.changed?
+    issue.save
+    hour_update_check_error(issue, issue_id)
+  end
+
+  def append_error_message_html(html, msg)
+    @message += '<div style="background:#faa;">' + msg + '</div><br>' if !msg.blank?
   end
 
   def hour_update_check_error(obj, issue_id)
@@ -918,12 +957,14 @@ private
                    :total=>0, :total_by_day=>{},
                    :other=>0, :other_by_day=>{},
                    :count_prjs=>0, :count_issues=>0}
+    @month_pack[:total_by_day].default = 0
 
     # 日毎工数のデータを作成
     @day_pack = {:ref_prjs=>{}, :odr_prjs=>[],
                  :total=>0, :total_by_day=>{},
                  :other=>0, :other_by_day=>{},
                  :count_prjs=>0, :count_issues=>0}
+    @day_pack[:total_by_day].default = 0
 
     # プロジェクト順の表示データを作成
     dsp_prjs = Project.find(:all, :joins=>"INNER JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id",
@@ -953,8 +994,9 @@ private
 
     # 月内の工数を集計
     hours = TimeEntry.find(:all, :conditions =>
-        ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
-        {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}])
+          ["user_id=:uid and spent_on>=:day1 and spent_on<=:day2",
+          {:uid => @this_uid, :day1 => @first_date, :day2 => @last_date}],
+        :include => [:issue])
     hours.each do |hour|
       next if @restrict_project && @restrict_project!=hour.project.id
       work_time = hour.hours
@@ -974,11 +1016,8 @@ private
 
         # 日毎の合計時間の計算
         date = hour.spent_on
-        @month_pack[:total_by_day][date] ||= 0
         @month_pack[:total_by_day][date] += work_time
-        prj_pack[:total_by_day][date] ||= 0
         prj_pack[:total_by_day][date] += work_time
-        issue_pack[:total_by_day][date] ||= 0
         issue_pack[:total_by_day][date] += work_time
 
         if date==@this_date then # 表示日の工数であれば項目追加
@@ -1068,6 +1107,7 @@ private
         pack[:ref_prjs][new_prj.id] = prj_pack
         pack[:odr_prjs].push prj_pack
         pack[:count_prjs] += 1
+        prj_pack[:total_by_day].default = 0
       end
       pack[:ref_prjs][new_prj.id]
   end
@@ -1078,12 +1118,30 @@ private
       unless prj_pack[:ref_issues].has_key?(id) then
         issue_pack = {:odr=>odr, :issue=>new_issue,
                       :total=>0, :total_by_day=>{},
-                      :count_hours=>0, :each_entries=>{}}
+                      :count_hours=>0, :each_entries=>{},
+                      :cnt_childrens=>0}
         prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
+        issue_pack[:total_by_day].default = 0
+        cnt_childrens = Issue.count(
+            :conditions => ["parent_id = " + new_issue.id.to_s]
+        )
+        issue_pack[:cnt_childrens] = cnt_childrens
       end
       prj_pack[:ref_issues][id]
+  end
+
+  def sum_or_nil(v1, v2)
+    if v2.blank?
+      v1
+    else
+      if v1.blank?
+        v2
+      else
+        v1 + v2
+      end
+    end
   end
 
   # 重複削除と順序の正規化
