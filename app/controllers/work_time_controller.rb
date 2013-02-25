@@ -502,12 +502,12 @@ private
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
           tm_vals = vals.slice! "remaining_hours", "status_id"
-          next if tm_vals["hours"].blank? && vals["remaining_hours"].blank?
+          next if tm_vals["hours"].blank? && vals["remaining_hours"].blank? && vals["status_id"].blank?
           if !tm_vals[:activity_id] then
             append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
             next
           end
-          if !tm_vals["hours"].blank? then
+          if tm_vals["hours"].present? then
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
             if new_entry.changed? then
