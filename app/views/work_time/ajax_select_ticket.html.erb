@@ -1,14 +1,42 @@
 <%
-issues = Issue.find(:all, :order=>"id DESC", :conditions =>
-                     ["project_id=:p",{:p=>params[:prj]}])
+  opt = {
+    :action => 'ajax_select_ticket',
+    :prj => params[:prj],
+    :all => params[:all] || '0'
+  }
+
+  opt[:all] = opt[:all] == '0' ? '1' : '0' if params.key?(:all_toggle)
+
+  url1 = url_for(opt.merge({:all_toggle => ''}))
+
+  link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opened_only)
+
+  issues = Issue.find(
+      :all,
+      :include => [:assigned_to],
+      :order => "id DESC",
+      :conditions => ["project_id=:p",{:p=>params[:prj]}])
+%>
+<a href="#"
+  onclick="JavaScript:
+    ajax_select_tickets('<%=url1%>');
+    return false;">
+    <%= link_label1 %>
+</a>
+<br/>
+<br/>
+<%
 issues.each do |issue|
   next if issue.nil? || !issue.visible?
   if issue.closed? then
-    next if !params.key?(:all)
+    next if opt[:all] == '0'
     issueHtml = "<del>"+issue.to_s+"</del>"
   else
     issueHtml = issue.to_s
   end
+  issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
+issues = Issue.find(:all, :order=>"id DESC", :conditions =>
+                     ["project_id=:p",{:p=>params[:prj]}])
 %>
 <div style="font-size:14px;">
 <input type="button" onclick="JavaScript:ticket_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
@@ -25,13 +53,5 @@ issues.each do |issue|
 <br/>
 </div>
 <%end%>
-
-<%if !params.key?(:all) then
-    url=url_for(:action=>'ajax_select_ticket', :prj=>params[:prj], :all=>'')%>
-  <a href="#"
-    onclick="JavaScript:
-      ajax_select_tickets('<%=url%>');
-      return false;">
-    [display closed ticket]
-  </a>
-<%end%>
+<br/>
+<br/>

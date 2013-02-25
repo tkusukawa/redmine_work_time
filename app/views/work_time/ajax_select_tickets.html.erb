@@ -21,7 +21,7 @@
       :include => [:assigned_to],
       :order => "id DESC",
       :conditions => ["project_id=:p",{:p=>params[:prj]}])
-    %>
+%>
 <a href="#"
   onclick="JavaScript:
     ajax_select_tickets('<%=url1%>');
@@ -40,7 +40,7 @@
 <input type="button" onclick="JavaScript:tickets_checked();" value="<%=l(:wt_apply_checked)%>"/>
 <br/>
 <br/>
-  <%
+<%
 issues.each do |issue|
   next if issue.nil? || !issue.visible?
   next if opt[:other] == '0' && issue.assigned_to_id != User.current.id

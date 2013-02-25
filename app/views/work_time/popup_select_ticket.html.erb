@@ -11,7 +11,7 @@
 <select onchange="JavaScript:if (this.value != '') {
   ajax_select_tickets(this.value);
   return false;}">
-  <option value=''>select project...</option>
+  <option value=''><%=l(:wt_select_project)%></option>
   <option disabled="disabled">---</option>
 <%
 projects = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=-1",
@@ -30,7 +30,7 @@ end
 </select>
 <br/>
 <div id="tickets">
-or input a ticket number
+<%=l(:wt_input_ticket_numbers)%>
   <form action="">
     <input type="text" id="input_id" size=32 onKeyPress="return checkKey(event,ticket_inputed);"/>
     <input type="button" value="<%=l(:button_apply)%>" onclick="ticket_inputed();"/>
