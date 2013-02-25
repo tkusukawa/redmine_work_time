@@ -1056,12 +1056,15 @@ private
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
     t2 = Time.local(next_date.year, next_date.month, next_date.day)
     issues = Issue.find(:all,
+              :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id",
               :conditions => ["1 = 1
                          and ((issues.author_id = :u
+                           and (issues.assigned_to_id is null or issues.author_id = :u)
                            and issues.created_on > :t1
                            and issues.created_on < :t2)
                            or (issues.assigned_to_id = :u
-                           and :t1 between issues.start_date and issues.due_date)
+                           and issues.start_date < :t2
+                           and ist.is_closed != 1)
                            or (exists (select 1 from journals
                                        where journals.journalized_id = issues.id
                                          and journals.journalized_type = 'Issue'
@@ -1074,8 +1077,16 @@ private
       next if !@this_user.allowed_to?(:log_time, issue.project)
       next if !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
+      new_pack = !prj_pack[:ref_issues].has_key?(issue.id)
       issue_pack = make_pack_issue(prj_pack, issue)
-      issue_pack[:worked] = true;
+      if new_pack then
+        issue_pack[:css_classes].gsub!(/wt_iss_default/, '')
+        if !issue.due_date.nil? && issue.due_date < t1.to_datetime then
+          issue_pack[:css_classes] << ' wt_iss_overdue'
+        else
+          issue_pack[:css_classes] << ' wt_iss_worked'
+        end
+      end
     end
 
     # 月間工数表から工数が無かった項目の削除と項目数のカウント
@@ -1117,10 +1128,11 @@ private
                       :total=>0, :total_by_day=>{},
                       :count_hours=>0, :each_entries=>{},
                       :cnt_childrens=>0}
+        issue_pack[:total_by_day].default = 0
+        issue_pack[:css_classes] = 'wt_iss_default'
         prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
-        issue_pack[:total_by_day].default = 0
         cnt_childrens = Issue.count(
             :conditions => ["parent_id = " + new_issue.id.to_s]
         )

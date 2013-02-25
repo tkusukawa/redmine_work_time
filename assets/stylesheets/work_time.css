@@ -1,0 +1,10 @@
+/* use day table */
+td.wt_iss_default {
+  background: #fff;
+}
+td.wt_iss_worked {
+  background: #cfc;
+}
+td.wt_iss_overdue {
+  background: #fee5e5;
+}

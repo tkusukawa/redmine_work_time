@@ -1,3 +1,4 @@
+<%= stylesheet_link_tag 'work_time', :plugin => 'redmine_work_time' %>
 <table border="1" id="time_input_table">
   <tr align="center" style="background:#ddd;">
     <td>
@@ -66,7 +67,8 @@ prj_pack[:odr_issues].each do |issue_pack|
   issue = issue_pack[:issue]
   issue_id = issue.nil? ? -1 : issue.id
   issue_odr = issue_pack[:odr].to_i
-  issue_color = issue_pack[:worked] ? "#cfc" : "#fff"
+#  issue_class = issue_pack[:worked] ? "#cfc" : "#fff"
+  issue_css_classes = issue_pack[:css_classes]
   issue = Issue.find_by_id(issue_id)
   if issue.nil? || !issue.visible? then
     issueHtml = "<del>Issue:"+issue_id.to_s+"</del>"
@@ -80,7 +82,7 @@ prj_pack[:odr_issues].each do |issue_pack|
 %>
 <!-- 工数エントリなし -->
 <tr id="time_entry_pos<%=issue_id%>_0">
-  <td style="background:<%=issue_color%>;">
+  <td class="<%=issue_css_classes%>">
   <div style="position:relative;width:300px;">
     <%if @this_uid==@crnt_uid then%>
     <a href="#"
@@ -175,7 +177,7 @@ prj_pack[:odr_issues].each do |issue_pack|
 %>
 <!-- 工数エントリあり -->
 <tr id="time_entry_pos<%=hour_id%>">
-  <td style="background:<%=issue_color%>;">
+  <td class="<%=issue_css_classes%>">
   <div style="position:relative;width:300px;">
   <%if !issue.nil? then%>
     <%if @this_uid==@crnt_uid then%>
