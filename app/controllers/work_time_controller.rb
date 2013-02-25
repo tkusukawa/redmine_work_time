@@ -1055,23 +1055,20 @@ private
     next_date = @this_date+1
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
     t2 = Time.local(next_date.year, next_date.month, next_date.day)
-    issues = Issue.find(:all, :conditions=>["author_id=:u and created_on>=:t1 and created_on<:t2",
-        {:u=>@this_uid, :t1=>t1, :t2=>t2}])
-    issues.each do |issue|
-      next if @restrict_project && @restrict_project!=issue.project.id
-      next if !@this_user.allowed_to?(:log_time, issue.project)
-      next if issue.nil? || !issue.visible?
-      prj_pack = make_pack_prj(@day_pack, issue.project)
-      issue_pack = make_pack_issue(prj_pack, issue)
-      issue_pack[:worked] = true;
-    end
-    # この日のチケット操作を洗い出す
-    issues = Issue.find(:all, :joins=>"INNER JOIN journals ON journals.journalized_id=issues.id",
-                        :conditions=>["journals.journalized_type='Issue' and
-                                       journals.user_id=:u and
-                                       journals.created_on>=:t1 and
-                                       journals.created_on<:t2",
-                                       {:u=>@this_uid, :t1=>t1, :t2=>t2}])
+    issues = Issue.find(:all,
+              :conditions => ["1 = 1
+                         and ((issues.author_id = :u
+                           and issues.created_on > :t1
+                           and issues.created_on < :t2)
+                           or (issues.assigned_to_id = :u
+                           and :t1 between issues.start_date and issues.due_date)
+                           or (exists (select 1 from journals
+                                       where journals.journalized_id = issues.id
+                                         and journals.journalized_type = 'Issue'
+                                         and journals.user_id = :u
+                                         and journals.created_on >= :t1
+                                         and journals.created_on < :t2)))",
+                          {:u => @this_uid, :t1 => t1, :t2 => t2}])
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
       next if !@this_user.allowed_to?(:log_time, issue.project)
