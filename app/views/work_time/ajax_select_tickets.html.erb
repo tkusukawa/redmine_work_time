@@ -1,15 +1,56 @@
 <form style="font-size:14px;" action="">
 <%
-issues = Issue.find(:all, :order=>"id DESC", :conditions =>
-                     ["project_id=:p",{:p=>params[:prj]}])
+  opt = {
+    :action => 'ajax_select_tickets',
+    :prj => params[:prj],
+    :all => params[:all] || '0',
+    :other => params[:other] || '0'
+  }
+
+  opt[:all] = opt[:all] == '0' ? '1' : '0' if params.key?(:all_toggle)
+  opt[:other] = opt[:other] == '0' ? '1' : '0' if params.key?(:other_toggle)
+
+  url1 = url_for(opt.merge({:all_toggle => ''}))
+  url2 = url_for(opt.merge({:other_toggle => ''}) )
+
+  link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opened_only)
+  link_label2 = opt[:other] == '0' ? l(:wt_opt_disp_ticket_with_other_member) : l(:wt_opt_disp_ticket_mine_only)
+
+  issues = Issue.find(
+      :all,
+      :include => [:assigned_to],
+      :order => "id DESC",
+      :conditions => ["project_id=:p",{:p=>params[:prj]}])
+%>
+<a href="#"
+  onclick="JavaScript:
+    ajax_select_tickets('<%=url1%>');
+    return false;">
+    <%= link_label1 %>
+</a>
+<br/>
+<a href="#"
+  onclick="JavaScript:
+    ajax_select_tickets('<%=url2%>');
+    return false;">
+    <%= link_label2 %>
+</a>
+<br/>
+<br/>
+<input type="button" onclick="JavaScript:tickets_checked();" value="<%=l(:wt_apply_checked)%>"/>
+<br/>
+<br/>
+<%
 issues.each do |issue|
   next if issue.nil? || !issue.visible?
+  next if opt[:other] == '0' && issue.assigned_to_id != User.current.id
   if issue.closed? then
-    next if !params.key?(:all)
+    next if opt[:all] == '0'
     issueHtml = "<del>"+issue.to_s+"</del>"
   else
     issueHtml = issue.to_s
   end
+  issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
 %>
 <input type="checkbox" name="selected"  value="<%=issue.id%>"/>
 <input type="button" onclick="JavaScript:tickets_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
@@ -27,14 +68,5 @@ issues.each do |issue|
 <%end%>
 </form>
 <input type="button" onclick="JavaScript:tickets_checked();" value="<%=l(:wt_apply_checked)%>"/>
-
-<%if !params.key?(:all) then
-    url=url_for(:action=>'ajax_select_tickets', :prj=>params[:prj], :all=>'')%>
-  <br/>
-  <a href="#" 
-    onclick="JavaScript:
-      ajax_select_tickets('<%=url%>');
-      return false;">
-    [display closed ticket]
-  </a>
-<%end%>
+<br/>
+<br/>
