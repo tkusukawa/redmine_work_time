@@ -13,7 +13,7 @@
   url1 = url_for(opt.merge({:all_toggle => ''}))
   url2 = url_for(opt.merge({:other_toggle => ''}) )
 
-  link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opend_only)
+  link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opened_only)
   link_label2 = opt[:other] == '0' ? l(:wt_opt_disp_ticket_with_other_member) : l(:wt_opt_disp_ticket_mine_only)
 
   issues = Issue.find(

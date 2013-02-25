@@ -26,6 +26,6 @@ de:
   wt_delete_closed_tickets: "delete closed tickets"
   wt_data_download: "Daten laden"
   wt_opt_disp_ticket_with_closed: "[display closed ticket]"
-  wt_opt_disp_ticket_opend_only: "[display opend ticket only]"
+  wt_opt_disp_ticket_opened_only: "[display opened ticket only]"
   wt_opt_disp_ticket_with_other_member: "[display other members ticket]"
   wt_opt_disp_ticket_mine_only: "[display my ticket only]"
