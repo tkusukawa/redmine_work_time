@@ -1059,7 +1059,6 @@ private
               :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id",
               :conditions => ["1 = 1
                          and ((issues.author_id = :u
-                           and (issues.assigned_to_id is null or issues.author_id = :u)
                            and issues.created_on > :t1
                            and issues.created_on < :t2)
                            or (issues.assigned_to_id = :u
