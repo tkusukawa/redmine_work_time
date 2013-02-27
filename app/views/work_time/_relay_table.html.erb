@@ -44,12 +44,14 @@ prjs.each do |po|
   next unless @issue_cost[issue_id].key?(-1)
 
   issue = Issue.find_by_id(issue_id)
+  parent_id = ""
   next if issue.nil? # チケットが削除されていたらパス
   next if issue.project_id != dsp_prj
   issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
 
   if tic.parent && tic.parent != 0 then
     parent = Issue.find_by_id(tic.parent)
+    parent_id = parent.id
     if parent.nil? then
       parentHtml = "<del>Issue:"+tic.parent.to_s+"</del>"
     else
@@ -98,7 +100,7 @@ prjs.each do |po|
   </td>
   <td style="text-align:right;"><%=cost.html_safe%></td>
   <td style="text-align:right;"><%=r_cost.html_safe%></td>
-  <td id="ticket<%=issue_id%>"> => <%=parentHtml.html_safe%>
+  <td id="ticket<%=issue_id%>" class="<%= parentHtml.present? ? 'wt_set_relay' : 'wt_not_relay' %>" data-has-parent="<%= parentHtml.present? ? 'true' : 'false' %>" data-parent-id="<%= parent_id %>" data-redmine-parent-id="<%= issue.parent_id %>"> => <%= parentHtml.html_safe %>
 <%
 if User.current.allowed_to?(:edit_work_time_total, @project) then
   if parentHtml != "" then

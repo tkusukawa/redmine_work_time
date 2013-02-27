@@ -3,6 +3,12 @@
 <%= @message.html_safe %>
 <div style="text-align:right;">
 <%= render :partial=>'select_project' %> <br/>
+<a href="#"
+  onclick="JavaScript:
+    set_ticket_relay_by_issue_relation('<%=url_for(@link_params.merge(:action=>"ajax_relay_table"))%>');
+    return false;">
+  [<%= 'bulk update' %>]
+</a>
 [<%= link_to(l(:wt_each_member_report), @link_params.merge(:action=>"show")) %>]
 [<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
 [<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>]
