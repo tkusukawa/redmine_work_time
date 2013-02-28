@@ -715,6 +715,10 @@ private
         @message += '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
         return
       end
+
+      @Issue = Issue.find_by_id(@issue_id)
+      @redmine_parent_id = @Issue.parent_id
+      @parent_id = parent_id
       if parent_id != 0 && !((parent = Issue.find_by_id(parent_id)).nil?) then
         @parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s
       end

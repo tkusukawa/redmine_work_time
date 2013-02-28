@@ -31,24 +31,40 @@ function member_pos(url, user_id, pos, max)
   }
 }
 
-function set_ticket_relay(pop_url, rep_url, child)
+function set_ticket_relay_core(req_url, child_id, parent_id) {
+  if (typeof jQuery == "function") {
+    jQuery.ajax({
+      url:req_url+"&ticket_relay="+child_id+"_"+parent_id,
+      data:{asynchronous:true, method:'get'},
+      success:function(response) {
+        jQuery('#ticket'+child_id).html(response);
+      }
+    });
+  } else {
+    new Ajax.Updater('ticket'+child_id,
+      req_url+"&ticket_relay="+child_id+"_"+parent_id,
+      {asynchronous:true, method:'get'});
+  }
+}
+
+function set_ticket_relay(pop_url, req_url, child_id)
 {
-  var parent = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
-  if(parent!=null) {
-    if( typeof jQuery == "function" ) {
-      jQuery.ajax({
-        url:rep_url+"&ticket_relay="+child+"_"+parent,
-        data:{asynchronous:true, method:'get'},
-        success:function(response){
-          jQuery('#ticket'+child).html(response);
-        }
-      });
-    }
-    else {
-      new Ajax.Updater('ticket'+child,
-        rep_url+"&ticket_relay="+child+"_"+parent,
-        {asynchronous:true, method:'get'});
-    }
+  var parent_id = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
+  if (parent_id != null) {
+    set_ticket_relay_core(req_url, child_id, parent_id);
+  }
+}
+
+function set_ticket_relay_by_issue_relation(req_url) {
+  if (typeof jQuery == "function") {
+    $('[data-has-parent="false"]').each(function(i, v) {
+      var child_id = v.attributes['data-issue-id'].value || '';
+      var parent_id = v.attributes['data-redmine-parent-id'].value || '';
+      if (child_id == ''|| parent_id == '')  return;
+      set_ticket_relay_core(req_url, child_id, parent_id);
+    });
+  } else {
+    alert('sorry not supported!');
   }
 }
 

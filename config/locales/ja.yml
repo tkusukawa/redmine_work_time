@@ -29,3 +29,4 @@ ja:
   wt_opt_disp_ticket_opened_only: "[オープン中のチケットのみ表示]"
   wt_opt_disp_ticket_with_other_member: "[他のメンバーのチケットも表示]"
   wt_opt_disp_ticket_mine_only: "[自分のチケットのみ表示]"
+  wt_bulkupdate_relations: "親チケットへ一括更新"

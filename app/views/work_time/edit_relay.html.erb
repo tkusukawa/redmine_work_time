@@ -1,4 +1,4 @@
-﻿<%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
+﻿<%=javascript_include_tag 'work_time', :plugin=>'redmine_work_time' %>
 
 <%= @message.html_safe %>
 <div style="text-align:right;">
@@ -7,12 +7,11 @@
 [<%= link_to(l(:wt_raw_total), @link_params.merge(:action=>"total")) %>]
 [<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>]
 </div>
-
-<% 
+<%
 ###################################################### チケット関係テーブルの表示
 %>
 <br/>
-<h2><%=l(:wt_edit_relay)%> 
+<h2><%=l(:wt_edit_relay)%>
 <%= link_to("<<", @link_params.merge(:day=>@last_month.day, :month=>@last_month.month, :year=>@last_month.year))%>
 <%= @this_year %>-<%= @month_names[@this_month-1] %>
 <%= link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year))%>
@@ -20,6 +19,10 @@
 <table border="1" id="relay_table">
 <%= render :partial=>'relay_table' %>
 </table>
+<br/>
+<%= submit_tag(l('wt_bulkupdate_relations'),
+              {:type => 'button',
+               :onclick => "set_ticket_relay_by_issue_relation('#{url_for(@link_params.merge(:action=>'ajax_relay_table'))}')".html_safe}) %>
 
 <div style="text-align:right;">
 <%= render :partial=>'select_project' %> <br/>
