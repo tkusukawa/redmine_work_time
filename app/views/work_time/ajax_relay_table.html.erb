@@ -1,5 +1,5 @@
 <%=@message.html_safe%>
-<td id="ticket<%=@issue_id%>">
+<div class="<%= @parentHtml.present? ? 'wt_set_relay' : 'wt_not_relay' %>" data-has-parent="<%= @parentHtml.present? ? 'true' : 'false' %>" data-parent-id="<%= @parent_id %>" data-issue-id="<%= @issue_id %>" data-redmine-parent-id="<%= @redmine_parent_id %>">
   <div style="background:#cfc;">
     => <%=@parentHtml.html_safe%>
 <%
@@ -38,4 +38,4 @@ if User.current.allowed_to?(:edit_work_time_total, @project) then
 end
 %>
   </div>
-</td>
+</div>

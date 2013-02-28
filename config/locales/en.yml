@@ -29,3 +29,4 @@ en:
   wt_opt_disp_ticket_opened_only: "[display opened ticket only]"
   wt_opt_disp_ticket_with_other_member: "[display other members ticket]"
   wt_opt_disp_ticket_mine_only: "[display my ticket only]"
+  wt_bulkupdate_relations: "bulkupdate to parent"

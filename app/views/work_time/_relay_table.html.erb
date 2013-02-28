@@ -11,7 +11,7 @@ prjs.each do |po|
  prj =Project.find(dsp_prj)
 %>
 <tr style="background:#000;color:#fff;">
-  <td> 
+  <td>
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
     <a href="#"
        onclick="JavaScript:
@@ -100,7 +100,8 @@ prjs.each do |po|
   </td>
   <td style="text-align:right;"><%=cost.html_safe%></td>
   <td style="text-align:right;"><%=r_cost.html_safe%></td>
-  <td id="ticket<%=issue_id%>" class="<%= parentHtml.present? ? 'wt_set_relay' : 'wt_not_relay' %>" data-has-parent="<%= parentHtml.present? ? 'true' : 'false' %>" data-parent-id="<%= parent_id %>" data-redmine-parent-id="<%= issue.parent_id %>"> => <%= parentHtml.html_safe %>
+  <td id="ticket<%=issue_id%>">
+  <div class="<%= parentHtml.present? ? 'wt_set_relay' : 'wt_not_relay' %>" data-has-parent="<%= parentHtml.present? ? 'true' : 'false' %>" data-parent-id="<%= parent_id %>" data-issue-id=<%= issue_id %> data-redmine-parent-id="<%= issue.parent_id %>"> => <%= parentHtml.html_safe %>
 <%
 if User.current.allowed_to?(:edit_work_time_total, @project) then
   if parentHtml != "" then
@@ -136,6 +137,7 @@ if User.current.allowed_to?(:edit_work_time_total, @project) then
   end
 end
 %>
+</div>
 </td>
 </tr>
 <%

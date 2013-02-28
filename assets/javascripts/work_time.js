@@ -58,11 +58,10 @@ function set_ticket_relay(pop_url, req_url, child_id)
 function set_ticket_relay_by_issue_relation(req_url) {
   if (typeof jQuery == "function") {
     $('[data-has-parent="false"]').each(function(i, v) {
+      var child_id = v.attributes['data-issue-id'].value || '';
       var parent_id = v.attributes['data-redmine-parent-id'].value || '';
-      if (parent_id == '')  return;
-      if (v.id.match(/ticket([\d]+)/)) {
-        set_ticket_relay_core(req_url, RegExp.$1, parent_id);
-      }
+      if (child_id == ''|| parent_id == '')  return;
+      set_ticket_relay_core(req_url, child_id, parent_id);
     });
   } else {
     alert('sorry not supported!');
