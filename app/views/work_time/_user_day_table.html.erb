@@ -1,6 +1,6 @@
 <%= stylesheet_link_tag 'work_time', :plugin => 'redmine_work_time' %>
 <table border="1" id="time_input_table">
-  <tr align="center" style="background:#ddd;">
+  <tr style="background:#ddd;">
     <td>
       <div style="position:relative;height:25px;">
         <div style="top:3px;left:20px;width:200px;font-size:1.5em;">
@@ -39,13 +39,11 @@
       <%if @this_uid==@crnt_uid then%>
 
         <a href="#"
-          onclick="JavaScript:
-            prj_pos(
-              '<%=url_for(@link_params) %>',
-              <%=dsp_prj%>,
-              <%=dsp_pos%>,
-              <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
-            return false;">
+          onclick="prj_pos('<%=url_for(@link_params) %>',
+                           <%=dsp_prj%>,
+                           <%=dsp_pos%>,
+                           <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
+                   return false;">
           <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>
         </a>
      <%end%>
@@ -71,11 +69,11 @@ prj_pack[:odr_issues].each do |issue_pack|
   issue_css_classes = issue_pack[:css_classes]
   issue = Issue.find_by_id(issue_id)
   if issue.nil? || !issue.visible? then
-    issueHtml = "<del>Issue:"+issue_id.to_s+"</del>"
+    issue_html = "<del>Issue:"+issue_id.to_s+"</del>"
   elsif issue.closed?
-    issueHtml = "<del>"+issue.to_s+"</del>" 
+    issue_html = "<del>"+issue.to_s+"</del>"
   else
-    issueHtml = issue.to_s
+    issue_html = issue.to_s
   end
 
   if issue_pack[:each_entries].length==0 then
@@ -86,39 +84,35 @@ prj_pack[:odr_issues].each do |issue_pack|
   <div style="position:relative;width:300px;">
     <%if @this_uid==@crnt_uid then%>
     <a href="#"
-      onclick="JavaScript:
-        ticket_pos(
-          '<%=url_for(@link_params) %>',
-          <%=issue_id%>,
-          <%=issue_odr%>,
-          <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
-        return false;">
+      onclick="ticket_pos('<%=url_for(@link_params) %>',
+                          <%=issue_id%>,
+                          <%=issue_odr%>,
+                          <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
+               return false;">
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
     </a>
     <%end%>
 
-    <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
+    <%= link_to(issue_html.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
     <%= print_issue_cost(issue) %>
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue.id.to_s%>"
         href="#"
-        onclick="JavaScript:
-          update_done_ratio(
-            '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-            '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
-            <%=issue_id%>);
-          return false;">
+        onclick="update_done_ratio(
+                     '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+                     '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+                     <%=issue_id%>);
+                 return false;">
       [<%=issue.done_ratio%>&#37;]
     </a>
     &nbsp;&nbsp;&nbsp;
     <a style="position:absolute;bottom:1px;right:10px;"
        href="#"
-       onclick="JavaScript:
-           dup_ticket(
-             '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-             'time_entry_pos<%=issue_id%>_0',
-             <%=issue_id%>);
-           return false;">
+       onclick="dup_ticket(
+                    '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+                    'time_entry_pos<%=issue_id%>_0',
+                    <%=issue_id%>);
+                return false;">
       +
     </a>
       <%if issue_odr>0 then%>
@@ -182,40 +176,36 @@ prj_pack[:odr_issues].each do |issue_pack|
   <%if !issue.nil? then%>
     <%if @this_uid==@crnt_uid then%>
     <a href="#"
-      onclick="JavaScript:
-        ticket_pos(
-          '<%=url_for(@link_params) %>',
-          <%=issue_id%>,
-          <%=issue_odr%>,
-          <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
-        return false;">
+      onclick="ticket_pos('<%=url_for(@link_params) %>',
+                          <%=issue_id%>,
+                          <%=issue_odr%>,
+                          <%=@issue_odr_max+((issue_odr.to_i<0)?1:0)%>);
+               return false;">
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
     </a>
     <%end%>
-    <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
+    <%= link_to(issue_html.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
 
     <%= print_issue_cost(issue) %>
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue_id.to_s%>"
         href="#"
-        onclick="JavaScript:
-          update_done_ratio(
-            '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-            '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
-            <%=issue_id%>);
-          return false;">
+        onclick="update_done_ratio(
+                     '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
+                     '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+                     <%=issue_id%>);
+                 return false;">
       [<%=issue.done_ratio%>&#37;]
     </a>
     &nbsp;&nbsp;&nbsp;
 
     <a style="position:absolute;bottom:1px;right:10px;"
        href="#"
-       onclick="JavaScript:
-           dup_ticket(
-             '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
-             'time_entry_pos<%=hour_id%>',
-             <%=issue_id%>);
-           return false;">
+       onclick="dup_ticket(
+                    '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+                    'time_entry_pos<%=hour_id%>',
+                    <%=issue_id%>);
+                return false;">
       +
     </a>
       <%if issue_odr>0 then%>
