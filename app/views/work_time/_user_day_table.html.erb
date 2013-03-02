@@ -267,7 +267,9 @@ end
 <tr style="background:#000;color:#fff;">
   <td>private</td>
   <td><%=sprintf("%1.1f", @day_pack[:other])%></td>
-  <td><%=sprintf("%1.1f", @day_pack[:other_remain]) if @day_pack[:other_remain]%></td>
+  <% if @is_registerd_backlog then %>
+      <td><%=sprintf("%1.1f", @day_pack[:other_remain]) if @day_pack[:other_remain]%></td>
+  <% end %>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
