@@ -19,7 +19,6 @@
 <table border="1" id="relay_table">
 <%= render :partial=>'relay_table' %>
 </table>
-<br/>
 <%= submit_tag(l('wt_bulkupdate_relations'),
               {:type => 'button',
                :onclick => "set_ticket_relay_by_issue_relation('#{url_for(@link_params.merge(:action=>'ajax_relay_table'))}')".html_safe}) %>

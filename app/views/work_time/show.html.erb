@@ -7,13 +7,19 @@
   <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
   <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br/>
 <%end%>
-<%if @project && User.current.allowed_to?(:edit_work_time_total, @project) then%>
-  <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
-    <%= link_to(l(:wt_set_holiday), @link_params.merge(:set_holiday=>@this_date)) %>
-  <%else%>
-    <%= link_to(l(:wt_del_holiday), @link_params.merge(:del_holiday=>@this_date)) %>
+  <%if @project && User.current.allowed_to?(:edit_work_time_total, @project) then%>
+      <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
+          <input type="button"
+                 onclick="location.href='<%=url_for(@link_params.merge(:set_holiday=>@this_date))%>'"
+                 value="<%=l(:wt_set_holiday)%>"
+          />
+      <%else%>
+          <input type="button"
+                 onclick="location.href='<%=url_for(@link_params.merge(:del_holiday=>@this_date))%>'"
+                 value="<%=l(:wt_del_holiday)%>"
+          />
+      <%end%>
   <%end%>
-<%end%>
 </div>
 
 <%= render :partial=>'user_month_table' %>
@@ -33,16 +39,19 @@
 <%= render :partial=>'user_day_table' %>
 
 <%if @this_uid==@crnt_uid then%>
-[<a href="#" 
-    onclick="JavaScript:
-      add_ticket(
-        '<%=url_for(:action=>"popup_select_tickets")%>',
-        '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');
-      return false;">
-  <%=l(:wt_add_ticket)%>
-</a>]
-[<%= link_to(l(:wt_delete_closed_tickets), @link_params.merge(:ticket_del=>"closed")) %>]
-<%= submit_tag l(:wt_update) %>
+        <%= submit_tag l(:wt_update) %>
+        &#58;
+        <input type="button"
+               onclick="add_ticket('<%=url_for(:action=>"popup_select_tickets")%>',
+                                   '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');
+                        return false;"
+               value="<%=l(:wt_add_ticket)%>"
+        />
+
+        <input type="button"
+               onclick="location.href='<%=url_for(@link_params.merge(:ticket_del=>"closed"))%>'"
+               value="<%=l(:wt_delete_closed_tickets)%>"
+        />
 <br/>
 <%end%>
 

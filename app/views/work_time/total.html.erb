@@ -9,9 +9,6 @@
 </div>
 
 <h2><%=l(:wt_raw_total)%></h2>
-<div style="text-align:right;">
-[<%= link_to(l(:wt_data_download), @link_params.merge(:action=>"total_data")) %>]
-</div>
 
 <%
 if !User.current.allowed_to?(:view_work_time_other_member, @project) then
@@ -191,6 +188,10 @@ if @prj_cost.has_key?(-1) then
 </tr>
 <%end%>
 </table>
+<input type="button"
+       onclick="location.href='<%=url_for(@link_params.merge(:action=>"total_data"))%>'"
+       value="<%=l(:wt_data_download)%>"
+/>
 
 <div align="right">
 <%= render :partial=>'select_project' %> <br/>
