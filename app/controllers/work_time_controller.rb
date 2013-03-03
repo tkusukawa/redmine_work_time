@@ -1067,7 +1067,7 @@ private
                            and issues.created_on < :t2)
                            or (issues.assigned_to_id = :u
                            and issues.start_date < :t2
-                           and ist.is_closed != 1)
+                           and ist.is_closed IS FALSE)
                            or (exists (select 1 from journals
                                        where journals.journalized_id = issues.id
                                          and journals.journalized_type = 'Issue'
