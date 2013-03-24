@@ -1067,14 +1067,14 @@ private
                            and issues.created_on < :t2)
                            or (issues.assigned_to_id = :u
                            and issues.start_date < :t2
-                           and ist.is_closed IS FALSE)
+                           and ist.is_closed = :closed)
                            or (exists (select 1 from journals
                                        where journals.journalized_id = issues.id
                                          and journals.journalized_type = 'Issue'
                                          and journals.user_id = :u
                                          and journals.created_on >= :t1
                                          and journals.created_on < :t2)))",
-                          {:u => @this_uid, :t1 => t1, :t2 => t2}])
+                          {:u => @this_uid, :t1 => t1, :t2 => t2, :closed => false}])
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
       next if !@this_user.allowed_to?(:log_time, issue.project)
