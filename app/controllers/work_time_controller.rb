@@ -510,10 +510,8 @@ private
           if tm_vals["hours"].present? then
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
-            if new_entry.changed? then
-              new_entry.save
-              append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
-            end
+            new_entry.save
+            append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
           end
           if vals["remaining_hours"].present? || vals["status_id"].present? then
             append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
@@ -533,10 +531,8 @@ private
           tm.destroy
         else
           tm.safe_attributes = tm_vals
-          if tm.changed? then
-            tm.save
-            append_error_message_html(@message, hour_update_check_error(tm, issue_id))
-          end
+          tm.save
+          append_error_message_html(@message, hour_update_check_error(tm, issue_id))
         end
         if vals["remaining_hours"].present? || vals["status_id"].present? then
           append_error_message_html(@message, issue_update_to_remain_and_more(issue_id, vals))
