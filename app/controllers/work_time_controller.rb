@@ -847,13 +847,6 @@ private
     end
     @prj_cost = Hash.new
     @r_prj_cost = Hash.new
-    WtProjectOrders.find(:all, :conditions=>"uid=-1").each do |i|
-      pid = i.dsp_prj
-      @prj_cost[pid] = Hash.new
-      @prj_cost[pid][-1] = 0
-      @r_prj_cost[pid] = Hash.new
-      @r_prj_cost[pid][-1] = 0
-    end
 
     #当月の時間記録を抽出
     TimeEntry.find(:all, :conditions =>
@@ -880,18 +873,18 @@ private
       if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible?
         iid = -1 # private
         pid = -1 # private
-        @issue_cost[iid] ||= Hash.new
-        @issue_cost[iid][-1] ||= 0
-        @prj_cost[iid] ||= Hash.new
-        @prj_cost[iid][-1] ||= 0
       end
-      (@issue_cost[iid])[-1] += cost
-      (@issue_cost[iid])[uid] ||= 0
-      (@issue_cost[iid])[uid] += cost
+      @issue_cost[iid] ||= Hash.new
+      @issue_cost[iid][-1] ||= 0
+      @issue_cost[iid][-1] += cost
+      @issue_cost[iid][uid] ||= 0
+      @issue_cost[iid][uid] += cost
 
-      (@prj_cost[pid])[-1] += cost
-      (@prj_cost[pid])[uid] ||= 0
-      (@prj_cost[pid])[uid] += cost
+      @prj_cost[pid] ||= Hash.new
+      @prj_cost[pid][-1] ||= 0
+      @prj_cost[pid][-1] += cost
+      @prj_cost[pid][uid] ||= 0
+      @prj_cost[pid][uid] += cost
 
       parent_issue = Issue.find_by_id(parent_iid)
       if parent_issue && parent_issue.visible?
@@ -899,19 +892,19 @@ private
       else
         parent_iid = -1
         parent_pid = -1
-        @r_issue_cost[parent_iid] ||= Hash.new
-        @r_issue_cost[parent_iid][-1] ||= 0
-        @r_prj_cost[parent_iid] ||= Hash.new
-        @r_prj_cost[parent_iid][-1] ||= 0
       end
 
-      (@r_issue_cost[parent_iid])[-1] += cost
-      (@r_issue_cost[parent_iid])[uid] ||= 0
-      (@r_issue_cost[parent_iid])[uid] += cost
+      @r_issue_cost[parent_iid] ||= Hash.new
+      @r_issue_cost[parent_iid][-1] ||= 0
+      @r_issue_cost[parent_iid][-1] += cost
+      @r_issue_cost[parent_iid][uid] ||= 0
+      @r_issue_cost[parent_iid][uid] += cost
 
-      (@r_prj_cost[parent_pid])[-1] += cost
-      (@r_prj_cost[parent_pid])[uid] ||= 0
-      (@r_prj_cost[parent_pid])[uid] += cost
+      @r_prj_cost[parent_pid] ||= Hash.new
+      @r_prj_cost[parent_pid][-1] ||= 0
+      @r_prj_cost[parent_pid][-1] += cost
+      @r_prj_cost[parent_pid][uid] ||= 0
+      @r_prj_cost[parent_pid][uid] += cost
     end
   end
 
@@ -936,17 +929,11 @@ private
     # iid に対する初めての処理
     pid = issue.project_id
     unless @prj_cost.has_key?(pid)
-      WtProjectOrders.create(:uid=>-1, :dsp_prj=>pid, :dsp_pos=>@prj_cost.size)
-      @prj_cost[pid] ||= Hash.new
-      @prj_cost[pid][-1] ||= 0
-      @r_prj_cost[pid] ||= Hash.new
-      @r_prj_cost[pid][-1] ||= 0
+      check = WtProjectOrders.find(:all, :conditions=>["uid=-1 and dsp_prj=:p",{:p=>pid}])
+      if check.size == 0
+        WtProjectOrders.create(:uid=>-1, :dsp_prj=>pid, :dsp_pos=>@prj_cost.size)
+      end
     end
-
-    @issue_cost[iid] ||= Hash.new
-    @issue_cost[iid][-1] ||= 0
-    @r_issue_cost[iid] ||= Hash.new
-    @r_issue_cost[iid][-1] ||= 0
 
     @issue_parent[iid] = parent_id # return
   end
