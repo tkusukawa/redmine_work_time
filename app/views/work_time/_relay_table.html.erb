@@ -6,8 +6,7 @@ tic_max = tickets.size
 prjs.each do |po|
  dsp_prj = po.dsp_prj
  dsp_pos = po.dsp_pos
- next unless @prj_cost.has_key?(dsp_prj) || @r_prj_cost.has_key?(dsp_prj)
- next if @prj_cost[dsp_prj][-1]==0.0 && @r_prj_cost[dsp_prj][-1]==0.0
+ next if (!@prj_cost.has_key?(dsp_prj) || @prj_cost[dsp_prj][-1]==0.0) && (!@r_prj_cost.has_key?(dsp_prj) || @r_prj_cost[dsp_prj][-1]==0.0)
  prj =Project.find(dsp_prj)
 %>
 <tr style="background:#000;color:#fff;">
