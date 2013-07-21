@@ -2,6 +2,9 @@
 td.wt_iss_default {
   background: #fff;
 }
+td.wt_iss_assigned {
+    background: #cff;
+}
 td.wt_iss_worked {
   background: #cfc;
 }

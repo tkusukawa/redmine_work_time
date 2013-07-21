@@ -1043,14 +1043,10 @@ private
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
     t2 = Time.local(next_date.year, next_date.month, next_date.day)
     issues = Issue.find(:all,
-              :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id",
               :conditions => ["1 = 1
                          and ((issues.author_id = :u
                            and issues.created_on >= :t1
                            and issues.created_on < :t2)
-                           or (issues.assigned_to_id = :u
-                           and issues.start_date < :t2
-                           and ist.is_closed = :closed)
                            or (exists (select 1 from journals
                                        where journals.journalized_id = issues.id
                                          and journals.journalized_type = 'Issue'
@@ -1063,16 +1059,24 @@ private
       next if !@this_user.allowed_to?(:log_time, issue.project)
       next if !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
-      new_pack = !prj_pack[:ref_issues].has_key?(issue.id)
       issue_pack = make_pack_issue(prj_pack, issue)
-      if new_pack then
-        issue_pack[:css_classes].gsub!(/wt_iss_default/, '')
-        if !issue.due_date.nil? && issue.due_date < t1.to_datetime then
-          issue_pack[:css_classes] << ' wt_iss_overdue'
-        else
-          issue_pack[:css_classes] << ' wt_iss_worked'
-        end
-      end
+      issue_pack[:css_classes] = 'wt_iss_worked' if issue_pack[:css_classes] != 'wt_iss_overdue'
+    end
+    issues = Issue.find(:all,
+                        :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id",
+                        :conditions => ["1 = 1
+                         and (issues.assigned_to_id = :u
+                           and issues.start_date < :t2
+                           and ist.is_closed = :closed
+                           )",
+                                        {:u => @this_uid, :t2 => t2, :closed => false}])
+    issues.each do |issue|
+      next if @restrict_project && @restrict_project!=issue.project.id
+      next if !@this_user.allowed_to?(:log_time, issue.project)
+      next if !issue.visible?
+      prj_pack = make_pack_prj(@day_pack, issue.project)
+      issue_pack = make_pack_issue(prj_pack, issue)
+      issue_pack[:css_classes] = 'wt_iss_assigned' if issue_pack[:css_classes] == 'wt_iss_default'
     end
 
     # 月間工数表から工数が無かった項目の削除と項目数のカウント
@@ -1115,7 +1119,15 @@ private
                       :count_hours=>0, :each_entries=>{},
                       :cnt_childrens=>0}
         issue_pack[:total_by_day].default = 0
-        issue_pack[:css_classes] = 'wt_iss_default'
+        if new_issue.assigned_to_id == @this_uid && !new_issue.start_date.nil? && new_issue.start_date <= @this_date.to_datetime then
+          if !new_issue.due_date.nil? && new_issue.due_date < @this_date.to_datetime then
+            issue_pack[:css_classes] = 'wt_iss_overdue'
+          else
+            issue_pack[:css_classes] = 'wt_iss_assigned'
+          end
+        else
+          issue_pack[:css_classes] = 'wt_iss_default'
+        end
         prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
