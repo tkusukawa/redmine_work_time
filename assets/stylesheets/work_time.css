@@ -2,12 +2,24 @@
 td.wt_iss_default {
   background: #fff;
 }
-td.wt_iss_assigned {
-    background: #cff;
-}
 td.wt_iss_worked {
   background: #cfc;
 }
 td.wt_iss_overdue {
-  background: #fee5e5;
+  background: #ffc;
+}
+td.wt_iss_overdue_worked {
+  background: #ccc;
+}
+td.wt_iss_assigned {
+  background: #cff;
+}
+td.wt_iss_assigned_worked {
+  background: #ccf;
+}
+td.wt_iss_assigned_overdue {
+  background: #fcc;
+}
+td.wt_iss_assigned_overdue_worked {
+  background: #fcf;
 }

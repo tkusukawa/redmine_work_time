@@ -1060,7 +1060,11 @@ private
       next if !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
-      issue_pack[:css_classes] = 'wt_iss_worked' if issue_pack[:css_classes] != 'wt_iss_overdue'
+      if issue_pack[:css_classes] == 'wt_iss_overdue'
+        issue_pack[:css_classes] = 'wt_iss_overdue_worked'
+      else
+        issue_pack[:css_classes] = 'wt_iss_worked'
+      end
     end
     issues = Issue.find(:all,
                         :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id",
@@ -1076,7 +1080,15 @@ private
       next if !issue.visible?
       prj_pack = make_pack_prj(@day_pack, issue.project)
       issue_pack = make_pack_issue(prj_pack, issue)
-      issue_pack[:css_classes] = 'wt_iss_assigned' if issue_pack[:css_classes] == 'wt_iss_default'
+      if issue_pack[:css_classes] == 'wt_iss_default'
+        issue_pack[:css_classes] = 'wt_iss_assigned'
+      elsif issue_pack[:css_classes] == 'wt_iss_worked'
+        issue_pack[:css_classes] = 'wt_iss_assigned_worked'
+      elsif issue_pack[:css_classes] == 'wt_iss_overdue'
+        issue_pack[:css_classes] = 'wt_iss_assigned_overdue'
+      elsif issue_pack[:css_classes] == 'wt_iss_overdue_worked'
+        issue_pack[:css_classes] = 'wt_iss_assigned_overdue_worked'
+      end
     end
 
     # 月間工数表から工数が無かった項目の削除と項目数のカウント
@@ -1119,12 +1131,8 @@ private
                       :count_hours=>0, :each_entries=>{},
                       :cnt_childrens=>0}
         issue_pack[:total_by_day].default = 0
-        if new_issue.assigned_to_id == @this_uid && !new_issue.start_date.nil? && new_issue.start_date <= @this_date.to_datetime then
-          if !new_issue.due_date.nil? && new_issue.due_date < @this_date.to_datetime then
-            issue_pack[:css_classes] = 'wt_iss_overdue'
-          else
-            issue_pack[:css_classes] = 'wt_iss_assigned'
-          end
+        if !new_issue.due_date.nil? && new_issue.due_date < @this_date.to_datetime
+          issue_pack[:css_classes] = 'wt_iss_overdue'
         else
           issue_pack[:css_classes] = 'wt_iss_default'
         end
