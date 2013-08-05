@@ -548,6 +548,11 @@ private
     journal = issue.init_journal(User.current)
     # update "0.0" is changed
     vals["remaining_hours"] = 0 if vals["remaining_hours"] == "0.0"
+    if vals['status_id'] =~ /^M+(.*)$/
+      vals['status_id'] = $1
+    else
+      vals.delete 'status_id'
+    end
     issue.safe_attributes = vals
     return if !issue.changed?
     issue.save
