@@ -492,7 +492,7 @@ private
   end
 
   def hour_update # *********************************** 工数更新要求の処理
-    return if @this_uid != @crnt_uid
+    return unless @this_uid == @crnt_uid || User.current.allowed_to?(:edit_work_time_other_member, @project)
 
     # 新規工数の登録
     if params["new_time_entry"] then
@@ -508,7 +508,7 @@ private
             next
           end
           if tm_vals["hours"].present? then
-            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => User.current, :spent_on => @this_date)
+            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => @this_user, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
             new_entry.save
             append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))

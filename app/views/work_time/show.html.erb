@@ -38,7 +38,7 @@
 
 <%= render :partial=>'user_day_table' %>
 
-<%if @this_uid==@crnt_uid then%>
+<%if @this_uid==@crnt_uid || User.current.allowed_to?(:edit_work_time_other_member, @project) %>
         <%= submit_tag l(:wt_update) %>
         &#58;
         <input type="button"

@@ -17,6 +17,7 @@ Redmine::Plugin.register :redmine_work_time do
             :ajax_memo_edit,:ajax_relay_table]}
     permission :view_work_time_other_member, {}
     permission :edit_work_time_total, {}
+    permission :edit_work_time_other_member, {}
   end
 
   menu :account_menu, :work_time,
