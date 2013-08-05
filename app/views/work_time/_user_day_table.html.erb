@@ -142,7 +142,12 @@ prj_pack[:odr_issues].each do |issue_pack|
     <% if issue.new_statuses_allowed_to(User.current).length == 0 then %>
       <%= issue.status %>
     <% else %>
-      <%= select_tag "new_time_entry["+issue_id.to_s+"][0][status_id]", options_for_select(issue.new_statuses_allowed_to(User.current).collect {|p| [p.name, p.id]}, issue.status_id), :required => true %>
+      <% select_name="new_time_entry["+issue_id.to_s+"][0][status_id]" %>
+      <%= select_tag select_name,
+                     options_for_select(issue.new_statuses_allowed_to(User.current).collect {|p| [p.name, p.id]},
+                                        issue.status_id),
+                     :onchange => "statusUpdateOnDailyTable('#{select_name}')",
+                     :required => true %>
     <% end %>
   </td>
   <td>
@@ -236,7 +241,12 @@ prj_pack[:odr_issues].each do |issue_pack|
     <% if issue.new_statuses_allowed_to(User.current).length == 0 then %>
       <%= issue.status %>
     <% else %>
-      <%= select_tag "time_entry["+hour_id.to_s+"][status_id]", options_for_select(issue.new_statuses_allowed_to(User.current).collect {|p| [p.name, p.id]}, issue.status_id), :required => true %>
+      <% select_name="time_entry["+hour_id.to_s+"][status_id]" %>
+      <%= select_tag select_name,
+                     options_for_select(issue.new_statuses_allowed_to(User.current).collect {|p| [p.name, p.id]},
+                                        issue.status_id),
+                     :onchange => "statusUpdateOnDailyTable('#{select_name}')",
+                     :required => true %>
     <% end %>
   </td>
   <td>

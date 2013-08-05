@@ -249,3 +249,11 @@ function tickets_checked()
   returnValue = issue_ids;
   close();
 }
+
+function statusUpdateOnDailyTable(name) {
+  obj = document.getElementsByName(name)[0];
+  obj.style.backgroundColor = '#cfc';
+  index = obj.selectedIndex;
+  v = obj.options[index].value;
+  obj.options[index].value = 'M'+v;
+}
