@@ -1,14 +1,17 @@
 ﻿<%#**************************************************** ユーザセレクタ %>
 <%if @project then%>
+<%=l(:wt_select_user)%>
 <select onchange="if (this.value != '') {window.location = this.value;}">
-  <option selected="selected"><%=l(:wt_select_user)%></option>
-  <option disabled="disabled">---</option>
+  <option value="">---</option>
 <%
-@members.each do |mem|
-  user=mem[1]
+members_name_id = Array.new
+@members.each {|mem| members_name_id << [mem[1].to_s, mem[1].id]}
+members_name_id.sort!
+members_name_id.each do |member_name_id|
+  sel = (member_name_id[1] == @this_uid) ? 'selected' : ''
 %>
-  <option value="<%= url_for(link_params.merge(:user=>user.id));%>">
-    <%=user.to_s%>
+  <option value="<%= url_for(link_params.merge(:user=>member_name_id[1]));%>" <%=sel%>>
+    <%=member_name_id[0]%>
   </option>
 <%
 end

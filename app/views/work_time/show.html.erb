@@ -4,8 +4,8 @@
 <div style="text-align:right;">
 <%= render :partial=>'select_project' %><br/>
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
-  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
   <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br/>
+  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %><br/>
 <%end%>
   <%if @project && User.current.allowed_to?(:edit_work_time_total, @project) then%>
       <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
