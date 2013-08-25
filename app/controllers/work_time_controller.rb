@@ -17,7 +17,7 @@ class WorkTimeController < ApplicationController
     ticket_del
     hour_update
     make_pack
-    update_daily_memo
+    update_daily_memo(params[:memo]) if params.key?(:memo)
     set_holiday
     @custom_fields = TimeEntryCustomField.find(:all)
     @link_params.merge!(:action=>"index")
@@ -40,7 +40,7 @@ class WorkTimeController < ApplicationController
     hour_update
     make_pack
     member_add_del_check
-    update_daily_memo
+    update_daily_memo(params[:memo]) if params.key?(:memo)
     set_holiday
     @custom_fields = TimeEntryCustomField.find(:all)
     @link_params.merge!(:action=>"show")
@@ -492,7 +492,14 @@ private
   end
 
   def hour_update # *********************************** 工数更新要求の処理
-    return unless @this_uid == @crnt_uid || User.current.allowed_to?(:edit_work_time_other_member, @project)
+    by_other = false
+    if @this_uid != @crnt_uid
+      if User.current.allowed_to?(:edit_work_time_other_member, @project)
+        by_other = true
+      else
+        return
+      end
+    end
 
     # 新規工数の登録
     if params["new_time_entry"] then
@@ -508,6 +515,11 @@ private
             next
           end
           if tm_vals["hours"].present? then
+            if by_other
+              append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
+              append_text += " add time entry of ##{issue.id.to_s}: #{tm_vals[:hours].to_f}h"
+              update_daily_memo(append_text, true)
+            end
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => @this_user, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
             new_entry.save
@@ -530,6 +542,11 @@ private
           # 工数指定が空文字の場合は工数項目を削除
           tm.destroy
         else
+          if by_other && tm_vals.key?(:hours) && tm.hours.to_f != tm_vals[:hours].to_f
+            append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
+            append_text += " update time entry of ##{issue_id.to_s}: #{tm.hours.to_f}->#{tm_vals[:hours].to_f}h"
+            update_daily_memo(append_text, true)
+          end
           tm.safe_attributes = tm_vals
           tm.save
           append_error_message_html(@message, hour_update_check_error(tm, issue_id))
@@ -638,12 +655,11 @@ private
     
   end
 
-  def update_daily_memo # 日ごとメモの更新
-    text = params["memo"] || return # メモ更新のpostがあるか？
-    year = params["year"] || return
-    month = params["month"] || return
-    day = params["day"] || return
-    user_id = params["user"] || return
+  def update_daily_memo(text, append = false) # 日ごとメモの更新
+    year = params[:year] || return
+    month = params[:month] || return
+    day = params[:day] || return
+    user_id = params[:user] || return
 
     # ユーザと日付で既存のメモを検索
     date = Date.new(year.to_i,month.to_i,day.to_i)
@@ -655,6 +671,7 @@ private
     if find.size != 0 then
       # 既存のメモがあれば
       record = find.shift
+      text = record.description + text if append
       record.description = text
       record.updated_on = Time.now
       record.save # 更新

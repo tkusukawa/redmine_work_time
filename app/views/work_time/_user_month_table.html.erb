@@ -21,7 +21,7 @@ end
       <div style="position:absolute;top:1px;left:2px;">
       <div style="background: #eee;font-size:2.0em;">
       <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
-        <%= @this_year %>/<%= @month_names[@this_month-1] %>
+        <%=@this_date.strftime("%Y-%m") %>
       </div>
       </div>
       <div style="text-align:right;position:absolute;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
