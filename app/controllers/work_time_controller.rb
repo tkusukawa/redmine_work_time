@@ -540,11 +540,16 @@ private
         tm_vals = vals.slice! "remaining_hours", "status_id"
         if tm_vals["hours"].blank? then
           # 工数指定が空文字の場合は工数項目を削除
+          if by_other
+            append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
+            append_text += " delete time entry of ##{issue_id.to_s}: -#{tm.hours.to_f}h-"
+            update_daily_memo(append_text, true)
+          end
           tm.destroy
         else
           if by_other && tm_vals.key?(:hours) && tm.hours.to_f != tm_vals[:hours].to_f
             append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
-            append_text += " update time entry of ##{issue_id.to_s}: #{tm.hours.to_f}->#{tm_vals[:hours].to_f}h"
+            append_text += " update time entry of ##{issue_id.to_s}: -#{tm.hours.to_f}h- #{tm_vals[:hours].to_f}h"
             update_daily_memo(append_text, true)
           end
           tm.safe_attributes = tm_vals
