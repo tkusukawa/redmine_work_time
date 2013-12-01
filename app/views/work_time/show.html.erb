@@ -57,8 +57,7 @@
 
 <br/>
 <h2 id="memo">
-  <%=link_to(@this_year.to_s+'/'+@this_month.to_s+'/'+@this_day.to_s+
-    '('+@wday_name[@this_date.wday]+') '+@this_user.to_s,
+  <%=link_to(@this_date.strftime("%Y-%m-%d")+'('+@wday_name[@this_date.wday]+') '+@this_user.to_s,
     @link_params.merge(:anchor=>"memo"))
   %>
 </h2>
@@ -72,7 +71,7 @@ if memo then # この日のメモがある場合
 <div class="wiki" style="background:#ffb;">
   <%=textilizable(memo.description) %>
   <div style="text-align:right;">
-    (update:<%=memo.updated_on.localtime.strftime("%y/%m/%d %H:%M")%>)
+    (update:<%=memo.updated_on.localtime.strftime("%Y-%m-%d %H:%M")%>)
   </div>
 </div>
 <%end%>
