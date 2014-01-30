@@ -510,11 +510,11 @@ private
         valss.each do |count, vals|
           tm_vals = vals.slice! "remaining_hours", "status_id"
           next if tm_vals["hours"].blank? && vals["remaining_hours"].blank? && vals["status_id"].blank?
-          if !tm_vals[:activity_id] then
-            append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
-            next
-          end
           if tm_vals["hours"].present? then
+            if !tm_vals[:activity_id] then
+              append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
+              next
+            end
             if by_other
               append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
               append_text += " add time entry of ##{issue.id.to_s}: #{tm_vals[:hours].to_f}h"
