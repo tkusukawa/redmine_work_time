@@ -1,6 +1,7 @@
 class WorkTimeController < ApplicationController
   unloadable
   #  before_filter :find_project, :authorize
+  accept_api_auth :relay_total
 
   helper :custom_fields
   include CustomFieldsHelper
@@ -160,7 +161,7 @@ class WorkTimeController < ApplicationController
 
   def relay_total
     @message = ""
-    find_project
+    find_project || return
     authorize
     prepare_values
     add_ticket_relay
@@ -169,7 +170,12 @@ class WorkTimeController < ApplicationController
     change_project_position
     member_add_del_check
     calc_total
-    @link_params.merge!(:action=>"relay_total")
+    respond_to do |format|
+	format.html {
+	    @link_params.merge!(:action=>"relay_total")
+	}
+	format.api {}
+    end
   end
 
   def relay_total_data
