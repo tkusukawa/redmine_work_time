@@ -57,7 +57,7 @@ class WorkTimeController < ApplicationController
     prepare_values
     make_pack
 
-    csv_data = "\"user\",\"date\",\"project\",\"ticket\",\"spend time\"\n"
+    csv_data = %Q|"user","date","project","ticket","spend time"\n|
 
     (@first_date..@last_date).each do |date|
       @month_pack[:odr_prjs].each do |prj_pack|
@@ -66,12 +66,12 @@ class WorkTimeController < ApplicationController
           next if issue_pack[:count_hours] == 0
           issue = issue_pack[:issue]
           if issue_pack[:total_by_day][date] then
-            csv_data << "\"#{@this_user}\",\"#{date}\",\"#{issue.project}\",\"#{issue.subject}\",#{issue_pack[:total_by_day][date]}\n"
+            csv_data << %Q|"#{@this_user}","#{date}","#{issue.project}","#{issue.subject}",#{issue_pack[:total_by_day][date]}\n|
           end
         end
       end
       if @month_pack[:other_by_day].has_key?(date) then
-        csv_data << "\"#{@this_user}\",\"#{date}\",\"PRIVATE\",\"PRIVATE\",#{@month_pack[:other_by_day][date]}\n"
+        csv_data << %Q|"#{@this_user}","#{date}","PRIVATE","PRIVATE",#{@month_pack[:other_by_day][date]}\n|
       end
     end
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"member_monthly.csv"
@@ -102,7 +102,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check
     calc_total
     
-    csv_data = "\"user\",\"relayed project\",\"relayed ticket\",\"project\",\"ticket\",\"spend time\"\n"
+    csv_data = %Q|"user","relayed project","relayed ticket","project","ticket","spend time"\n|
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
       user = mem_info[1]
@@ -134,11 +134,12 @@ class WorkTimeController < ApplicationController
           parent_issue = Issue.find_by_id(@issue_parent[issue_id])
           next if parent_issue.nil? # チケットが削除されていたらパス
 
-          csv_data << "\"#{user}\",\"#{parent_issue.project}\",\"#{parent_issue.subject}\",\"#{prj}\",\"#{issue.to_s}\",#{@issue_cost[issue_id][user.id]}\n"
+          csv_data << %Q|"#{user}","#{parent_issue.project}","#{parent_issue.subject}",|
+          csv_data << %Q|"#{prj}","#{issue.to_s}",#{@issue_cost[issue_id][user.id]}\n|
         end
       end
       if @issue_cost.has_key?(-1) && @issue_cost[-1].has_key?(user.id) then
-        csv_data << "\"#{user}\",\"private\",\"private\",\"private\",\"private\",#{@issue_cost[-1][user.id]}\n"
+        csv_data << %Q|"#{user}","private","private","private","private",#{@issue_cost[-1][user.id]}\n|
       end
     end
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report_raw.csv"
@@ -183,7 +184,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check
     calc_total
     
-    csv_data = "\"user\",\"project\",\"ticket\",\"spend time\"\n"
+    csv_data = %Q|"user","project","ticket","spend time"\n|
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
       user = mem_info[1]
@@ -212,11 +213,11 @@ class WorkTimeController < ApplicationController
           next if issue.nil? # チケットが削除されていたらパス
           next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
 
-          csv_data << "\"#{user}\",\"#{prj}\",\"#{issue.subject}\",#{@r_issue_cost[issue_id][user.id]}\n"
+          csv_data << %Q|"#{user}","#{prj}","#{issue.id} #{issue.subject}",#{@r_issue_cost[issue_id][user.id]}\n|
         end
       end
       if @r_issue_cost.has_key?(-1) && @r_issue_cost[-1].has_key?(user.id) then
-        csv_data << "\"#{user}\",\"private\",\"private\",#{@r_issue_cost[-1][user.id]}\n"
+        csv_data << %Q|"#{user}","private","private",#{@r_issue_cost[-1][user.id]}\n|
       end
     end
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report.csv"
