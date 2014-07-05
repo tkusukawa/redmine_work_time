@@ -1095,9 +1095,10 @@ private
       end
     end
     issues = Issue.find(:all,
-                        :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id",
+                        :joins => "INNER JOIN issue_statuses ist on ist.id = issues.status_id " +
+                            "LEFT JOIN groups_users on issues.assigned_to_id = group_id",
                         :conditions => ["1 = 1
-                         and (issues.assigned_to_id = :u
+                         and ((issues.assigned_to_id = :u or groups_users.user_id = :u)
                            and issues.start_date < :t2
                            and ist.is_closed = :closed
                            )",
