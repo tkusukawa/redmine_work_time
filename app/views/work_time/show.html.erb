@@ -7,7 +7,7 @@
   <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br/>
   <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %><br/>
 <%end%>
-  <%if @project && User.current.allowed_to?(:edit_work_time_total, @project) then%>
+  <%if User.current.admin then%>
       <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
           <input type="button"
                  onclick="location.href='<%=url_for(@link_params.merge(:set_holiday=>@this_date))%>'"
