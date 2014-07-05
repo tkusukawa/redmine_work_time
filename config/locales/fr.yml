@@ -30,3 +30,7 @@ fr:
   wt_opt_disp_ticket_with_other_member: "[display other members ticket]"
   wt_opt_disp_ticket_mine_only: "[display my ticket only]"
   wt_bulkupdate_relations: "bulkupdate to parent"
+  permission_view_work_time_tab: "Afficher l'onglet Temps de travail"
+  permission_view_work_time_other_member: "Afficher les temps des autres membres"
+  permission_edit_work_time_total: "Modifier les totaux de temps de travail"
+  permission_edit_work_time_other_member: "Modifier les temps des autres membres"
