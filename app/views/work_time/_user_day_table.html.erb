@@ -39,12 +39,13 @@
       <%if @this_uid==@crnt_uid then%>
 
         <a href="#"
+          style="color:#8ff;"
           onclick="prj_pos('<%=url_for(@link_params) %>',
                            <%=dsp_prj%>,
                            <%=dsp_pos%>,
                            <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
                    return false;">
-          <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>
+          <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>:
         </a>
      <%end%>
         <%=prj.name%>
