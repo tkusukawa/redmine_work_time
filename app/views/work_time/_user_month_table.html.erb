@@ -86,6 +86,7 @@ ofst_t = win_hs*3-5
       <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
 <%if @this_uid==@crnt_uid then%>
         <a href="#"
+          style="color:#8ff;"
           onclick="JavaScript:
             prj_pos(
               '<%=url_for(@link_params) %>',
@@ -93,7 +94,7 @@ ofst_t = win_hs*3-5
               <%=dsp_pos%>,
               <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
             return false;">
-          <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>
+          <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>:
         </a>
 <%end%>
         <%= prj.name%>

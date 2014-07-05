@@ -22,7 +22,7 @@ projects.each do |prj|
   next if !prj.visible?
 %>
   <option value="<%= url_for(:action=>"ajax_select_ticket", :prj=>prj.id) %>">
-    <%= prj.name %> 
+    <%= (prj.pos < 100000) ? prj.pos : '*' %>: <%= prj.name %>
   </option>
 <%
 end

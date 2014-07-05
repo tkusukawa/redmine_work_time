@@ -8,10 +8,11 @@
 prjs = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=#{User.current.id}",
                           :select=>"projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos",
                           :order=>"pos,name")
-prjs.each do |prj|
+Project.project_tree(prjs) do |prj, level|
   next unless prj.active?
   next if !prj.visible?
+  name_prefix = (level > 0 ? '&nbsp;' * 2 * level + '&#187; ': '').html_safe
 %>
-  <option value="<%= url_for(@link_params.merge(:prj=>prj.id));%>"> <%=prj.name%> </option>
+  <option value="<%= url_for(@link_params.merge(:prj=>prj.id));%>"> <%=name_prefix + prj.name%> </option>
 <%end%>
 </select>
