@@ -257,3 +257,27 @@ function statusUpdateOnDailyTable(name) {
   v = obj.options[index].value;
   obj.options[index].value = 'M'+v;
 }
+
+//------------- for user_day_table.html.erb
+function sumDayTimes() {
+  var total=0;
+  var dayInputs;
+  
+  // List all Input elemnets of the page
+  dayInputs = document.getElementsByTagName("input");
+  for (var i=0; i<dayInputs.length; i++) {
+    // Consider only those with an id containing the strings 'time_entry' and 'hours'
+    if ((dayInputs[i].id.indexOf("time_entry") >= 0) && (dayInputs[i].id.indexOf("hours") >= 0)) {
+      if (dayInputs[i].value && !isNaN(parseFloat(dayInputs[i].value))) {
+      // add the number to the total if it is a valid number
+        total = total + parseFloat(dayInputs[i].value);
+     }
+    }
+  }
+  // Set the total value to the new number, changing the style to indicate 
+  // it is not saved, and adding the saved value as a flyover indication
+  var originalValue;
+  document.getElementById("currentTotal").innerHTML = total.toFixed(1);
+  document.getElementById("currentTotal").style = 'color:#FF0000;';
+return true;
+}
