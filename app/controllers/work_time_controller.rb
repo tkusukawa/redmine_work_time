@@ -627,22 +627,24 @@ private
     odr.each do |o|
       if mem_by_uid.has_key?(o.user_id) then
         user=mem_by_uid[o.user_id].user
-        # 順位の確認と修正
-        if o.position != pos then
-          o.position=pos
-          o.save
+        if ! user.nil? then
+          # 順位の確認と修正
+          if o.position != pos then
+            o.position=pos
+            o.save
+          end
+          # 表示メンバーに追加
+          if user.active? || cnt_by_uid.has_key?(user.id) then
+            @members.push([pos, user])
+          end
+          pos += 1
+          # 順序情報に存在したメンバーを削っていく
+          mem_by_uid.delete(o.user_id)
+          next
         end
-        # 表示メンバーに追加
-        if user.active? || cnt_by_uid.has_key?(user.id) then
-          @members.push([pos, user])
-        end
-        pos += 1
-        # 順序情報に存在したメンバーを削っていく
-        mem_by_uid.delete(o.user_id)
-      else
-        # メンバーに無い順序情報は削除する
-        o.destroy
       end
+      # メンバーに無い順序情報は削除する
+      o.destroy
     end
 
     # 残ったメンバーを順序情報に加える
