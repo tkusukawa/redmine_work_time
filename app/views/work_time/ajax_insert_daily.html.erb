@@ -30,14 +30,14 @@
   </div>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][hours]", "", :size=>5, :onchange => "sumDayTimes()") %>
+    <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][hours]", "", :size=>5, :oninput => "sumDayTimes()") %>
   </td>
   <% if @is_registerd_backlog then %>
   <td>
     <% if @add_issue_children_cnt != 0 || @add_issue.closed? then %>
       <%= @add_issue.remaining_hours %>
     <% else %>
-        <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][remaining_hours]", @add_issue.remaining_hours, :size=>5, :onchange => "sumDayTimes()") %>
+        <%= text_field_tag("new_time_entry["+@add_issue_id+"]["+@add_count+"][remaining_hours]", @add_issue.remaining_hours, :size=>5, :oninput => "sumDayTimes()") %>
     <% end %>
   </td>
   <% end %>

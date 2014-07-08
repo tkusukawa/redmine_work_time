@@ -34,6 +34,7 @@ ja:
   permission_view_work_time_other_member: "他のメンバーの工数の表示"
   permission_edit_work_time_total: "工数集計の設定"
   permission_edit_work_time_other_member: "他のメンバーの工数の入力"
+  wt_saved_value: "保存時間: "
   wt_legend: "チケット表示凡例"
   wt_style_default: "通常表示"
   wt_style_assigned: "担当期間"
