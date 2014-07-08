@@ -34,6 +34,7 @@ it:
   permission_view_work_time_other_member: "View other members' work time"
   permission_edit_work_time_total: "Edit work time totals"
   permission_edit_work_time_other_member: "Edit other members' work time"
+  wt_saved_value: "Saved timed: "
   wt_legend: "Legend"
   wt_style_default: "By default"
   wt_style_assigned: "Assigned"
