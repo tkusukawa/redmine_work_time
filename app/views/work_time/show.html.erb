@@ -1,11 +1,11 @@
 <%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
 
 <%= @message.html_safe %>
-<div style="text-align:right;">
-<%= render :partial=>'select_project' %><br/>
+<div class="contextual">
+<%= render :partial=>'select_project' %>
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
-  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br/>
-  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %><br/>
+  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %>
+  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
 <%end%>
   <%if User.current.admin then%>
       <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
@@ -25,7 +25,7 @@
 <%= render :partial=>'user_month_table' %>
 
 <br/>
-
+<br/>
 <h2>
   <%=l(:wt_daily_report)%>
 </h2>
@@ -56,8 +56,9 @@
 <%end%>
 
   <%#------------------------- Legend for the daily table%>
+  <br/>
   <B><%=l(:wt_legend)%>:</B>
-  <table border="1">
+  <table border="0">
     <tr>
       <td class='wt_iss_default' width='100px' align='center'><%=l(:wt_style_default)%></td>
       <td class='wt_iss_assigned' width='100px' align='center'><%=l(:wt_style_assigned)%></td>
@@ -123,4 +124,3 @@ d = memo.day
 <%end%>
 
 <%end%>
-
