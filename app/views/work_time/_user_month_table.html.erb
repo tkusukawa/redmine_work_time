@@ -1,6 +1,6 @@
 <%
 win_w = 35    # 小窓の幅
-win_h = 30    # 小窓の高さ
+win_h = 31    # 小窓の高さ
 win_hs = 20   # 小さい小窓の高さ
 
 box_w = 300
@@ -18,13 +18,13 @@ end
     <div style="background: #ccc;">
     <div style="position:relative;height:<%=box_h%>px;overflow:auto;">
 
-      <div style="position:absolute;top:1px;left:2px;">
-      <div style="background: #eee;font-size:2.0em;">
-      <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
+      <div style="position:absolute;top:1px;left:1px;">
+      <div style="background: #fff;font-size:2.0em;">
+      <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=box_w-2%>px;height:<%=win_hs*2-1%>px;">
         <%=@this_date.strftime("%Y-%m") %>
       </div>
       </div>
-      <div style="text-align:right;position:absolute;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs*2-2%>px;">
+      <div style="text-align:right;position:absolute;top:1px;left:1px;width:<%=box_w-2%>px;height:<%=win_hs*2-1%>px;">
         <%= link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year))%>
       </div>
       <div style="text-align:left;position:absolute;top:1px;left:1px;">
@@ -52,9 +52,9 @@ ofst_t = win_hs*3-5
       issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
     end
 %>
-    <div style="position:absolute;top:<%=ofst_t%>px;left:2px;">
-      <div style="background: #eee;font-size:0.8em;">
-        <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_h-2%>px;">
+    <div style="position:absolute;top:<%=ofst_t%>px;left:1px;">
+      <div style="background: #fff;font-size:0.8em;">
+        <div style="position:relative;top:1px;left:1px;width:<%=box_w-2%>px;height:<%=win_h-1%>px;">
           <%if !issue.nil? then%>
             <%if @this_uid==@crnt_uid then%>
               <a href="#"
@@ -83,7 +83,7 @@ ofst_t = win_hs*3-5
 %>
   <div style="position:absolute;top:<%=prj_ofst_t%>px;left:2px;">
     <div style="background:#000;color:#fff;font-size:1.0em;">
-      <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
+      <div style="position:relative;top:1px;left:1px;width:<%=box_w-3%>px;height:<%=win_hs-1%>px;">
 <%if @this_uid==@crnt_uid then%>
         <a href="#"
           style="color:#8ff;"
@@ -157,14 +157,14 @@ end
 %>
     <div style="position:absolute;top:1px;left:<%=ofst_l%>px;" <%=today_id%> >
       <div style="background:<%=bcolor_day%>;">
-        <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+        <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-1%>px;height:<%=win_hs-1%>px;">
           <%= link_to(day, @link_params.merge(:day=>day)) %>
         </div>
       </div>
     </div>
     <div style="position:absolute;top:<%=win_hs+1%>px;left:<%=ofst_l%>px;">
       <div style="background:<%=bcolor%>;">
-        <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+        <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-1%>px;height:<%=win_hs-1%>px;">
           <%= @wday_name[wday]%>
         </div>
       </div>
@@ -188,7 +188,7 @@ day_cost = 0
 %>
     <div style="position:absolute;top:<%=ofst_t%>px;left:<%=ofst_l%>px;">
       <div style="background:<%=bcolor%>;font-size:0.8em;">
-        <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_h-2%>px;">
+        <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-1%>px;height:<%=win_h-1%>px;">
 <%
   if issue_pack[:total_by_day].has_key?(date) then
 %>
@@ -205,7 +205,7 @@ day_cost = 0
 %>
   <div style="position:absolute;top:<%=prj_ofst_t%>px;left:<%=ofst_l%>px;">
     <div style="background:#000;color:#fff;font-size:0.8em;">
-      <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
+      <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-1%>px;height:<%=win_hs-1%>px;">
 <%if prj_pack[:total_by_day].has_key?(date) then%>
         <%=sprintf("%1.1f", prj_pack[:total_by_day][date])%>
 <%end%>
