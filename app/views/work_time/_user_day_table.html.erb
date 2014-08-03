@@ -119,14 +119,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   </div>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5, :onchange => "sumDayTimes()") %>
+    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5, :oninput => "sumDayTimes()") %>
   </td>
   <% if @is_registerd_backlog then %>
   <td>
     <% if issue_pack[:cnt_childrens] != 0 || issue.closed? then %>
       <%= issue[:remaining_hours] %>
     <% else %>
-      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue[:remaining_hours], :size=>5, :onchange => "sumDayTimes()") %>
+      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue[:remaining_hours], :size=>5, :oninput => "sumDayTimes()") %>
     <% end %>
   </td>
   <% end %>
@@ -218,14 +218,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   </div>
   </td>
   <td>
-    <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5, :onchange => "sumDayTimes()") %>
+    <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5, :oninput => "sumDayTimes()") %>
   </td>
   <% if @is_registerd_backlog then %>
   <td>
     <% if issue_pack[:cnt_childrens] != 0 || hour.issue.closed? then %>
       <%= hour.issue[:remaining_hours] %>
     <% else %>
-      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue[:remaining_hours], :size=>5, :onchange => "sumDayTimes()") %>
+      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue[:remaining_hours], :size=>5, :oninput => "sumDayTimes()") %>
     <% end %>
   </td>
   <% end %>
