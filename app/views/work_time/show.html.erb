@@ -1,13 +1,13 @@
 <%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
 
 <%= @message.html_safe %>
-<div style="text-align:right;">
-<%= render :partial=>'select_project' %><br/>
+<div class="contextual">
+<%= render :partial=>'select_project' %>
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
-  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %><br/>
-  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %><br/>
+  <%= render :partial=>'select_user', :locals=>{:link_params=>@link_params} %>
+  <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
 <%end%>
-  <%if @project && User.current.allowed_to?(:edit_work_time_total, @project) then%>
+  <%if User.current.admin then%>
       <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
           <input type="button"
                  onclick="location.href='<%=url_for(@link_params.merge(:set_holiday=>@this_date))%>'"
@@ -25,7 +25,7 @@
 <%= render :partial=>'user_month_table' %>
 
 <br/>
-
+<br/>
 <h2>
   <%=l(:wt_daily_report)%>
 </h2>
@@ -54,6 +54,22 @@
         />
 <br/>
 <%end%>
+
+  <%#------------------------- Legend for the daily table%>
+  <br/>
+  <B><%=l(:wt_legend)%>:</B>
+  <table border="0">
+    <tr>
+      <td class='wt_iss_default' width='100px' align='center'><%=l(:wt_style_default)%></td>
+      <td class='wt_iss_assigned' width='100px' align='center'><%=l(:wt_style_assigned)%></td>
+      <td class='wt_iss_worked' width='100px' align='center'><%=l(:wt_style_worked)%></td>
+      <td class='wt_iss_assigned_worked' width='100px' align='center'><%=l(:wt_style__assigned_worked)%></td>
+      <td class='wt_iss_overdue' width='100px' align='center'><%=l(:wt_style_overdue)%>
+      <td class='wt_iss_assigned_overdue' width='100px' align='center'><%=l(:wt_style_assigned_overdue)%>
+      </td><td class='wt_iss_overdue_worked' width='100px' align='center'><%=l(:wt_style_overdue_worked)%></td>
+      <td class='wt_iss_assigned_overdue_worked' width='100px' align='center'><%=l(:wt_style_assigned_overdue_worked)%></td>
+    </tr>
+  </table>
 
 <br/>
 <h2 id="memo">
@@ -108,4 +124,3 @@ d = memo.day
 <%end%>
 
 <%end%>
-

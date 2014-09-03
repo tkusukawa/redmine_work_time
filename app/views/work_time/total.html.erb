@@ -92,6 +92,7 @@ prjs.each do |po|
  <td>
 <%if User.current.allowed_to?(:edit_work_time_total, @project) then%>
     <a href="#"
+      style="color:#8ff;"
       onclick="JavaScript:
         prj_pos(
           '<%=url_for(@link_params)%>',
@@ -99,7 +100,7 @@ prjs.each do |po|
           <%=dsp_pos%>,
           <%=prjs.size%>);
         return false;">
-      <%=dsp_pos%>
+      <%=dsp_pos%>:
     </a>
 <%end%>
    <%=prj.name%>
