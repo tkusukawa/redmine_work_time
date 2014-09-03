@@ -1,13 +1,7 @@
 <%= stylesheet_link_tag 'work_time', :plugin => 'redmine_work_time' %>
-<table border="1" id="time_input_table">
-  <tr style="background:#ddd;">
-    <td>
-      <div style="position:relative;height:25px;">
-        <div style="top:3px;left:20px;width:200px;font-size:1.5em;">
-          <%=@this_date.strftime("%Y-%m-%d")%><br/>
-        </div>
-      </div>
-    </td>
+<table border="0" id="time_input_table">
+  <tr style="background:#fff;font-size:14px">
+    <td><%=@this_date.strftime("%Y-%m-%d")%></td>
     <td><%=l(:work_time)%></td>
     <% if @is_registerd_backlog then %>
     <td><%=l(:field_remaining_hours)%></td>
@@ -39,12 +33,13 @@
       <%if @this_uid==@crnt_uid then%>
 
         <a href="#"
+          style="color:#8ff;"
           onclick="prj_pos('<%=url_for(@link_params) %>',
                            <%=dsp_prj%>,
                            <%=dsp_pos%>,
                            <%=@prj_odr_max+((dsp_pos.to_i<0)?1:0)%>);
                    return false;">
-          <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>
+          <%= (dsp_pos.to_i<0) ? "*" : dsp_pos %>:
         </a>
      <%end%>
         <%=prj.name%>
@@ -124,14 +119,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   </div>
   </td>
   <td>
-    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5) %>
+    <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][hours]", "", :size=>5, :oninput => "sumDayTimes()") %>
   </td>
   <% if @is_registerd_backlog then %>
   <td>
     <% if issue_pack[:cnt_childrens] != 0 || issue.closed? then %>
       <%= issue[:remaining_hours] %>
     <% else %>
-      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue[:remaining_hours], :size=>5) %>
+      <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][remaining_hours]", issue[:remaining_hours], :size=>5, :oninput => "sumDayTimes()") %>
     <% end %>
   </td>
   <% end %>
@@ -223,14 +218,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   </div>
   </td>
   <td>
-    <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5) %>
+    <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5, :oninput => "sumDayTimes()") %>
   </td>
   <% if @is_registerd_backlog then %>
   <td>
     <% if issue_pack[:cnt_childrens] != 0 || hour.issue.closed? then %>
       <%= hour.issue[:remaining_hours] %>
     <% else %>
-      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue[:remaining_hours], :size=>5) %>
+      <%= text_field_tag("time_entry["+hour_id.to_s+"][remaining_hours]", hour.issue[:remaining_hours], :size=>5, :oninput => "sumDayTimes()") %>
     <% end %>
   </td>
   <% end %>
@@ -282,7 +277,7 @@ end
 <% end %>
 <tr align="center" id="time_input_table_bottom" style="background:#ddd;">
   <td>&nbsp;</td>
-  <td><%=sprintf("%1.1f", @day_pack[:total])%></td>
+  <td><span id='currentTotal' title='<%=l(:wt_saved_value)%> <%=sprintf("%1.1f", @day_pack[:total])%>'><%=sprintf("%1.1f", @day_pack[:total])%></span></td>
   <% if @is_registerd_backlog then %>
   <td>&nbsp;</td>
   <% end %>
