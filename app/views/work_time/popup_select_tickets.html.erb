@@ -17,15 +17,16 @@
 projects = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=#{User.current.id}",
                           :select=>"projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos",
                           :order=>"pos,name")
-projects.each do |prj|
+Project.project_tree(projects) do |prj, level|
   next unless prj.active?
   next if !User.current.allowed_to?(:log_time, prj)
   members = Member.find(:all, :conditions=>
             ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}])
   next if members.size==0
+  name_prefix = (level > 0 ? '&nbsp;' * 2 * level + '&#187; ': '').html_safe
 %>
   <option value="<%= url_for(:action=>"ajax_select_tickets", :prj=>prj.id) %>">
-    <%= prj.name %> 
+    <%= name_prefix + prj.name %> 
   </option>
 <%
 end
