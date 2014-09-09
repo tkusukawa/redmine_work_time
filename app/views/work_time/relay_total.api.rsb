@@ -1,14 +1,5 @@
 api.total_relay do
   api.total_cost @total_cost
-#  api.array :members do
-#    @members.each do |mem_info|
-#      api.member do
-#        api.id mem_info[1].id
-#        api.firstname mem_info[1].firstname
-#	api.lastname mem_info[1].lastname
-#      end
-#    end
-#  end
   api.array :member_cost do
     @members.each do |mem_info|
       if @member_cost.key?(mem_info[1].id) && @member_cost[mem_info[1].id] > 0 then
