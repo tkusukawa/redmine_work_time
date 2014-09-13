@@ -1,0 +1,30 @@
+<div name="<%='done_ratio'+@issue.id.to_s%>">
+<% if @issue.estimated_hours then %>
+    <%= print_issue_cost(@issue) %>
+    &#61;
+    <%= print_issue_cost_rate(@issue) %>
+    &#37;
+<% end %>
+<br/>
+<form action="">
+  <%= @issue.done_ratio %>
+  &#37;
+  &rarr;
+  <input type="text"
+         id="<%='input_ratio'+@issue.id.to_s%>"
+         size="4"
+         onKeyPress="return checkKey(event,
+                 update_done_ratio,
+                 '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+                 <%=@issue.id.to_s%>);"
+         value="<%= print_issue_cost_rate(@issue) %>"/>
+  &#37;
+  <input type="button"
+         value="<%=l(:button_apply)%>"
+         onclick="update_done_ratio('<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+                 <%=@issue.id.to_s%>);" />
+</form>
+</div>
+<script>
+    $('#<%='input_ratio'+@issue.id.to_s%>').focus();
+</script>

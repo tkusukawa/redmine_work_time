@@ -68,31 +68,25 @@ function set_ticket_relay_by_issue_relation(req_url) {
   }
 }
 
-function update_done_ratio(pop_url, rep_url, issue_id)
-{
-  var done_ratio = showModalDialog(pop_url+"&issue_id="+issue_id,
-        window, "dialogWidth:500px;dialogHeight:150px");
-  if(done_ratio!=null){
-    if( typeof jQuery == "function" ) {
-      jQuery.ajax({
-        url:rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
-        data:{asynchronous:true, method:'get'},
-        success:function(response){
-          jQuery('#done_ratio'+issue_id).html(response);
-        }
-      });
+function input_done_ratio(ajax_url, issue_id) {
+  jQuery.ajax({
+    url: ajax_url + "&issue_id=" + issue_id,
+    data: {asynchronous: true, method: 'get'},
+    success: function (response) {
+      jQuery('[name="done_ratio'+ issue_id+'"]:first').replaceWith(response);
     }
-    else {
-      new Ajax.Updater('done_ratio'+issue_id,
-        rep_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
-        {asynchronous:true, method:'get'});
-    }
+  });
+}
 
-    var drs = document.getElementsByName("done_ratio"+issue_id);
-    for(var i = 0; i < drs.length; i++) {
-      drs[i].innerHTML = "["+done_ratio+"&#37;]";
+function update_done_ratio(ajax_url, issue_id) {
+  var done_ratio = $('#input_ratio'+issue_id).val();
+  jQuery.ajax({
+    url:ajax_url+"&issue_id="+issue_id+"&done_ratio="+done_ratio,
+    data:{asynchronous:true, method:'get'},
+    success:function(response){
+      jQuery('[name="done_ratio'+ issue_id+'"]').replaceWith(response);
     }
-  }
+  });
 }
 
 function del_ticket_relay(rep_url, child)
@@ -114,11 +108,11 @@ function del_ticket_relay(rep_url, child)
   }
 }
 
-function checkKey(e, finish_func, finish_arg)
+function checkKey(e, finish_func, arg1, arg2)
 {
   if (!e) var e = window.event;
   if(e.keyCode == 13) {
-    finish_func(finish_arg);
+    finish_func(arg1,arg2);
     return false;
   }
   else
@@ -190,13 +184,6 @@ function edit_memo(ajax_url)
       ajax_url,
       {asynchronous:true, method:'get'});
   }
-}
-
-//---------------------------------------- for popup_update_done_ratio.html.erb
-function ratio_inputed()
-{
-  returnValue = document.getElementById("input_ratio").value;
-  close();
 }
 
 //--------------- for popup_select_ticket.html.erb, ajax_select_ticket.html.erb

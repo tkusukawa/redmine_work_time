@@ -9,9 +9,8 @@
     <a name="<%='done_ratio'+@add_issue.id.to_s%>"
        href="#"
        onclick="JavaScript:
-         update_done_ratio(
-           '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-           '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+         input_done_ratio(
+           '<%=url_for(@link_params.merge(:action=>"ajax_input_done_ratio"))%>',
            <%=@add_issue.id%>);
          return false;">
       [<%=@add_issue.done_ratio%>&#37;]

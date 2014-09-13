@@ -93,9 +93,8 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue.id.to_s%>"
         href="#"
-        onclick="update_done_ratio(
-                     '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-                     '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+        onclick="input_done_ratio(
+                     '<%=url_for(@link_params.merge(:action=>"ajax_input_done_ratio"))%>',
                      <%=issue_id%>);
                  return false;">
       [<%=issue.done_ratio%>&#37;]
@@ -190,9 +189,8 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%if @this_uid==@crnt_uid then%>
     <a name="<%='done_ratio'+issue_id.to_s%>"
         href="#"
-        onclick="update_done_ratio(
-                     '<%=url_for(@link_params.merge(:action=>"popup_update_done_ratio"))%>',
-                     '<%=url_for(@link_params.merge(:action=>"ajax_update_done_ratio"))%>',
+        onclick="input_done_ratio(
+                     '<%=url_for(@link_params.merge(:action=>"ajax_input_done_ratio"))%>',
                      <%=issue_id%>);
                  return false;">
       [<%=issue.done_ratio%>&#37;]

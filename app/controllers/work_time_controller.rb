@@ -239,10 +239,6 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
-  def popup_select_tickets # 複数チケット選択ウィンドウの内容を返すアクション
-    render(:layout=>false)
-  end
-
   def ajax_select_tickets # 複数チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
     prepare_values
     @issues = Issue.find(
@@ -320,7 +316,8 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
-  def popup_update_done_ratio # 進捗％更新ポップアップ
+  def ajax_input_done_ratio # 進捗％更新ポップアップ
+    prepare_values
     issue_id = params[:issue_id]
     @issue = Issue.find_by_id(issue_id)
     if @issue.nil? || @issue.closed? || !@issue.visible? then
@@ -332,6 +329,7 @@ class WorkTimeController < ApplicationController
   end
 
   def ajax_update_done_ratio
+    prepare_values
     issue_id = params[:issue_id]
     done_ratio = params[:done_ratio]
     @issue = Issue.find_by_id(issue_id)
