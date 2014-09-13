@@ -1,0 +1,27 @@
+api.total_relay do
+  api.total_cost @total_cost
+  api.array :member_cost do
+    @members.each do |mem_info|
+      if @member_cost.key?(mem_info[1].id) && @member_cost[mem_info[1].id] > 0 then
+        api.member_cost do
+          api.user(:id => mem_info[1].id, :firstname => mem_info[1].firstname, :lastname => mem_info[1].lastname) unless mem_info[1].nil?
+          api.cost @member_cost[mem_info[1].id]
+        end
+      end
+    end
+  end
+  api.array :issues_cost do
+    @r_issue_cost.each do |issue,cost|
+      iss = Issue.find_by_id(issue)
+      api.issue_cost do
+        api.issue do
+	  api.id iss.id unless iss.nil?
+	  api.tracker(:id => iss.tracker.id, :name => iss.tracker.name) unless iss.tracker.nil?
+          api.subject iss.subject
+        end
+        api.cost cost[-1]
+      end
+    end
+  end
+end
+     
