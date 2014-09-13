@@ -23,3 +23,10 @@ td.wt_iss_assigned_overdue {
 td.wt_iss_assigned_overdue_worked {
   background: #fcf;
 }
+div.wt_memo_wiki_block {
+  background: #ffb;
+}
+div.wt_add_ticket_block {
+  background: #ddd;
+  border: 1px solid black;
+}

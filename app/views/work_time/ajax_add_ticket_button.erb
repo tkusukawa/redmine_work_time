@@ -1,0 +1,34 @@
+<div class="wt_add_ticket_block">
+<h2><%=l(:wt_add_ticket)%></h2>
+<select onchange="JavaScript:if (this.value != '') {
+        ajax_select_tickets(this.value);
+        return false;}">
+  <option value=''><%=l(:wt_select_project)%></option>
+  <option disabled="disabled">---</option>
+  <%
+     Project.project_tree(@select_projects) do |prj, level|
+       next unless prj.active?
+       next if !User.current.allowed_to?(:log_time, prj)
+       members = Member.find(:all, :conditions=>
+               ["user_id=:u and project_id=:p",{:u=>User.current.id, :p=>prj.id}])
+       next if members.size==0
+       name_prefix = (level > 0 ? '&nbsp;' * 2 * level + '&#187; ': '').html_safe
+  %>
+      <option value="<%= url_for(:action=>"ajax_select_tickets", :prj=>prj.id) %>">
+        <%= name_prefix + prj.name %>
+      </option>
+  <%
+     end
+  %>
+</select>
+<div id="tickets" style="display: inline-block;_display: inline;">
+  <%=l(:wt_input_ticket_numbers)%>
+  <form action="">
+    <input type="text" id="input_ids" size=32 onKeyPress="return checkKey(event,tickets_inputed, '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');"/>
+    <input type="button" value="<%=l(:button_apply)%>" onclick="tickets_inputed('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');"/>
+  </form>
+</div>
+</div>
+<script>
+    $('#input_ids').focus();
+</script>

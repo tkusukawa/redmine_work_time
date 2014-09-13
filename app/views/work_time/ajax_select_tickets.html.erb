@@ -1,3 +1,4 @@
+<div id="tickets">
 <form style="font-size:14px;" action="">
 <%
   opt = {
@@ -15,20 +16,14 @@
 
   link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opened_only)
   link_label2 = opt[:other] == '0' ? l(:wt_opt_disp_ticket_with_other_member) : l(:wt_opt_disp_ticket_mine_only)
-
-  issues = Issue.find(
-      :all,
-      :include => [:assigned_to],
-      :order => "id DESC",
-      :conditions => ["project_id=:p",{:p=>params[:prj]}])
 %>
+<br/>
 <a href="#"
   onclick="JavaScript:
     ajax_select_tickets('<%=url1%>');
     return false;">
     <%= link_label1 %>
 </a>
-<br/>
 <a href="#"
   onclick="JavaScript:
     ajax_select_tickets('<%=url2%>');
@@ -37,11 +32,12 @@
 </a>
 <br/>
 <br/>
-<input type="button" onclick="JavaScript:tickets_checked();" value="<%=l(:wt_apply_checked)%>"/>
+<input type="button" onclick="JavaScript:tickets_checked('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');" value="<%=l(:wt_apply_checked)%>"/>
 <br/>
 <br/>
+<div id="tickets_check">
 <%
-issues.each do |issue|
+@issues.each do |issue|
   next if issue.nil? || !issue.visible?
   next if opt[:other] == '0' && issue.assigned_to_id != User.current.id
   if issue.closed? then
@@ -52,8 +48,8 @@ issues.each do |issue|
   end
   issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
 %>
-<input type="checkbox" name="selected"  value="<%=issue.id%>"/>
-<input type="button" onclick="JavaScript:tickets_selected('<%=issue.id%>');" value="<%=l(:button_apply)%>" />
+<input type="checkbox" name="ticket_select_check"  value="<%=issue.id%>"/>
+<input type="button" onclick="JavaScript:tickets_selected('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>', '<%=issue.id%>');" value="<%=l(:button_apply)%>" />
 <%=issueHtml.html_safe%>
 <a href="#"
   onclick="JavaScript:
@@ -66,7 +62,9 @@ issues.each do |issue|
 </a>
 <br/>
 <%end%>
+</div>
 </form>
-<input type="button" onclick="JavaScript:tickets_checked();" value="<%=l(:wt_apply_checked)%>"/>
+<input type="button" onclick="JavaScript:tickets_checked('<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');" value="<%=l(:wt_apply_checked)%>"/>
 <br/>
 <br/>
+</div>

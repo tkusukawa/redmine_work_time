@@ -231,11 +231,26 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
+  def ajax_add_ticket_button
+    prepare_values
+    @select_projects = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=#{User.current.id}",
+                            :select=>"projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos",
+                            :order=>"pos,name")
+    render(:layout=>false)
+  end
+
   def popup_select_tickets # 複数チケット選択ウィンドウの内容を返すアクション
     render(:layout=>false)
   end
 
   def ajax_select_tickets # 複数チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
+    prepare_values
+    @issues = Issue.find(
+        :all,
+        :include => [:assigned_to],
+        :order => "id DESC",
+        :conditions => ["project_id=:p",{:p=>params[:prj]}])
+
     render(:layout=>false)
   end
 

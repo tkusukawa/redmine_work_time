@@ -114,11 +114,11 @@ function del_ticket_relay(rep_url, child)
   }
 }
 
-function checkKey(e, finish_func)
+function checkKey(e, finish_func, finish_arg)
 {
   if (!e) var e = window.event;
   if(e.keyCode == 13) {
-    finish_func();
+    finish_func(finish_arg);
     return false;
   }
   else
@@ -132,7 +132,7 @@ function ajax_select_tickets(rep_url)
       url:rep_url,
       data:{asynchronous:true, method:'get'},
       success:function(response){
-        jQuery('#tickets').html(response);
+        jQuery('#tickets').replaceWith(response);
       }
     });
   }
@@ -145,26 +145,14 @@ function ajax_select_tickets(rep_url)
 
 //------------------------------------------------- for show.html.erb
 var add_ticket_count = 1;
-function add_ticket(pop_url, ajax_url)
-{
-    var tickets = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
-    for(i=0; i<tickets.length;i++) {
-      if( typeof jQuery == "function" ) {
-        jQuery.ajax({
-          url:ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
-          data:{asynchronous:true, method:'get'},
-          success:function(response){
-            jQuery('#time_input_table_bottom').before(response);
-          }
-        });
+function add_ticket(ajax_url) {
+    jQuery.ajax({
+      url: ajax_url,
+      data: {asynchronous: true, method: 'get'},
+      success: function (response) {
+        jQuery('#add_ticket_button').replaceWith(response);
       }
-      else {
-        new Ajax.Updater('time_input_table_bottom',
-          ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
-          {insertion:Insertion.Before, method:'get'});
-      }
-      add_ticket_count ++;
-    }
+    })
 }
 
 function dup_ticket(ajax_url, insert_pos, id)
@@ -224,30 +212,38 @@ function ticket_selected(issue_id)
   close();
 }
 
-//------------- for popup_select_tickets.html.erb, ajax_select_tickets.html.erb
-function tickets_inputed()
+function tickets_insert(ajax_url, tickets)
+{
+  for(i=0; i<tickets.length;i++) {
+    jQuery.ajax({
+      url:ajax_url+"&add_issue="+tickets[i]+"&count="+add_ticket_count,
+      data:{asynchronous:true, method:'get'},
+      success:function(response){
+        jQuery('#time_input_table_bottom').before(response);
+      }
+    });
+    add_ticket_count ++;
+  }
+}
+
+function tickets_inputed(ajax_url)
 {
   var vals = document.getElementById("input_ids").value;
   var tickets = vals.split(',');
-  returnValue=tickets;
-  close();
+  tickets_insert(ajax_url, tickets);
 }
 
-function tickets_selected(issue_id)
+function tickets_selected(ajax_url, issue_id)
 {
-  returnValue = [issue_id];
-  close();
+  var tickets = [issue_id];
+  tickets_insert(ajax_url, tickets);
 }
 
-function tickets_checked()
+function tickets_checked(ajax_url)
 {
-  var issue_ids = new Array;
-  for(i=0; e = document.forms[0].elements[i]; i++) {
-    if(e.checked)
-      issue_ids.push(e.value);
-  }
-  returnValue = issue_ids;
-  close();
+  var $checked = $('[name="ticket_select_check"]:checked');
+  var tickets = $checked.map(function(i,e){return $(this).val()});
+  tickets_insert(ajax_url, tickets);
 }
 
 function statusUpdateOnDailyTable(name) {
