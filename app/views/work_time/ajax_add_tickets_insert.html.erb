@@ -10,7 +10,7 @@
        href="#"
        onclick="JavaScript:
          input_done_ratio(
-           '<%=url_for(@link_params.merge(:action=>"ajax_input_done_ratio"))%>',
+           '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
            <%=@add_issue.id%>);
          return false;">
       [<%=@add_issue.done_ratio%>&#37;]
@@ -20,7 +20,7 @@
        href="#"
        onclick="JavaScript:
          dup_ticket(
-           '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+           '<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>',
            'time_entry_pos<%=@add_issue_id%>_<%=@add_count%>',
            <%=@add_issue.id%>);
          return false;">

@@ -1,0 +1,58 @@
+<div id="input_area_<%=@issue_id%>">
+  <%
+  opt = {
+    :action => 'ajax_relay_input_select',
+    :issue_id => @issue_id,
+    :prj => params[:prj],
+    :all => params[:all] || '0'
+  }
+
+  opt[:all] = opt[:all] == '0' ? '1' : '0' if params.key?(:all_toggle)
+
+  url1 = url_for(opt.merge({:all_toggle => ''}))
+
+  link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opened_only)
+%>
+<a href="#"
+   onclick="jQuery.ajax({
+           url: '<%=url1%>',
+           data: {asynchronous: true, method: 'get'},
+           success: function (response) {
+                   jQuery('#input_area_<%=@issue_id%>').html(response);}
+           });JavaScript:
+           return false;">
+  <%= link_label1 %>
+</a>
+<br/>
+<%
+@issues.each do |issue|
+  next if issue.nil? || !issue.visible?
+  if issue.closed? then
+    next if opt[:all] == '0'
+    issueHtml = "<del>"+issue.to_s+"</del>"
+  else
+    issueHtml = issue.to_s
+  end
+  issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
+%>
+<div style="font-size:14px;">
+<input type="button"
+       onclick="jQuery.ajax({
+               url:'<%=url_for(:action=>'ajax_relay', :issue_id=>@issue_id, :parent_id=>issue.id)%>',
+               data:{asynchronous:true, method:'get'},
+               success: function(response) {
+                       jQuery('#ticket_relay_<%=@issue_id%>').html(response);}
+               });
+       "
+       value="<%=l(:button_apply)%>"
+/>
+<%=issueHtml.html_safe%>
+<a href="#"
+  onclick="window.open('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');
+          return false;">
+  &#63;
+</a>
+<br/>
+</div>
+<%end%>
+</div>

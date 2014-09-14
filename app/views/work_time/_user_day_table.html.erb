@@ -1,4 +1,3 @@
-<%= stylesheet_link_tag 'work_time', :plugin => 'redmine_work_time' %>
 <table border="0" id="time_input_table">
   <tr style="background:#fff;font-size:14px">
     <td><%=@this_date.strftime("%Y-%m-%d")%></td>
@@ -94,7 +93,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <a name="<%='done_ratio'+issue.id.to_s%>"
         href="#"
         onclick="input_done_ratio(
-                     '<%=url_for(@link_params.merge(:action=>"ajax_input_done_ratio"))%>',
+                     '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
                      <%=issue_id%>);
                  return false;">
       [<%=issue.done_ratio%>&#37;]
@@ -103,7 +102,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <a style="position:absolute;bottom:1px;right:10px;"
        href="#"
        onclick="dup_ticket(
-                    '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+                    '<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>',
                     'time_entry_pos<%=issue_id%>_0',
                     <%=issue_id%>);
                 return false;">
@@ -190,7 +189,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <a name="<%='done_ratio'+issue_id.to_s%>"
         href="#"
         onclick="input_done_ratio(
-                     '<%=url_for(@link_params.merge(:action=>"ajax_input_done_ratio"))%>',
+                     '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
                      <%=issue_id%>);
                  return false;">
       [<%=issue.done_ratio%>&#37;]
@@ -200,7 +199,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <a style="position:absolute;bottom:1px;right:10px;"
        href="#"
        onclick="dup_ticket(
-                    '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>',
+                    '<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>',
                     'time_entry_pos<%=hour_id%>',
                     <%=issue_id%>);
                 return false;">

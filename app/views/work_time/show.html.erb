@@ -1,4 +1,5 @@
 <%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
+<%=stylesheet_link_tag 'work_time', :plugin => 'redmine_work_time' %>
 
 <%= @message.html_safe %>
 <div class="contextual">
@@ -45,9 +46,15 @@
                onclick="location.href='<%=url_for(@link_params.merge(:ticket_del=>"closed"))%>'"
                value="<%=l(:wt_delete_closed_tickets)%>"
         />
-        <div id="add_ticket_button" style="display: inline-block;_display: inline;">
+        <div id="add_ticket_area" style="display: inline-block;_display: inline;">
           <input type="button"
-               onclick="add_ticket('<%=url_for(:action=>"ajax_add_ticket_button")%>');
+               onclick="jQuery.ajax({
+                       url: '<%=url_for(:action=>"ajax_add_tickets_input")%>',
+                       data:{asynchronous:true, method:'get'},
+                       success: function(response){
+                               jQuery('#add_ticket_area').replaceWith(response);
+                               }
+                       });
                        return false;"
                value="<%=l(:wt_add_ticket)%>"
           />
@@ -101,9 +108,14 @@ d = memo.day
 
 <%if @this_uid==@crnt_uid then%>
 [<a href="#"
-    onclick="JavaScript:
-      edit_memo('<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>');
-      return false;">
+    onclick="jQuery.ajax({
+            url: '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
+            data:{asynchronous:true, method:'get'},
+            success: function(response){
+                    jQuery('#memo-wiki').html(response);
+                    }
+            });
+            return false;">
   <%=l(:wt_edit_memo)%>
 </a>]
 <%end%>

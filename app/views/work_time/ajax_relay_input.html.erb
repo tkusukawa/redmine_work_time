@@ -1,0 +1,70 @@
+<select onchange="JavaScript:if (this.value != '') {
+        jQuery.ajax({
+                url:this.value,
+                data:{asynchronous:true, method:'get'},
+                success:function(response){
+                        jQuery('#input_area_<%=@issue_id%>').replaceWith(response);
+                        }
+                });
+        return false;}">
+  <option value=''><%=l(:wt_select_project)%></option>
+  <option disabled="disabled">---</option>
+  <%
+     @projects.each do |prj|
+       next unless prj.active?
+       next if !prj.visible?
+  %>
+      <option value="<%= url_for(:action=>"ajax_relay_input_select", :prj=>prj.id, :issue_id=>@issue_id) %>">
+        <%= (prj.pos.to_i < 100000) ? prj.pos : '*' %>: <%= prj.name %>
+      </option>
+  <%
+     end
+  %>
+</select>
+<div id="input_area_<%=@issue_id%>" style="display: inline-block;_display: inline;">
+  <%=l(:wt_input_ticket_numbers)%>
+  <form action="">
+    <input type="text"
+           id="input_id_<%=@issue_id%>"
+           size="8"
+           onKeyPress="if(checkEnter(event)) {
+                   jQuery.ajax({
+                           url:'<%=url_for(:action=>'ajax_relay',:issue_id=>@issue_id)%>' +
+                                   '&parent_id=' + $('#input_id_<%=@issue_id%>').val(),
+                           data:{asynchronous:true, method:'get'},
+                           success: function(response) {
+                                   jQuery('#ticket_relay_<%=@issue_id%>').html(response);}
+                           });
+                   return false;
+                   }
+                   return event;"
+    />
+    <input type="button"
+           value="<%=l(:button_apply)%>"
+           onclick="jQuery.ajax({
+                   url:'<%=url_for(:action=>'ajax_relay',:issue_id=>@issue_id)%>' +
+                           '&parent_id=' + $('#input_id_<%=@issue_id%>').val(),
+                   data:{asynchronous:true, method:'get'},
+                   success: function(response) {
+                           jQuery('#ticket_relay_<%=@issue_id%>').html(response);}
+                   });
+                   return false;"
+    />
+  </form>
+</div>
+
+<a href="#"
+   onclick="jQuery.ajax({
+           url: '<%=url_for(:action=>"ajax_relay", :issue_id=>@issue_id.to_s)%>',
+           data: {asynchronous: true, method: 'get'},
+           success: function (response) {
+                   jQuery('#ticket_relay_<%=@issue_id.to_s%>').html(response);
+                   }
+           });
+           return false;">
+  <%=l(:button_cancel)%>
+</a>
+
+<script>
+    $('#input_id_<%=@issue_id%>').focus();
+</script>

@@ -31,41 +31,17 @@ function member_pos(url, user_id, pos, max)
   }
 }
 
-function set_ticket_relay_core(req_url, child_id, parent_id) {
-  if (typeof jQuery == "function") {
+function set_ticket_relay_by_issue_relation(ajax_url) {
+  $('[id^=ticket_relay_]').each(function(){
+    var issue_id = $(this).attr('id').replace(/.*([^_]+)$/, "$1");
     jQuery.ajax({
-      url:req_url+"&ticket_relay="+child_id+"_"+parent_id,
+      url: ajax_url + '&issue_id=' + issue_id,
       data:{asynchronous:true, method:'get'},
-      success:function(response) {
-        jQuery('#ticket'+child_id).html(response);
+      success: function(response) {
+        jQuery('#ticket_relay_'+issue_id).html(response);
       }
     });
-  } else {
-    new Ajax.Updater('ticket'+child_id,
-      req_url+"&ticket_relay="+child_id+"_"+parent_id,
-      {asynchronous:true, method:'get'});
-  }
-}
-
-function set_ticket_relay(pop_url, req_url, child_id)
-{
-  var parent_id = showModalDialog(pop_url, window, "dialogWidth:600px;dialogHeight:480px");
-  if (parent_id != null) {
-    set_ticket_relay_core(req_url, child_id, parent_id);
-  }
-}
-
-function set_ticket_relay_by_issue_relation(req_url) {
-  if (typeof jQuery == "function") {
-    $('[data-has-parent="false"]').each(function(i, v) {
-      var child_id = v.attributes['data-issue-id'].value || '';
-      var parent_id = v.attributes['data-redmine-parent-id'].value || '';
-      if (child_id == ''|| parent_id == '')  return;
-      set_ticket_relay_core(req_url, child_id, parent_id);
-    });
-  } else {
-    alert('sorry not supported!');
-  }
+  })
 }
 
 function input_done_ratio(ajax_url, issue_id) {
@@ -89,114 +65,28 @@ function update_done_ratio(ajax_url, issue_id) {
   });
 }
 
-function del_ticket_relay(rep_url, child)
-{
-  if( typeof jQuery == "function" ) {
-    jQuery.ajax({
-        url:rep_url+"&ticket_relay="+child+"_0",
-        data:{asynchronous:true, method:'get'
-      },
-      success:function(response){
-        jQuery('#ticket'+child).html(response);
-      }
-    });
-  }
-  else {
-    new Ajax.Updater('ticket'+child,
-      rep_url+"&ticket_relay="+child+"_0",
-      {asynchronous:true, method:'get'});
-  }
-}
-
-function checkKey(e, finish_func, arg1, arg2)
+function checkEnter(e)
 {
   if (!e) var e = window.event;
-  if(e.keyCode == 13) {
-    finish_func(arg1,arg2);
-    return false;
-  }
+  if(e.keyCode == 13)
+    return true;
   else
-    return e;
-}
-
-function ajax_select_tickets(rep_url)
-{
-  if( typeof jQuery == "function" ) {
-    jQuery.ajax({
-      url:rep_url,
-      data:{asynchronous:true, method:'get'},
-      success:function(response){
-        jQuery('#tickets').replaceWith(response);
-      }
-    });
-  }
-  else {
-    new Ajax.Updater('tickets',
-      rep_url,
-      {asynchronous:true, method:'get'});
-  }
+    return false;
 }
 
 //------------------------------------------------- for show.html.erb
 var add_ticket_count = 1;
-function add_ticket(ajax_url) {
-    jQuery.ajax({
-      url: ajax_url,
-      data: {asynchronous: true, method: 'get'},
-      success: function (response) {
-        jQuery('#add_ticket_button').replaceWith(response);
-      }
-    })
-}
 
 function dup_ticket(ajax_url, insert_pos, id)
 {
-  if( typeof jQuery == "function" ) {
-    jQuery.ajax({
-      url:ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
-      data:{asynchronous:true, method:'get'},
-      success:function(response){
-        jQuery('#'+insert_pos).after(response);
-      }
-    });
-  }
-  else {
-    new Ajax.Updater( insert_pos,
-      ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
-      {insertion:Insertion.After, method:'get'});
-  }
+  jQuery.ajax({
+    url:ajax_url+"&add_issue="+id+"&count="+add_ticket_count,
+    data:{asynchronous:true, method:'get'},
+    success:function(response){
+      jQuery('#'+insert_pos).after(response);
+    }
+  });
   add_ticket_count ++;
-}
-
-function edit_memo(ajax_url)
-{
-  if( typeof jQuery == "function" ) {
-    jQuery.ajax({
-      url:ajax_url,
-      data:{asynchronous:true, method:'get'},
-      success: function(response){
-        jQuery('#memo-wiki').html(response);
-      }
-    });
-  }
-  else {
-    new Ajax.Updater('memo-wiki',
-      ajax_url,
-      {asynchronous:true, method:'get'});
-  }
-}
-
-//--------------- for popup_select_ticket.html.erb, ajax_select_ticket.html.erb
-function ticket_inputed()
-{
-  returnValue = document.getElementById("input_id").value;
-  close();
-}
-
-function ticket_selected(issue_id)
-{
-  returnValue = issue_id;
-  close();
 }
 
 function tickets_insert(ajax_url, tickets)
@@ -262,5 +152,5 @@ function sumDayTimes() {
   var originalValue;
   document.getElementById("currentTotal").innerHTML = total.toFixed(1);
   document.getElementById("currentTotal").style = 'color:#FF0000;';
-return true;
+  return true;
 }
