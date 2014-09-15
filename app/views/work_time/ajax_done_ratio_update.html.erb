@@ -1,0 +1,15 @@
+<%#
+# チケットの進捗％をAjaxUpdateする
+%>
+<%if User.current.allowed_to?(:edit_issues, @issue.project)%>
+    <a name="<%='done_ratio'+@issue.id.to_s%>"
+       href="#"
+       onclick="input_done_ratio(
+               '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
+               <%=@issue.id.to_s%>);
+               return false;">
+      [<%=@issue.done_ratio%>&#37;]
+    </a>
+<%else%>
+    [<%=@issue.done_ratio%>&#37;]
+<%end%>

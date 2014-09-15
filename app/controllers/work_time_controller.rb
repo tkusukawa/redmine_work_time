@@ -83,7 +83,6 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
@@ -96,7 +95,6 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
@@ -151,7 +149,6 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
@@ -165,7 +162,6 @@ class WorkTimeController < ApplicationController
     find_project || return
     authorize
     prepare_values
-    add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
@@ -183,7 +179,6 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
-    add_ticket_relay
     change_member_position
     change_ticket_position
     change_project_position
@@ -229,23 +224,109 @@ class WorkTimeController < ApplicationController
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report.csv"
   end
 
-  def popup_select_ticket # チケット選択ウィンドウの内容を返すアクション
+  def ajax_relay
+    if !params.key?(:issue_id)
+      render :layout=>false, :text=>'ERROR: no issue_id'
+      return
+    end
+    @issue_id = params[:issue_id].to_i
+
+    find_project
+    @message = ''
+    @parent_disp = ''
+    @relay_modified = false
+
+    if params.key?(:parent_id)
+      @parent_id = params[:parent_id].to_i
+      if @parent_id >= 0
+        update_relay @issue_id, @parent_id
+      else
+        # parent_id == -1 by set_ticket_relay_by_issue_relation
+        redmine_parent_id = Issue.find_by_id(@issue_id).parent_id
+        if redmine_parent_id && redmine_parent_id >= 1 # has parent
+          update_relay @issue_id, redmine_parent_id
+        end
+      end
+    end
+    relay = WtTicketRelay.find(:first, :conditions=>["issue_id=:i",{:i=>@issue_id}])
+    @parent_id = relay.parent
+
+    if @parent_id != 0 && !((parent = Issue.find_by_id(@parent_id)).nil?) then
+      @parent_disp = parent.closed? ? '<del>'+parent.to_s+'</del>' : parent.to_s
+    end
+    render :layout=>false
+  end
+
+  def update_relay(issue_id, parent_id)
+    if !User.current.allowed_to?(:edit_work_time_total, @project)
+      @message = l(:wt_no_permission)
+      return
+    end
+
+    # loop relay check
+    route = ''
+    search_id = parent_id
+    while search_id != 0 do
+      route += "->#{search_id}"
+      if search_id == issue_id
+        @message = l(:wt_loop_relay)+route
+        return
+      end
+      relay = WtTicketRelay.find(:first, :conditions=>["issue_id=:i",{:i=>search_id}])
+      break if !relay
+      search_id = relay.parent
+    end
+
+    relay = WtTicketRelay.find(:first, :conditions=>["issue_id=:i",{:i=>issue_id}])
+    if relay then
+      relay.parent = parent_id
+      relay.save
+      @relay_modified = true
+    else
+      @message = "Internal Error: no WtTicketRelay for ##{issue_id}"
+    end
+  end
+
+  def ajax_relay_input # チケット選択の内容を返すアクション
+    @issue_id = params[:issue_id]
+    @projects = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=-1",
+                            :select=>"projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos",
+                            :order=>"pos,name")
     render(:layout=>false)
   end
 
-  def ajax_select_ticket # チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
+  def ajax_relay_input_select # チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
+    @issue_id = params[:issue_id]
+    @issues = Issue.find(
+        :all,
+        :include => [:assigned_to],
+        :order => "id DESC",
+        :conditions => ["project_id=:p",{:p=>params[:prj]}])
     render(:layout=>false)
   end
 
-  def popup_select_tickets # 複数チケット選択ウィンドウの内容を返すアクション
+  def ajax_add_tickets_input
+    prepare_values
+    @select_projects = Project.find(
+        :all,
+        :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=#{User.current.id}",
+        :select=>"projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos",
+        :order=>"pos,name")
     render(:layout=>false)
   end
 
-  def ajax_select_tickets # 複数チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
+  def ajax_add_tickets_input_select # 複数チケット選択ウィンドウにAjaxで挿入(Update)される内容を返すアクション
+    prepare_values
+    @issues = Issue.find(
+        :all,
+        :include => [:assigned_to],
+        :order => "id DESC",
+        :conditions => ["project_id=:p",{:p=>params[:prj]}])
+
     render(:layout=>false)
   end
 
-  def ajax_insert_daily # 日毎工数に挿入するAjaxアクション
+  def ajax_add_tickets_insert # 日毎工数に挿入するAjaxアクション
     prepare_values
 
     uid = params[:user]
@@ -301,17 +382,8 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
-  def ajax_relay_table
-    @message = ""
-    find_project
-    authorize
+  def ajax_done_ratio_input # 進捗％更新ポップアップ
     prepare_values
-    add_ticket_relay
-    @link_params.merge!(:action=>"edit_relay")
-    render(:layout=>false)
-  end
-
-  def popup_update_done_ratio # 進捗％更新ポップアップ
     issue_id = params[:issue_id]
     @issue = Issue.find_by_id(issue_id)
     if @issue.nil? || @issue.closed? || !@issue.visible? then
@@ -322,7 +394,8 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
-  def ajax_update_done_ratio
+  def ajax_done_ratio_update
+    prepare_values
     issue_id = params[:issue_id]
     done_ratio = params[:done_ratio]
     @issue = Issue.find_by_id(issue_id)
@@ -716,47 +789,6 @@ private
     end
   end
 
-  def add_ticket_relay
-    ################################### チケット付け替え関係処理
-    @parentHtml = ""
-    if params.key?("ticket_relay") && params[:ticket_relay]=~/^(.*)_(.*)$/ then
-      child_id = $1.to_i
-      parent_id = $2.to_i
-      @issue_id = child_id
-      if User.current.allowed_to?(:edit_work_time_total, @project) then
-
-        anc_id = parent_id
-        while anc_id != 0 do
-          break if anc_id == child_id
-          relay = WtTicketRelay.find(:first, :conditions=>["issue_id=:i",{:i=>anc_id}])
-          break if !relay
-          anc_id = relay.parent
-        end
-
-        if anc_id != child_id then
-          relay = WtTicketRelay.find(:first, :conditions=>["issue_id=:i",{:i=>child_id}])
-          if relay then
-            relay.parent = parent_id
-            relay.save
-          end
-        else
-          @message += '<div style="background:#faa;">'+l(:wt_loop_relay)+'</div>'
-          return
-        end
-      else
-        @message += '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
-        return
-      end
-
-      @Issue = Issue.find_by_id(@issue_id)
-      @redmine_parent_id = @Issue.parent_id
-      @parent_id = parent_id
-      if parent_id != 0 && !((parent = Issue.find_by_id(parent_id)).nil?) then
-        @parentHtml = parent.closed? ? "<del>"+parent.to_s+"</del>" : parent.to_s
-      end
-    end
-  end
-
   def change_member_position
     ################################### メンバー順序変更処理
     if params.key?("member_pos") && params[:member_pos]=~/^(.*)_(.*)$/ then
@@ -891,7 +923,6 @@ private
       iid = time_entry.issue_id
       uid = time_entry.user_id
       cost = time_entry.hours
-
       # 本プロジェクトのユーザの工数でなければパス
       next unless @member_cost.key?(uid)
 
@@ -905,7 +936,6 @@ private
       @member_cost[uid] += cost
 
       parent_iid = get_parent_issue(relay, iid)
-
       if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible?
         iid = -1 # private
         pid = -1 # private
@@ -949,6 +979,7 @@ private
     return @issue_parent[iid] if @issue_parent.has_key?(iid)
     issue = Issue.find_by_id(iid)
     return 0 if issue.nil? # issueが削除されていたらそこまで
+    @issue_cost[iid] ||= Hash.new
 
     if relay.has_key?(iid)
       parent_id = relay[iid]

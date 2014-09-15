@@ -1,4 +1,5 @@
 <%=javascript_include_tag "work_time", :plugin=>'redmine_work_time' %>
+<%=stylesheet_link_tag 'work_time', :plugin => 'redmine_work_time' %>
 
 <%= @message.html_safe %>
 <div class="contextual">
@@ -42,17 +43,22 @@
         <%= submit_tag l(:wt_update) %>
         &#58;
         <input type="button"
-               onclick="add_ticket('<%=url_for(:action=>"popup_select_tickets")%>',
-                                   '<%=url_for(@link_params.merge(:action=>"ajax_insert_daily"))%>');
-                        return false;"
-               value="<%=l(:wt_add_ticket)%>"
-        />
-
-        <input type="button"
                onclick="location.href='<%=url_for(@link_params.merge(:ticket_del=>"closed"))%>'"
                value="<%=l(:wt_delete_closed_tickets)%>"
         />
-<br/>
+        <div id="add_ticket_area" style="display: inline-block;_display: inline;">
+          <input type="button"
+               onclick="jQuery.ajax({
+                       url: '<%=url_for(:action=>"ajax_add_tickets_input")%>',
+                       data:{asynchronous:true, method:'get'},
+                       success: function(response){
+                               jQuery('#add_ticket_area').replaceWith(response);
+                               }
+                       });
+                       return false;"
+               value="<%=l(:wt_add_ticket)%>"
+          />
+        </div>
 <%end%>
 
   <%#------------------------- Legend for the daily table%>
@@ -84,7 +90,7 @@
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
 if memo then # この日のメモがある場合
 %>
-<div class="wiki" style="background:#ffb;">
+<div class="wt_memo_wiki_block">
   <%=textilizable(memo.description) %>
   <div style="text-align:right;">
     (update:<%=memo.updated_on.localtime.strftime("%Y-%m-%d %H:%M")%>)
@@ -102,9 +108,14 @@ d = memo.day
 
 <%if @this_uid==@crnt_uid then%>
 [<a href="#"
-    onclick="JavaScript:
-      edit_memo('<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>');
-      return false;">
+    onclick="jQuery.ajax({
+            url: '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
+            data:{asynchronous:true, method:'get'},
+            success: function(response){
+                    jQuery('#memo-wiki').html(response);
+                    }
+            });
+            return false;">
   <%=l(:wt_edit_memo)%>
 </a>]
 <%end%>

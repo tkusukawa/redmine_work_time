@@ -1,0 +1,51 @@
+<% if @message != '' %>
+    <div class="wt_error">
+      <%=@message.html_safe%>
+    </div>
+<% end %>
+
+<div class="<%=@relay_modified ? 'wt_modified' : ''%>">
+  =>
+  <%=@parent_disp.html_safe%>
+  <%
+     if User.current.allowed_to?(:edit_work_time_total, @project)
+       if @parent_disp != ''
+  %>
+          <a href="#"
+             onclick="jQuery.ajax({
+                     url: '<%=url_for(:action=>"ajax_relay_input", :issue_id=>@issue_id.to_s)%>',
+                     data: {asynchronous: true, method: 'get'},
+                     success: function (response) {
+                             jQuery('#ticket_relay_<%=@issue_id.to_s%>').html(response);
+                             }
+                     });
+                     return false;">
+            [<%=l(:button_change)%>]
+          </a>
+          <a href="#"
+             onclick="jQuery.ajax({
+                     url:'<%=url_for(:action=>'ajax_relay',:issue_id=>@issue_id, :parent_id=>0)%>',
+                     data:{asynchronous:true, method:'get'},
+                     success: function(response) {
+                             jQuery('#ticket_relay_<%=@issue_id%>').html(response);}
+                     });
+                     return false;">
+            [<%=l(:button_delete)%>]
+          </a>
+      <%else%>
+          <a href="#"
+             onclick="jQuery.ajax({
+                     url: '<%=url_for(:action=>"ajax_relay_input", :issue_id=>@issue_id.to_s)%>',
+                     data: {asynchronous: true, method: 'get'},
+                     success: function (response) {
+                             jQuery('#ticket_relay_<%=@issue_id.to_s%>').html(response);
+                             }
+                     });
+                     return false;">
+            [<%=l(:button_add)%>]
+          </a>
+      <%
+         end
+         end
+      %>
+</div>

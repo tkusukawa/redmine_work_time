@@ -1,0 +1,79 @@
+<div id="input_tickets">
+<form style="font-size:14px;" action="">
+<%
+  opt = {
+    :action => 'ajax_add_tickets_input_select',
+    :prj => params[:prj],
+    :all => params[:all] || '0',
+    :other => params[:other] || '0'
+  }
+
+  opt[:all] = opt[:all] == '0' ? '1' : '0' if params.key?(:all_toggle)
+  opt[:other] = opt[:other] == '0' ? '1' : '0' if params.key?(:other_toggle)
+
+  url1 = url_for(opt.merge({:all_toggle => ''}))
+  url2 = url_for(opt.merge({:other_toggle => ''}) )
+
+  link_label1 = opt[:all] == '0' ? l(:wt_opt_disp_ticket_with_closed) : l(:wt_opt_disp_ticket_opened_only)
+  link_label2 = opt[:other] == '0' ? l(:wt_opt_disp_ticket_with_other_member) : l(:wt_opt_disp_ticket_mine_only)
+%>
+<a href="#"
+  onclick="jQuery.ajax({
+          url: '<%=url1%>',
+          data: {asynchronous: true, method: 'get'},
+          success: function (response) {
+                  jQuery('#input_tickets').replaceWith(response);}
+          });
+          return false;">
+    <%= link_label1 %>
+</a>
+<a href="#"
+  onclick="jQuery.ajax({
+          url: '<%=url2%>',
+          data: {asynchronous: true, method: 'get'},
+          success: function (response) {
+                  jQuery('#input_tickets').replaceWith(response);}
+          });return false;">
+    <%= link_label2 %>
+</a>
+<br/>
+  <input type="button"
+         onclick="tickets_checked('<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>');"
+         value="<%=l(:wt_apply_checked)%>"/>
+<br/>
+<div id="tickets_check">
+<%
+@issues.each do |issue|
+  next if issue.nil? || !issue.visible?
+  next if opt[:other] == '0' && issue.assigned_to_id != User.current.id
+  if issue.closed? then
+    next if opt[:all] == '0'
+    issueHtml = "<del>"+issue.to_s+"</del>"
+  else
+    issueHtml = issue.to_s
+  end
+  issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
+%>
+      <input type="checkbox"
+             name="ticket_select_check"
+             value="<%=issue.id%>"
+      />
+      <input type="button"
+             onclick="tickets_selected('<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>', '<%=issue.id%>');"
+             value="<%=l(:button_apply)%>"
+      />
+<%=issueHtml.html_safe%>
+<a href="#"
+  onclick="window.open('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');">
+  &#63;
+</a>
+<br/>
+<%end%>
+</div>
+</form>
+  <input type="button"
+         onclick="tickets_checked('<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>');"
+         value="<%=l(:wt_apply_checked)%>"/>
+<br/>
+<br/>
+</div>
