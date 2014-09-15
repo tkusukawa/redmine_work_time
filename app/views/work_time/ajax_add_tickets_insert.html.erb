@@ -6,15 +6,19 @@
     <br/>
     <%= link_to(@issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>@add_issue.id}, :popup=>true) %>
     <%= print_issue_cost(@add_issue) %>
-    <a name="<%='done_ratio'+@add_issue.id.to_s%>"
-       href="#"
-       onclick="JavaScript:
-         input_done_ratio(
-           '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
-           <%=@add_issue.id%>);
-         return false;">
-      [<%=@add_issue.done_ratio%>&#37;]
-    </a>
+    <%if User.current.allowed_to?(:edit_issues, @add_issue.project)%>
+        <a name="<%='done_ratio'+@add_issue.id.to_s%>"
+           href="#"
+           onclick="JavaScript:
+                   input_done_ratio(
+                           '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
+                           <%=@add_issue.id%>);
+                   return false;">
+          [<%=@add_issue.done_ratio%>&#37;]
+        </a>
+    <%else%>
+        [<%=@add_issue.done_ratio%>&#37;]
+    <%end%>
 
     <a style="position:absolute;bottom:1px;right:10px;"
        href="#"
