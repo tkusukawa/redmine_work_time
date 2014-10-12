@@ -1,4 +1,4 @@
-WorkTime is a plugin to view and update Spent time by each user.
+WorkTime is a plugin of Redmine to view and update Spent time by each user.
 
 ### Installation notes ###
 
