@@ -90,7 +90,7 @@
 memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
 if memo then # この日のメモがある場合
 %>
-<div class="wt_memo_wiki_block">
+<div class="wiki wt_memo_wiki_block">
   <%=textilizable(memo.description) %>
   <div style="text-align:right;">
     (update:<%=memo.updated_on.localtime.strftime("%Y-%m-%d %H:%M")%>)
