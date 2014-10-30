@@ -1109,18 +1109,21 @@ private
     next_date = @this_date+1
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
     t2 = Time.local(next_date.year, next_date.month, next_date.day)
-    issues = Issue.find(:all,
-              :conditions => ["1 = 1
-                         and ((issues.author_id = :u
-                           and issues.created_on >= :t1
-                           and issues.created_on < :t2)
-                           or (exists (select 1 from journals
-                                       where journals.journalized_id = issues.id
-                                         and journals.journalized_type = 'Issue'
-                                         and journals.user_id = :u
-                                         and journals.created_on >= :t1
-                                         and journals.created_on < :t2)))",
-                          {:u => @this_uid, :t1 => t1, :t2 => t2, :closed => false}])
+    isu = Issue.arel_table
+    jnl = Journal.arel_table
+    union_sql = Issue.where((isu[:author_id].eq(@this_uid))
+      .and(  isu[:created_on].gteq(t1))
+      .and(  isu[:created_on].lt(t2)))
+    .union(
+      Issue.joins(isu.join(jnl).on(isu[:id].eq(jnl[:journalized_id])).join_sources.first)
+      .where(jnl[:journalized_type].eq('Issue')
+        .and(  jnl[:user_id].eq(@this_uid))
+        .and(  jnl[:created_on].gteq(t1))
+        .and(  jnl[:created_on].lt(t2))
+      ).uniq
+    )
+    issues = Issue.from("#{union_sql.to_sql} issues" )
+
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
       next if !@this_user.allowed_to?(:log_time, issue.project)
