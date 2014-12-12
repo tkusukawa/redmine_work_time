@@ -20,11 +20,13 @@ Redmine::Plugin.register :redmine_work_time do
 
   menu :account_menu, :work_time,
     {:controller => 'work_time', :action => 'index'},
+    :before => :my_account,
     :caption => :work_time,
-    :if => Proc.new{Setting.plugin_redmine_work_time['show_account_menu']}
+    :if => Proc.new{User.current.logged? && Setting.plugin_redmine_work_time['show_account_menu']}
 
   menu :project_menu, :work_time,
-    {:controller => 'work_time', :action => 'show'}, :caption => :work_time
+    {:controller => 'work_time', :action => 'show'}, :caption => :work_time,
+    :after => :gantt
 
   settings :default => {'show_account_menu' => 'true'},
            :partial => 'settings/work_time_settings'
