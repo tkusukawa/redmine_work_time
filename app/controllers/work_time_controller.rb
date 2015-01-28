@@ -259,7 +259,8 @@ class WorkTimeController < ApplicationController
 
   def update_relay(issue_id, parent_id)
     if !User.current.allowed_to?(:edit_work_time_total, @project)
-      @message = l(:wt_no_permission)
+      @message ||= ''
+      @message += l(:wt_no_permission)
       return
     end
 
@@ -269,7 +270,8 @@ class WorkTimeController < ApplicationController
     while search_id != 0 do
       route += "->#{search_id}"
       if search_id == issue_id
-        @message = l(:wt_loop_relay)+route
+        @message ||= ''
+        @message += l(:wt_loop_relay)+route
         return
       end
       relay = WtTicketRelay.find(:first, :conditions=>["issue_id=:i",{:i=>search_id}])
@@ -283,7 +285,8 @@ class WorkTimeController < ApplicationController
       relay.save
       @relay_modified = true
     else
-      @message = "Internal Error: no WtTicketRelay for ##{issue_id}"
+      @message ||= ''
+      @message += "Internal Error: no WtTicketRelay for ##{issue_id}"
     end
   end
 
@@ -455,6 +458,7 @@ private
 
     # 重複削除と順序の正規化
     if order_normalization(UserIssueMonth, :issue, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}]) then
+      @message ||= ''
       @message += '<div style="background:#faa;">Warning: normalize UserIssueMonth</div>'
       return
     end
@@ -500,6 +504,7 @@ private
 
     # 重複削除と順序の正規化
     if order_normalization(WtProjectOrders, :dsp_prj, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]) then
+      @message ||= ''
       @message += '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
       return
     end
@@ -662,6 +667,7 @@ private
   end
 
   def append_error_message_html(html, msg)
+    @message ||= ''
     @message += '<div style="background:#faa;">' + msg + '</div><br>' if !msg.blank?
   end
 
@@ -815,7 +821,8 @@ private
           end
         end
       else
-        @message = '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
+        @message ||= ''
+        @message += '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
         return
       end
     end
@@ -824,6 +831,7 @@ private
   def change_ticket_position
     # 重複削除と順序の正規化
     if order_normalization(WtTicketRelay, :issue_id, :order=>"position") then
+      @message ||= ''
       @message += '<div style="background:#faa;">Warning: normalize WtTicketRelay</div>'
       return
     end
@@ -853,6 +861,7 @@ private
           end
         end
       else
+        @message ||= ''
         @message += '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
         return
       end
@@ -863,6 +872,7 @@ private
   def change_project_position
     # 重複削除と順序の正規化
     if order_normalization(WtProjectOrders, :dsp_prj, :order=>"dsp_pos", :conditions=>"uid=-1") then
+      @message ||= ''
       @message += '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
       return
     end
@@ -875,6 +885,7 @@ private
 
     if !User.current.allowed_to?(:edit_work_time_total, @project) then
        # 権限が無ければパス
+      @message ||= ''
       @message += '<div style="background:#faa;">'+l(:wt_no_permission)+'</div>'
       return
     end
