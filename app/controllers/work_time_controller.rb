@@ -58,7 +58,7 @@ class WorkTimeController < ApplicationController
     prepare_values
     make_pack
 
-    csv_data = %Q|"user","date","project","ticket","spend time"\n|
+    csv_data = %Q|"user","date","project","ticket","spent time"\n|
 
     (@first_date..@last_date).each do |date|
       @month_pack[:odr_prjs].each do |prj_pack|
@@ -101,7 +101,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check
     calc_total
     
-    csv_data = %Q|"user","relayed project","relayed ticket","project","ticket","spend time"\n|
+    csv_data = %Q|"user","relayed project","relayed ticket","project","ticket","spent time"\n|
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
       user = mem_info[1]
@@ -185,7 +185,7 @@ class WorkTimeController < ApplicationController
     member_add_del_check
     calc_total
     
-    csv_data = %Q|"user","project","ticket","spend time"\n|
+    csv_data = %Q|"user","project","ticket","spent time"\n|
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
       user = mem_info[1]
