@@ -9,7 +9,7 @@
   <%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>
 <%end%>
   <%if User.current.admin then%>
-      <%if WtHolidays.find(:all, :conditions=>["holiday=:h and deleted_on is null",{:h=>@this_date}]).size == 0 then %>
+      <%if WtHolidays.where(["holiday=:h and deleted_on is null",{:h=>@this_date}]).all.size == 0 then %>
           <input type="button"
                  onclick="location.href='<%=url_for(@link_params.merge(:set_holiday=>@this_date))%>'"
                  value="<%=l(:wt_set_holiday)%>"
@@ -87,7 +87,7 @@
 <%#------------------------------------------- Wiki表示#%>
 <div id="memo-wiki">
 <%
-memo=WtDailyMemo.find(:first, :conditions=>["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+memo=WtDailyMemo.where(["day=:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}]).first
 if memo then # この日のメモがある場合
 %>
 <div class="wiki wt_memo_wiki_block">
@@ -99,7 +99,7 @@ if memo then # この日のメモがある場合
 <%end%>
 
 <%
-memo=WtDailyMemo.find(:first, :order=>"day DESC", :conditions=>["day<:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+memo=WtDailyMemo.where(["day<:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}]).order("day DESC").first
 if memo then
 d = memo.day
 %>
@@ -121,7 +121,7 @@ d = memo.day
 <%end%>
 
 <%
-memo=WtDailyMemo.find(:first, :order=>"day", :conditions=>["day>:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}])
+memo=WtDailyMemo.where(["day>:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}]).order("day").first
 if memo then
 d = memo.day
 %>

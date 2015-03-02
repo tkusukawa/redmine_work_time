@@ -140,8 +140,9 @@ end
   day = date.day
   wday = date.wday
   ofst_l = win_w*(day-1)
-  holidayEntry = WtHolidays.find(:all, 
-                  :conditions=>["holiday=:h and deleted_on is null",{:h=>date}])
+  holidayEntry = WtHolidays.
+          where(["holiday=:h and deleted_on is null",{:h=>date}]).
+          all
   if holidayEntry.size == 0 then
     bcolor = @wday_color[wday]
   else

@@ -61,7 +61,7 @@ prj_pack[:odr_issues].each do |issue_pack|
   issue_odr = issue_pack[:odr].to_i
 #  issue_class = issue_pack[:worked] ? "#cfc" : "#fff"
   issue_css_classes = issue_pack[:css_classes]
-  issue = Issue.find_by_id(issue_id)
+  issue = Issue.find_by(id: issue_id)
   if issue.nil? || !issue.visible? then
     issue_html = "<del>Issue:"+issue_id.to_s+"</del>"
   elsif issue.closed?

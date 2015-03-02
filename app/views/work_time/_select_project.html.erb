@@ -5,9 +5,12 @@
   <option selected="selectes"><%=l(:wt_select_project)%></option>
   <option value="<%= url_for(@link_params.merge(:prj=>false));%>">---</option>
 <%
-prjs = Project.find(:all, :joins=>"LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=#{User.current.id}",
-                          :select=>"projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos",
-                          :order=>"pos,name")
+prjs = Project.
+        joins("LEFT JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id AND wt_project_orders.uid=#{User.current.id}").
+        select("projects.*, coalesce(wt_project_orders.dsp_pos,100000) as pos").
+        order("pos,name").
+        all
+
 Project.project_tree(prjs) do |prj, level|
   next unless prj.active?
   next if !prj.visible?
