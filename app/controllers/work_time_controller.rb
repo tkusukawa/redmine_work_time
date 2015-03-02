@@ -116,7 +116,7 @@ class WorkTimeController < ApplicationController
         next unless @prj_cost.key?(dsp_prj) # 値の無いプロジェクトはパス
         next unless @prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
         next if @prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
-        prj =Project.find_by(id: dsp_prj)
+        prj =Project.find_by_id(dsp_prj)
         
         #-------------------------------------- チケットのループ
         tickets = WtTicketRelay.order("position").all
@@ -128,11 +128,11 @@ class WorkTimeController < ApplicationController
           next unless @issue_cost[issue_id].key?(user.id) # 値の無いチケットはパス
           next if @issue_cost[issue_id][user.id] == 0 # 値の無いチケットはパス
 
-          issue = Issue.find_by(id: issue_id)
+          issue = Issue.find_by_id(issue_id)
           next if issue.nil? # チケットが削除されていたらパス
           next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
 
-          parent_issue = Issue.find_by(id: @issue_parent[issue_id])
+          parent_issue = Issue.find_by_id(@issue_parent[issue_id])
           next if parent_issue.nil? # チケットが削除されていたらパス
 
           csv_data << %Q|"#{user}","#{parent_issue.project}","##{parent_issue.id} #{parent_issue.subject}",|
@@ -202,7 +202,7 @@ class WorkTimeController < ApplicationController
         next unless @r_prj_cost.key?(dsp_prj) # 値の無いプロジェクトはパス
         next unless @r_prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
         next if @r_prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
-        prj =Project.find_by(id: dsp_prj)
+        prj =Project.find_by_id(dsp_prj)
         
         #-------------------------------------- チケットのループ
         tickets = WtTicketRelay.order("position").all
@@ -214,7 +214,7 @@ class WorkTimeController < ApplicationController
           next unless @r_issue_cost[issue_id].key?(user.id) # 値の無いチケットはパス
           next if @r_issue_cost[issue_id][user.id] == 0 # 値の無いチケットはパス
 
-          issue = Issue.find_by(id: issue_id)
+          issue = Issue.find_by_id(issue_id)
           next if issue.nil? # チケットが削除されていたらパス
           next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
 
@@ -246,7 +246,7 @@ class WorkTimeController < ApplicationController
         update_relay @issue_id, @parent_id
       else
         # parent_id == -1 by set_ticket_relay_by_issue_relation
-        redmine_parent_id = Issue.find_by(id: @issue_id).parent_id
+        redmine_parent_id = Issue.find_by_id(@issue_id).parent_id
         if redmine_parent_id && redmine_parent_id >= 1 # has parent
           update_relay @issue_id, redmine_parent_id
         end
@@ -255,7 +255,7 @@ class WorkTimeController < ApplicationController
     relay = WtTicketRelay.where(["issue_id=:i",{:i=>@issue_id}]).first
     @parent_id = relay.parent
 
-    if @parent_id != 0 && !((parent = Issue.find_by(id: @parent_id)).nil?) then
+    if @parent_id != 0 && !((parent = Issue.find_by_id(@parent_id)).nil?) then
       @parent_disp = parent.closed? ? '<del>'+parent.to_s+'</del>' : parent.to_s
     end
     render :layout=>false
@@ -340,7 +340,7 @@ class WorkTimeController < ApplicationController
     @add_issue_id = params[:add_issue]
     @add_count = params[:count]
     if @this_uid==@crnt_uid then
-      add_issue = Issue.find_by(id: @add_issue_id)
+      add_issue = Issue.find_by_id(@add_issue_id)
       @add_issue_children_cnt = Issue.count(
           :conditions => ["parent_id = " + add_issue.id.to_s]
       )
@@ -392,7 +392,7 @@ class WorkTimeController < ApplicationController
   def ajax_done_ratio_input # 進捗％更新ポップアップ
     prepare_values
     issue_id = params[:issue_id]
-    @issue = Issue.find_by(id: issue_id)
+    @issue = Issue.find_by_id(issue_id)
     if @issue.nil? || @issue.closed? || !@issue.visible? then
       @issueHtml = "<del>"+@issue.to_s+"</del>"
     else
@@ -405,7 +405,7 @@ class WorkTimeController < ApplicationController
     prepare_values
     issue_id = params[:issue_id]
     done_ratio = params[:done_ratio]
-    @issue = Issue.find_by(id: issue_id)
+    @issue = Issue.find_by_id(issue_id)
     if User.current.allowed_to?(:edit_issues, @issue.project) then
       @issue.init_journal(User.current)
       @issue.done_ratio = done_ratio
@@ -426,7 +426,7 @@ private
     # ************************************* 値の準備
     @crnt_uid = User.current.id
     @this_uid = (params.key?(:user) && User.current.allowed_to?(:view_work_time_other_member, @project)) ? params[:user].to_i : @crnt_uid
-    @this_user = User.find_by(id: @this_uid)
+    @this_user = User.find_by_id(@this_uid)
 
     @today = Date.today
     @this_year = params.key?(:year) ? params[:year].to_i : @today.year
@@ -598,7 +598,7 @@ private
     # 新規工数の登録
     if params["new_time_entry"] then
       params["new_time_entry"].each do |issue_id, valss|
-        issue = Issue.find_by(id: issue_id)
+        issue = Issue.find_by_id(issue_id)
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
@@ -629,7 +629,7 @@ private
     # 既存工数の更新
     if params["time_entry"] then
       params["time_entry"].each do |id, vals|
-        tm = TimeEntry.find_by(id: id)
+        tm = TimeEntry.find_by_id(id)
         issue_id = tm.issue.id
         tm_vals = vals.slice! "remaining_hours", "status_id"
         if tm_vals["hours"].blank? then
@@ -658,7 +658,7 @@ private
   end
 
   def issue_update_to_remain_and_more(issue_id, vals)
-    issue = Issue.find_by(id: issue_id)
+    issue = Issue.find_by_id(issue_id)
     return 'Error: Issue'+issue_id+': Private!' if issue.nil? || !issue.visible?
     return if vals["remaining_hours"].blank? && vals["status_id"].blank?
     journal = issue.init_journal(User.current)
@@ -945,7 +945,7 @@ private
       # 本プロジェクトのユーザの工数でなければパス
       next unless @member_cost.key?(uid)
 
-      issue = Issue.find_by(id: iid)
+      issue = Issue.find_by_id(iid)
       next if issue.nil? # チケットが削除されていたらパス
       pid = issue.project_id
       # プロジェクト限定の対象でなければパス
@@ -955,7 +955,7 @@ private
       @member_cost[uid] += cost
 
       parent_iid = get_parent_issue(relay, iid)
-      if !Issue.find_by(id: iid) || !Issue.find_by(id: iid).visible?
+      if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible?
         iid = -1 # private
         pid = -1 # private
       end
@@ -971,7 +971,7 @@ private
       @prj_cost[pid][uid] ||= 0
       @prj_cost[pid][uid] += cost
 
-      parent_issue = Issue.find_by(id: parent_iid)
+      parent_issue = Issue.find_by_id(parent_iid)
       if parent_issue && parent_issue.visible?
         parent_pid = parent_issue.project_id
       else
@@ -996,7 +996,7 @@ private
   def get_parent_issue(relay, iid)
     @issue_parent ||= Hash.new
     return @issue_parent[iid] if @issue_parent.has_key?(iid)
-    issue = Issue.find_by(id: iid)
+    issue = Issue.find_by_id(iid)
     return 0 if issue.nil? # issueが削除されていたらそこまで
     @issue_cost[iid] ||= Hash.new
 
@@ -1042,7 +1042,7 @@ private
     # プロジェクト順の表示データを作成
     dsp_prjs = Project.joins("INNER JOIN wt_project_orders ON wt_project_orders.dsp_prj=projects.id").
         where(["wt_project_orders.uid=:u",{:u=>@this_uid}]).
-        select("projects.*", "wt_project_orders.dsp_pos as dsp_pos").
+        select("projects.*, wt_project_orders.dsp_pos as dsp_pos").
         order("wt_project_orders.dsp_pos").
         all
     dsp_prjs.each do |prj|
