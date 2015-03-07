@@ -1,13 +1,16 @@
-<%if @add_issue then%>
+﻿<%if @add_issue then%>
 <tr style="background:#ddf;" id="time_entry_pos<%=@add_issue_id%>_<%=@add_count%>">
   <td>
   <div style="position:relative;width:300px;">
     <%=@add_issue.project.name%>
     <br/>
-    <%= link_to(@issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>@add_issue.id}, :popup=>true) %>
+    <%= link_to(@issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>@add_issue.id},
+                :popup=>true, :class=>'wt_iss_link', :'data-issue'=>@add_issue.id) %>
     <%= print_issue_cost(@add_issue) %>
     <%if User.current.allowed_to?(:edit_issues, @add_issue.project)%>
         <a name="<%='done_ratio'+@add_issue.id.to_s%>"
+           class="wt_done_ratio"
+           data-issue="<%= @add_issue.id %>"
            href="#"
            onclick="JavaScript:
                    input_done_ratio(

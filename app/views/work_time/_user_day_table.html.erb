@@ -1,4 +1,4 @@
-<table border="0" id="time_input_table">
+﻿<table border="0" id="time_input_table">
   <tr style="background:#fff;font-size:14px">
     <td><%=@this_date.strftime("%Y-%m-%d")%></td>
     <td><%=l(:work_time)%></td>
@@ -94,7 +94,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%if User.current.allowed_to?(:edit_issues, issue.project)%>
         <a name="<%='done_ratio'+issue.id.to_s%>"
            class="wt_done_ratio"
-           data-issue=<%= issue_id %>
+           data-issue="<%= issue_id %>"
            href="#"
            onclick="input_done_ratio(
                    '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
@@ -190,11 +190,13 @@ prj_pack[:odr_issues].each do |issue_pack|
     <%end%>
     <%= link_to(issue_html.html_safe,
                 {:controller=>"issues", :action=>"show", :id=>issue_id},
-                :popup=>true, :class=>'wt_iss_link', 'data-issue'=>issue_id) %>
+                :popup=>true, :class=>'wt_iss_link', :'data-issue'=>issue_id) %>
 
     <%= print_issue_cost(issue) %>
     <%if User.current.allowed_to?(:edit_issues, issue.project)%>
             <a name="<%='done_ratio'+issue_id.to_s%>"
+               class="wt_done_ratio"
+               data-issue="<%= issue_id %>"
                href="#"
                onclick="input_done_ratio(
                        '<%=url_for(@link_params.merge(:action=>"ajax_done_ratio_input"))%>',
