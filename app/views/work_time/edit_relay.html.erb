@@ -19,15 +19,15 @@
 </h2>
 <table border="1" id="relay_table">
   <%
-     prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
-     tickets = WtTicketRelay.find(:all, :order=>"position")
+     prjs = WtProjectOrders.where("uid=-1").order("dsp_pos").all
+     tickets = WtTicketRelay.order("position").all
      tic_max = tickets.size
 
      prjs.each do |po|
        dsp_prj = po.dsp_prj
        dsp_pos = po.dsp_pos
        next if (!@prj_cost.has_key?(dsp_prj) || @prj_cost[dsp_prj][-1]==0.0) && (!@r_prj_cost.has_key?(dsp_prj) || @r_prj_cost[dsp_prj][-1]==0.0)
-       prj =Project.find(dsp_prj)
+       prj =Project.find_by_id(dsp_prj)
   %>
       <tr style="background:#000;color:#fff;">
         <td>

@@ -75,9 +75,9 @@ end
 </tr>
 
 <%
-prjs = WtProjectOrders.find(:all, :order=>"dsp_pos", :conditions=>"uid=-1")
+prjs = WtProjectOrders.where("uid=-1").order("dsp_pos").all
 
-tickets = WtTicketRelay.find(:all, :order=>"position")
+tickets = WtTicketRelay.order("position").all
 tic_max = tickets.size
 
 #-------------------------------------- チケット行のループ
