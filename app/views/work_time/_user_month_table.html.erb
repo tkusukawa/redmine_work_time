@@ -68,7 +68,7 @@ ofst_t = win_hs*3-5
                 <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
               </a>
             <%end%>
-            <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true) %>
+            <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue_id}, :popup=>true, :class=>'wt_iss_link', :'data-issue'=>issue_id) %>
             <%= print_issue_cost(issue) %>
           <%end%>
           <div style="position:absolute;top:15px;right:15px;">
