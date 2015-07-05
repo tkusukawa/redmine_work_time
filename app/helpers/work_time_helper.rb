@@ -3,7 +3,7 @@ module WorkTimeHelper
     return "" unless issue
     issue_cost_est = issue.estimated_hours
     return "" unless issue_cost_est
-    issue_cost = TimeEntry.sum(:hours, :conditions=>["issue_id=:i",{:i=>issue.id}])
+    issue_cost = TimeEntry.where(:issue_id => issue.id).sum(:hours).to_f
     return sprintf("(%1.1f/%1.1f)",issue_cost,issue_cost_est)
   end
 
@@ -11,7 +11,7 @@ module WorkTimeHelper
     return "" unless issue
     issue_cost_est = issue.estimated_hours
     return "" unless issue_cost_est
-    issue_cost = TimeEntry.sum(:hours, :conditions=>["issue_id=:i",{:i=>issue.id}])
+    issue_cost = TimeEntry.where(:issue_id => issue.id).sum(:hours).to_f
     return sprintf("%1.0f",issue_cost/issue_cost_est*100)
   end
 end
