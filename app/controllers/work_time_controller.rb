@@ -665,7 +665,7 @@ private
     # update "0.0" is changed
     vals["remaining_hours"] = 0 if vals["remaining_hours"] == "0.0"
     if vals['status_id'] =~ /^M+(.*)$/
-      vals['status_id'] = $1
+      vals['status_id'] = $1.to_i
     else
       vals.delete 'status_id'
     end
