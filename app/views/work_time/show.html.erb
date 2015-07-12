@@ -26,18 +26,36 @@
 <%= render :partial=>'user_month_table' %>
 
 <br/>
-<br/>
-<h2>
-  <%=l(:wt_daily_report)%>
-</h2>
-<%= form_tag @link_params do %>
-<%= hidden_field_tag('year', @this_year) %>
-<%= hidden_field_tag('month', @this_month) %>
-<%= hidden_field_tag('day', @this_day) %>
-<%= hidden_field_tag('user', @this_uid) %>
-<%= hidden_field_tag('prj', @restrict_project) %>
+<hr/>
 
-<%= render :partial=>'user_day_table' %>
+<%= form_tag @link_params do %>
+    <h2>
+      <%=l(:wt_daily_report)%>
+      <%=@this_date.strftime("%Y-%m-%d")%>
+    </h2>
+
+    <%= hidden_field_tag('year', @this_year) %>
+    <%= hidden_field_tag('month', @this_month) %>
+    <%= hidden_field_tag('day', @this_day) %>
+    <%= hidden_field_tag('user', @this_uid) %>
+    <%= hidden_field_tag('prj', @restrict_project) %>
+
+    <table style="background: #eeeeee;"><tr><td>
+      <table style="display:inline-block; border:0;">
+        <tr>
+          <td><%=l(:wt_legend)%>:</td>
+          <td class='wt_iss_default' width='100px' align='center'><%=l(:wt_style_default)%></td>
+          <td class='wt_iss_assigned' width='100px' align='center'><%=l(:wt_style_assigned)%></td>
+          <td class='wt_iss_worked' width='100px' align='center'><%=l(:wt_style_worked)%></td>
+          <td class='wt_iss_assigned_worked' width='100px' align='center'><%=l(:wt_style__assigned_worked)%></td>
+          <td class='wt_iss_overdue' width='100px' align='center'><%=l(:wt_style_overdue)%>
+          <td class='wt_iss_assigned_overdue' width='100px' align='center'><%=l(:wt_style_assigned_overdue)%>
+          </td><td class='wt_iss_overdue_worked' width='100px' align='center'><%=l(:wt_style_overdue_worked)%></td>
+          <td class='wt_iss_assigned_overdue_worked' width='100px' align='center'><%=l(:wt_style_assigned_overdue_worked)%></td>
+        </tr>
+      </table>
+    </td></tr></table>
+    <%= render :partial=>'user_day_table' %>
 
 <%if @this_uid==@crnt_uid || User.current.allowed_to?(:edit_work_time_other_member, @project) %>
         <%= submit_tag l(:wt_update) %>
@@ -62,22 +80,10 @@
 <%end%>
 
   <%#------------------------- Legend for the daily table%>
-  <br/>
-  <B><%=l(:wt_legend)%>:</B>
-  <table border="0">
-    <tr>
-      <td class='wt_iss_default' width='100px' align='center'><%=l(:wt_style_default)%></td>
-      <td class='wt_iss_assigned' width='100px' align='center'><%=l(:wt_style_assigned)%></td>
-      <td class='wt_iss_worked' width='100px' align='center'><%=l(:wt_style_worked)%></td>
-      <td class='wt_iss_assigned_worked' width='100px' align='center'><%=l(:wt_style__assigned_worked)%></td>
-      <td class='wt_iss_overdue' width='100px' align='center'><%=l(:wt_style_overdue)%>
-      <td class='wt_iss_assigned_overdue' width='100px' align='center'><%=l(:wt_style_assigned_overdue)%>
-      </td><td class='wt_iss_overdue_worked' width='100px' align='center'><%=l(:wt_style_overdue_worked)%></td>
-      <td class='wt_iss_assigned_overdue_worked' width='100px' align='center'><%=l(:wt_style_assigned_overdue_worked)%></td>
-    </tr>
-  </table>
+    <br/>
+    <br/>
+    <hr/>
 
-<br/>
 <h2 id="memo">
   <%=link_to(@this_date.strftime("%Y-%m-%d")+'('+@wday_name[@this_date.wday]+') '+@this_user.to_s,
     @link_params.merge(:anchor=>"memo"))
