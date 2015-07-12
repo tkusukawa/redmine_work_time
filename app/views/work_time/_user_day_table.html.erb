@@ -152,22 +152,14 @@ prj_pack[:odr_issues].each do |issue_pack|
   <td>
     <%= text_field_tag("new_time_entry["+issue_id.to_s+"][0][comments]", "", :size=>80)%>
   </td>
-  <%@custom_fields.each do |cf|
-    def cf.custom_field
-      return self
-    end
-    def cf.value
-      return self.default_value
-    end
-    def cf.true?
-      return self.default_value
-    end
-    def cf.customized
-      nil
-    end
+  <%if @custom_fields.length != 0
+      dummy_hour = TimeEntry.new(:project => issue.project, :issue => issue, :user => @this_user, :spent_on => @this_date)
+      @custom_fields.each do |cf|
+        cfv = dummy_hour.custom_field_values.detect {|v| v.custom_field_id == cf.id}
   %>
-     <td><%= custom_field_tag "new_time_entry["+issue_id.to_s+"][0]", cf %></td>
-  <% end %>
+     <td><%= custom_field_tag "new_time_entry["+issue_id.to_s+"][0]", cfv %></td>
+      <%end
+     end%>
 </tr>
 <%
   else
@@ -258,7 +250,6 @@ prj_pack[:odr_issues].each do |issue_pack|
   </td>
   <% @custom_fields.each do |cf|
     cfv = hour.custom_field_values.detect {|v| v.custom_field_id == cf.id}
-    def cf.customized; nil; end;
   %>
      <td><%= custom_field_tag "time_entry["+hour_id.to_s+"]", cfv %></td>
   <% end %>
