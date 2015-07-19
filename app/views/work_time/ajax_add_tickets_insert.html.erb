@@ -64,10 +64,9 @@
   </td>
   <%if @custom_fields.length != 0
       dummy_hour = TimeEntry.new(:project => @add_issue.project, :issue => @add_issue, :user => @this_user, :spent_on => @this_date)
-      @custom_fields.each do |cf|
-        cfv = dummy_hour.custom_field_values.detect {|v| v.custom_field_id == cf.id}
+      dummy_hour.custom_field_values.each do |cfv|
   %>
-     <td><%= custom_field_tag "new_time_entry["+@add_issue_id+"]["+@add_count+"]", cfv %></td>
+     <td><%= custom_field_tag "new_time_entry_"+@add_issue_id+"_"+@add_count, cfv %></td>
       <%end end%>
 </tr>
 <%end%>
