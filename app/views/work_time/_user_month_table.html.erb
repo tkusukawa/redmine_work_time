@@ -72,7 +72,7 @@ ofst_t = win_hs*3-5
             <%= print_issue_cost(issue) %>
           <%end%>
           <div style="position:absolute;top:15px;right:15px;">
-            <%=sprintf("%1.1f", issue_pack[:total])%>
+            <%=sprintf("%1.2f", issue_pack[:total])%>
           </div>
         </div>
       </div>
@@ -99,7 +99,7 @@ ofst_t = win_hs*3-5
 <%end%>
         <%= prj.name%>
           <div style="position:absolute;top:1px;right:10px;">
-            <%=sprintf("%1.1f",prj_pack[:total])%>
+            <%=sprintf("%1.2f",prj_pack[:total])%>
           </div>
       </div>
     </div>
@@ -113,17 +113,17 @@ end
           <div style="position:relative;top:1px;left:1px;width:<%=box_w-4%>px;height:<%=win_hs-2%>px;">
             private
               <div style="position:absolute;top:1px;right:10px;">
-                <%=sprintf("%1.1f", @month_pack[:other])%>
+                <%=sprintf("%1.2f", @month_pack[:other])%>
               </div>
           </div>
         </div>
       </div>
     <%end%>
       <div style="position:absolute;bottom:10px;right:10px;">
-        <%=sprintf("%1.1f", @month_pack[:total])%>
+        <%=sprintf("%1.2f", @month_pack[:total])%>
       </div>
       <div style="position:absolute;top:<%=win_hs*2%>px;right:10px;">
-        <%=sprintf("%1.1f", @month_pack[:total])%>
+        <%=sprintf("%1.2f", @month_pack[:total])%>
       </div>
     </div>
 
@@ -193,7 +193,7 @@ day_cost = 0
 <%
   if issue_pack[:total_by_day].has_key?(date) then
 %>
-          <%=sprintf("%1.1f", issue_pack[:total_by_day][date])%>
+          <%=sprintf("%1.2f", issue_pack[:total_by_day][date])%>
 <%
    end
 %>
@@ -208,7 +208,7 @@ day_cost = 0
     <div style="background:#000;color:#fff;font-size:0.8em;">
       <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-1%>px;height:<%=win_hs-1%>px;">
 <%if prj_pack[:total_by_day].has_key?(date) then%>
-        <%=sprintf("%1.1f", prj_pack[:total_by_day][date])%>
+        <%=sprintf("%1.2f", prj_pack[:total_by_day][date])%>
 <%end%>
       </div>
     </div>
@@ -222,7 +222,7 @@ end
       <div style="font-size:0.8em;">
         <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
 <%if @month_pack[:total_by_day].has_key?(date) then%>
-          <%= sprintf("%1.1f", @month_pack[:total_by_day][date])%>
+          <%= sprintf("%1.2f", @month_pack[:total_by_day][date])%>
 <%end%>
         </div>
       </div>
@@ -233,7 +233,7 @@ end
     <div style="background:#000;color:#fff;font-size:0.8em;">
       <div style="text-align:center;position:relative;top:5px;left:1px;width:<%=win_w-2%>px;height:<%=win_hs-2%>px;">
 <%if @month_pack[:other_by_day].has_key?(date) then%>
-          <%= sprintf("%1.1f", @month_pack[:other_by_day][date])%>
+          <%= sprintf("%1.2f", @month_pack[:other_by_day][date])%>
 <%end%>
       </div>
     </div>
