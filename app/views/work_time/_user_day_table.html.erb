@@ -1,4 +1,4 @@
-﻿<table border="0" id="time_input_table">
+<table border="0" id="time_input_table">
   <tr style="background:#fff;font-size:14px">
     <td>&nbsp;</td>
     <td><%=l(:work_time)%></td>
@@ -43,7 +43,7 @@
      <%end%>
         <%=prj.name%>
   </td>
-  <td><%=sprintf("%1.1f", prj_pack[:total])%></td>
+  <td><%=sprintf("%1.2f", prj_pack[:total])%></td>
   <% if @is_registerd_backlog then %>
   <td>&nbsp;</td>
   <% end %>
@@ -260,9 +260,9 @@ end
 <% if @day_pack[:other]!=0 then %>
 <tr style="background:#000;color:#fff;">
   <td>private</td>
-  <td><%=sprintf("%1.1f", @day_pack[:other])%></td>
+  <td><%=sprintf("%1.2f", @day_pack[:other])%></td>
   <% if @is_registerd_backlog then %>
-      <td><%=sprintf("%1.1f", @day_pack[:other_remain]) if @day_pack[:other_remain]%></td>
+      <td><%=sprintf("%1.2f", @day_pack[:other_remain]) if @day_pack[:other_remain]%></td>
   <% end %>
   <td>&nbsp;</td>
   <td>&nbsp;</td>
@@ -274,7 +274,7 @@ end
 <% end %>
 <tr align="center" id="time_input_table_bottom" style="background:#ddd;">
   <td>&nbsp;</td>
-  <td><span id='currentTotal' title='<%=l(:wt_saved_value)%> <%=sprintf("%1.1f", @day_pack[:total])%>'><%=sprintf("%1.1f", @day_pack[:total])%></span></td>
+  <td><span id='currentTotal' title='<%=l(:wt_saved_value)%> <%=sprintf("%1.2f", @day_pack[:total])%>'><%=sprintf("%1.2f", @day_pack[:total])%></span></td>
   <% if @is_registerd_backlog then %>
   <td>&nbsp;</td>
   <% end %>
