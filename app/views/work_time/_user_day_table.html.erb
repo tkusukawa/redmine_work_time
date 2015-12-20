@@ -218,7 +218,7 @@ prj_pack[:odr_issues].each do |issue_pack|
   </div>
   </td>
   <td>
-    <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", hour.hours, :size=>5, :oninput => "sumDayTimes()") %>
+    <%= text_field_tag("time_entry["+hour_id.to_s+"][hours]", sprintf("%1.2f", hour.hours), :size=>5, :oninput => "sumDayTimes()") %>
   </td>
   <% if @is_registerd_backlog then %>
   <td>
