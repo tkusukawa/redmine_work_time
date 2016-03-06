@@ -62,13 +62,7 @@ prj_pack[:odr_issues].each do |issue_pack|
 #  issue_class = issue_pack[:worked] ? "#cfc" : "#fff"
   issue_css_classes = issue_pack[:css_classes]
   issue = Issue.find_by_id(issue_id)
-  if issue.nil? || !issue.visible? then
-    issue_html = "<del>Issue:"+issue_id.to_s+"</del>"
-  elsif issue.closed?
-    issue_html = "<del>"+issue.to_s+"</del>"
-  else
-    issue_html = issue.to_s
-  end
+  issue_html = wk_pretty_issue_name issue, issue_id
 
   if issue_pack[:each_entries].length==0 then
 %>
@@ -87,7 +81,7 @@ prj_pack[:odr_issues].each do |issue_pack|
     </a>
     <%end%>
 
-    <%= link_to(issue_html.html_safe,
+    <%= link_to(issue_html,
                 {:controller=>"issues", :action=>"show", :id=>issue_id},
                 :popup=>true, :class=>'wt_iss_link', :'data-issue'=>issue_id) %>
     <%= print_issue_cost(issue) %>
@@ -179,7 +173,7 @@ prj_pack[:odr_issues].each do |issue_pack|
       <%= (issue_odr.to_i<0) ? "*" : issue_odr %>
     </a>
     <%end%>
-    <%= link_to(issue_html.html_safe,
+    <%= link_to(issue_html,
                 {:controller=>"issues", :action=>"show", :id=>issue_id},
                 :popup=>true, :class=>'wt_iss_link', :'data-issue'=>issue_id) %>
 

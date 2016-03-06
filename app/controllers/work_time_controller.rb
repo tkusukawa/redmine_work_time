@@ -463,7 +463,7 @@ private
     # 重複削除と順序の正規化
     if order_normalization(UserIssueMonth, :issue, :order=>"odr", :conditions=>["uid=:u",{:u=>@this_uid}]) then
       @message ||= ''
-      @message += '<div style="background:#faa;">Warning: normalize UserIssueMonth</div>'
+      #@message += '<div style="background:#faa;">Warning: normalize UserIssueMonth</div>'
       return
     end
 
@@ -509,7 +509,7 @@ private
     # 重複削除と順序の正規化
     if order_normalization(WtProjectOrders, :dsp_prj, :order=>"dsp_pos", :conditions=>["uid=:u",{:u=>@this_uid}]) then
       @message ||= ''
-      @message += '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
+      #@message += '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
       return
     end
 
@@ -839,7 +839,7 @@ private
     # 重複削除と順序の正規化
     if order_normalization(WtTicketRelay, :issue_id, :order=>"position") then
       @message ||= ''
-      @message += '<div style="background:#faa;">Warning: normalize WtTicketRelay</div>'
+      #@message += '<div style="background:#faa;">Warning: normalize WtTicketRelay</div>'
       return
     end
 
@@ -882,7 +882,7 @@ private
     # 重複削除と順序の正規化
     if order_normalization(WtProjectOrders, :dsp_prj, :order=>"dsp_pos", :conditions=>"uid=-1") then
       @message ||= ''
-      @message += '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
+      #@message += '<div style="background:#faa;">Warning: normalize WtProjectOrders</div>'
       return
     end
 

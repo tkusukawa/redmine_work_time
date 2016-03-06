@@ -130,7 +130,6 @@ tickets.each do |tic|
   next if issue.nil? # チケットが削除されていたらパス
   next if issue.project_id != dsp_prj # このプロジェクトに表示するチケットでない場合はパス
 
-  issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
 %>
 <tr>
 <td>
@@ -146,7 +145,7 @@ tickets.each do |tic|
       <%=tic.position%>
     </a>
 <%end%>
-  <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
+  <%= link_to( wk_pretty_issue_name(issue), {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
   <%= print_issue_cost(issue) %>
 </td>
 

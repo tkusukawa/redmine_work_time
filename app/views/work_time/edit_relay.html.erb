@@ -76,7 +76,6 @@
            parent_id = ""
            next if issue.nil? # チケットが削除されていたらパス
            next if issue.project_id != dsp_prj
-           issueHtml = issue.closed? ? "<del>"+issue.to_s+"</del>" : issue.to_s
 
            if tic.parent && tic.parent != 0 then
              parent = Issue.find_by_id(tic.parent)
@@ -120,7 +119,7 @@
                     <%=tic.position%>
                   </a>
               <%end%>
-              <%= link_to(issueHtml.html_safe, {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
+              <%= link_to(wk_pretty_issue_name(issue), {:controller=>"issues", :action=>"show", :id=>issue.id}, :popup=>true) %>
               <%= print_issue_cost(issue) %>
             </td>
             <td style="text-align:right;"><%=cost.html_safe%></td>

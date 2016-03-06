@@ -26,14 +26,7 @@
 <br/>
 <%
 @issues.each do |issue|
-  next if issue.nil? || !issue.visible?
-  if issue.closed? then
-    next if opt[:all] == '0'
-    issueHtml = "<del>"+issue.to_s+"</del>"
-  else
-    issueHtml = issue.to_s
-  end
-  issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
+  next if issue.nil? || !issue.visible? || (issue.closed? && opt[:all] == '0')
 %>
 <div style="font-size:14px;">
 <input type="button"
@@ -46,7 +39,7 @@
        "
        value="<%=l(:button_apply)%>"
 />
-<%=issueHtml.html_safe%>
+(<%= link_to_user(issue.assigned_to || '-') %>): <%= wk_pretty_issue_name issue %>
 <a href="#"
   onclick="window.open('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');
           return false;">

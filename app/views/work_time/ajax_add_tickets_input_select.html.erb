@@ -44,15 +44,7 @@
 <div id="tickets_check">
 <%
 @issues.each do |issue|
-  next if issue.nil? || !issue.visible?
-  next if opt[:other] == '0' && issue.assigned_to_id != User.current.id
-  if issue.closed? then
-    next if opt[:all] == '0'
-    issueHtml = "<del>"+issue.to_s+"</del>"
-  else
-    issueHtml = issue.to_s
-  end
-  issueHtml = "(#{link_to_user(issue.assigned_to || '-')}): #{issueHtml}"
+  next if issue.nil? || !issue.visible? || (opt[:other] == '0' && issue.assigned_to_id != User.current.id) || (issue.closed? && opt[:all] == '0')
 %>
       <input type="checkbox"
              name="ticket_select_check"
@@ -62,7 +54,7 @@
              onclick="tickets_selected('<%=url_for(@link_params.merge(:action=>"ajax_add_tickets_insert"))%>', '<%=issue.id%>');"
              value="<%=l(:button_apply)%>"
       />
-<%=issueHtml.html_safe%>
+(<%= link_to_user(issue.assigned_to || '-') %>): <%= wk_pretty_issue_name issue %>
 <a href="#"
   onclick="window.open('<%=url_for(:controller=>"issues", :action=>"show", :id=>issue.id)%>');">
   &#63;
