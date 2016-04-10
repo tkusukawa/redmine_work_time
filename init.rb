@@ -11,7 +11,8 @@ Redmine::Plugin.register :redmine_work_time do
   project_module :work_time do
     permission :view_work_time_tab, {:work_time =>
             [:show,:member_monthly_data,
-            :total,:total_data,:edit_relay,:relay_total,:relay_total_data,
+             :total,:total_data,:edit_relay,:relay_total,:relay_total_data,
+             :project_settings,
             ]}
     permission :view_work_time_other_member, {}
     permission :edit_work_time_total, {}
@@ -28,7 +29,13 @@ Redmine::Plugin.register :redmine_work_time do
     {:controller => 'work_time', :action => 'show'}, :caption => :work_time,
     :after => :gantt
 
-  settings :default => {'show_account_menu' => 'true'},
+  settings :default => {'account_start_days' => {}, 'show_account_menu' => 'true'},
            :partial => 'settings/work_time_settings'
 
+  Rails.configuration.to_prepare do
+    require_dependency 'projects_helper'
+    unless ProjectsHelper.included_modules.include? WorkTimeProjectsHelperPatch
+      ProjectsHelper.send(:include, WorkTimeProjectsHelperPatch)
+    end
+  end
 end

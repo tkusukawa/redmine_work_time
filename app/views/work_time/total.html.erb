@@ -9,7 +9,12 @@
 [<%= link_to(l(:wt_relay_total), @link_params.merge(:action=>"relay_total")) %>]
 </div>
 
-<h2><%=l(:wt_raw_total)%></h2>
+<h2>
+  <%=l(:wt_raw_total)%>
+  <%=link_to("<<", @link_params.merge(:day=>@last_month.day, :month=>@last_month.month, :year=>@last_month.year))%>
+  <%= @first_date.strftime("%Y/%m/%d") %> - <%= @last_date.strftime("%Y/%m/%d") %>
+  <%=link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year))%>
+</h2>
 
 <%
 if !User.current.allowed_to?(:view_work_time_other_member, @project) then
@@ -20,11 +25,6 @@ end
 <table border="1">
 <tr valign="top">
 <td>
-<div style="text-align:center;position:relative;top:1px;left:1px;font-size:2.0em;">
-<%=link_to("<<", @link_params.merge(:day=>@last_month.day, :month=>@last_month.month, :year=>@last_month.year))%>
-<%=@this_date.strftime("%Y-%m")%>
-<%=link_to(">>", @link_params.merge(:day=>@next_month.day, :month=>@next_month.month, :year=>@next_month.year))%>
-</div>
 </td>
 <td style="background:#ddd;"></td>
 <%

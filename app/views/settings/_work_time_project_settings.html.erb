@@ -1,0 +1,17 @@
+<%
+  if Setting.plugin_redmine_work_time[:account_start_days] &&
+      Setting.plugin_redmine_work_time[:account_start_days][@project.id.to_s]
+    day = Setting.plugin_redmine_work_time[:account_start_days][@project.id.to_s]
+  else
+    day = 1
+  end
+%>
+<%= form_tag(:controller=>"work_time", :id=>@project, :action => "project_settings") do %>
+    <p>
+      <%=content_tag(:label, l(:wt_account_start_day))%>
+      <%=number_field_tag 'account_start_day', day , in: 1..31 %>
+    </p>
+    <%= submit_tag l(:wt_update) %>
+<%end%>
+
+

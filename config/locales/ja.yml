@@ -44,3 +44,4 @@ ja:
   wt_style_assigned_overdue: "担当,期限超過"
   wt_style_overdue_worked: "期限超過,書込"
   wt_style_assigned_overdue_worked: "担当,超過,書込"
+  wt_account_start_day: "集計開始日"

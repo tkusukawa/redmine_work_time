@@ -414,6 +414,21 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
+  def project_settings
+    @message = ""
+    require_login || return
+    find_project
+    authorize
+    #prepare_values
+    #render "settings/work_time"
+    settings = Setting.plugin_redmine_work_time
+    settings[:account_start_days] ||= Hash.new
+    settings[:account_start_days][@project.id.to_s] = params[:account_start_day]
+    Setting.plugin_redmine_work_time = settings
+    redirect_to :controller => 'projects',
+                :action => "settings", :id => @project, :tab => 'work_time'
+  end
+
 private
   def find_project
     # Redmine Pluginとして必要らしいので@projectを設定
@@ -428,18 +443,30 @@ private
     @this_uid = (params.key?(:user) && User.current.allowed_to?(:view_work_time_other_member, @project)) ? params[:user].to_i : @crnt_uid
     @this_user = User.find_by_id(@this_uid)
 
+    if @project &&
+        Setting.plugin_redmine_work_time[:account_start_days] &&
+        Setting.plugin_redmine_work_time[:account_start_days][@project.id.to_s]
+      @account_start_day = Setting.plugin_redmine_work_time[:account_start_days][@project.id.to_s].to_i
+    else
+      @account_start_day = 1
+    end
+
     @today = Date.today
-    @this_year = params.key?(:year) ? params[:year].to_i : @today.year
-    @this_month = params.key?(:month) ? params[:month].to_i : @today.month
-    @this_day = params.key?(:day) ? params[:day].to_i : @today.day
-    @this_date = Date.new(@this_year, @this_month, @this_day)
+    year = params.key?(:year) ? params[:year].to_i : @today.year
+    month = params.key?(:month) ? params[:month].to_i : @today.month
+    day = params.key?(:day) ? params[:day].to_i : @today.day
+    @this_date = Date.new(year, month, day)
+    display_date = @this_date
+    display_date <<= 1 if day < @account_start_day
+    @display_year = display_date.year
+    @display_month = display_date.month
+
     @last_month = @this_date << 1
     @next_month = @this_date >> 1
-    @month_str = sprintf("%04d-%02d", @this_year, @this_month)
 
     @restrict_project = (params.key?(:prj) && params[:prj].to_i > 0) ? params[:prj].to_i : false
 
-    @first_date = Date.new(@this_year, @this_month, 1)
+    @first_date = Date.new(@display_year, @display_month, @account_start_day)
     @last_date = (@first_date >> 1) - 1
 
     @month_names = l(:wt_month_names).split(',')
@@ -447,7 +474,7 @@ private
     @wday_color = ["#faa", "#eee", "#eee", "#eee", "#eee", "#eee", "#aaf"]
 
     @link_params = {:controller=>"work_time", :id=>@project,
-                    :year=>@this_year, :month=>@this_month, :day=>@this_day,
+                    :year=>year, :month=>month, :day=>day,
                     :user=>@this_uid, :prj=>@restrict_project}
     @is_registerd_backlog = false
     begin

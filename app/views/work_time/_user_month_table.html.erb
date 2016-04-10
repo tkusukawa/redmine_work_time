@@ -19,9 +19,9 @@ end
     <div style="position:relative;height:<%=box_h%>px;overflow:auto;">
 
       <div style="position:absolute;top:1px;left:1px;">
-      <div style="background: #fff;font-size:2.0em;">
+      <div style="background: #fff;font-size:1.5em;">
       <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=box_w-2%>px;height:<%=win_hs*2-1%>px;">
-        <%=@this_date.strftime("%Y-%m") %>
+        <%= @first_date.strftime("%Y/%m/%d") %> - <%= @last_date.strftime("%Y/%m/%d") %>
       </div>
       </div>
       <div style="text-align:right;position:absolute;top:1px;left:1px;width:<%=box_w-2%>px;height:<%=win_hs*2-1%>px;">
@@ -132,10 +132,13 @@ end
     <div style="position:relative;height:<%=box_h%>px;overflow:auto;" id="day_scroll">
 
 <% # チケット毎の合計時間を計算＆表示
+day_pos = 0
 (@first_date..@last_date).each do |date|
+  day_pos += 1
+  month = date.month
   day = date.day
   wday = date.wday
-  ofst_l = win_w*(day-1)
+  ofst_l = win_w*(day_pos-1)
   holidayEntry = WtHolidays.
           where(["holiday=:h and deleted_on is null",{:h=>date}]).
           all
@@ -144,7 +147,7 @@ end
   else
     bcolor = "#fbc"
   end
-  if day==@this_day then
+  if day==@this_date.day then
     bcolor_day = "#cfc"
     today_id = 'id=day_scroll_today'
   else
@@ -155,7 +158,7 @@ end
     <div style="position:absolute;top:1px;left:<%=ofst_l%>px;" <%=today_id%> >
       <div style="background:<%=bcolor_day%>;">
         <div style="text-align:center;position:relative;top:1px;left:1px;width:<%=win_w-1%>px;height:<%=win_hs-1%>px;">
-          <%= link_to(day, @link_params.merge(:day=>day)) %>
+          <%= link_to(day, @link_params.merge(:day=>day, :month=>month)) %>
         </div>
       </div>
     </div>

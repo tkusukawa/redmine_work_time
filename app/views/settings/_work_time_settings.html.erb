@@ -1,8 +1,8 @@
-<table>
-  <tr>
-    <td> show account menu </td>
-    <td>
-      <%= check_box_tag 'settings[show_account_menu]', true, @settings['show_account_menu'] %>
-    </td>
-  </tr>
-</table>
+<p>
+  <%= label_tag :settings_show_account_menu, 'show account menu' %>
+  <%= check_box_tag 'settings[show_account_menu]', true, @settings[:show_account_menu] %>
+</p>
+
+<% (@settings[:account_start_days] || {}).each do |k,v| %>
+    <%= hidden_field_tag "settings[account_start_days][#{k}]", v %>
+<% end %>

@@ -34,9 +34,9 @@
       <%=@this_date.strftime("%Y-%m-%d")%>
     </h2>
 
-    <%= hidden_field_tag('year', @this_year) %>
-    <%= hidden_field_tag('month', @this_month) %>
-    <%= hidden_field_tag('day', @this_day) %>
+    <%= hidden_field_tag('year', @this_date.year) %>
+    <%= hidden_field_tag('month', @this_date.month) %>
+    <%= hidden_field_tag('day', @this_date.day) %>
     <%= hidden_field_tag('user', @this_uid) %>
     <%= hidden_field_tag('prj', @restrict_project) %>
 
