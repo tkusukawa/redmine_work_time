@@ -1,13 +1,11 @@
 <%
-  value = true
-  @settings = ActionController::Parameters.new unless @settings.is_a?(ActionController::Parameters)
-  value = @settings[:show_account_menu] if @settings.has_key?(:show_account_menu)
+  @settings = Hash.new unless @settings.is_a?(Hash)
 %>
 <p>
   <%= label_tag :settings_show_account_menu, 'show account menu' %>
-  <%= check_box_tag 'settings[show_account_menu]', true, value %>
+  <%= check_box_tag 'settings[show_account_menu]', true, @settings['show_account_menu'] %>
 </p>
 
-<% (@settings[:account_start_days] || {}).each do |k,v| %>
+<% (@settings['account_start_days'] || {}).each do |k,v| %>
     <%= hidden_field_tag "settings[account_start_days][#{k}]", v %>
 <% end %>

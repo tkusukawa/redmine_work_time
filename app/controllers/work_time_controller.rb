@@ -414,20 +414,18 @@ class WorkTimeController < ApplicationController
     render(:layout=>false)
   end
 
-  def project_settings
+  def register_project_settings
     @message = ""
     require_login || return
     find_project
     authorize
-    #prepare_values
-    #render "settings/work_time"
-    settings = Setting.plugin_redmine_work_time
-    settings = ActionController::Parameters.new unless settings.is_a?(ActionController::Parameters)
-    settings[:account_start_days] = ActionController::Parameters.new unless settings.has_key?(:account_start_days)
-    settings[:account_start_days][@project.id.to_s] = params[:account_start_day]
-    Setting.plugin_redmine_work_time = settings
+    @settings = Setting.plugin_redmine_work_time
+    @settings = Hash.new unless @settings.is_a?(Hash)
+    @settings['account_start_days'] = Hash.new unless @settings['account_start_days'].is_a?(Hash)
+    @settings['account_start_days'][@project.id.to_s] = params['account_start_day']
+    Setting.plugin_redmine_work_time = @settings
     redirect_to :controller => 'projects',
-                :action => "settings", :id => @project, :tab => 'work_time'
+                :action => 'settings', :id => @project, :tab => 'work_time'
   end
 
 private
@@ -445,11 +443,10 @@ private
     @this_user = User.find_by_id(@this_uid)
 
     if @project &&
-      Setting.plugin_redmine_work_time.is_a?(ActionController::Parameters) &&
-      Setting.plugin_redmine_work_time.has_key?(:account_start_days) &&
-      Setting.plugin_redmine_work_time[:account_start_days].is_a?(ActionController::Parameters)
-      Setting.plugin_redmine_work_time[:account_start_days].has_key?(@project.id.to_s)
-        @account_start_day = Setting.plugin_redmine_work_time[:account_start_days][@project.id.to_s].to_i
+      Setting.plugin_redmine_work_time.is_a?(Hash) &&
+      Setting.plugin_redmine_work_time['account_start_days'].is_a?(Hash) &&
+      Setting.plugin_redmine_work_time['account_start_days'].has_key?(@project.id.to_s)
+        @account_start_day = Setting.plugin_redmine_work_time['account_start_days'][@project.id.to_s].to_i
     else
       @account_start_day = 1
     end

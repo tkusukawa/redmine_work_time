@@ -12,7 +12,7 @@ Redmine::Plugin.register :redmine_work_time do
     permission :view_work_time_tab, {:work_time =>
             [:show,:member_monthly_data,
              :total,:total_data,:edit_relay,:relay_total,:relay_total_data,
-             :project_settings,
+             :register_project_settings,
             ]}
     permission :view_work_time_other_member, {}
     permission :edit_work_time_total, {}
