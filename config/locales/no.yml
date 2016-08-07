@@ -25,6 +25,7 @@
   wt_input_ticket_numbers: "eller legg inn saksnummer"
   wt_delete_closed_tickets: "Slett lukkede poster"
   wt_data_download: "Last ned data"
+  wt_data_download_with_act: "Last ned data(each activity)"
   wt_opt_disp_ticket_with_closed: "[vis lukkede saker]"
   wt_opt_disp_ticket_opened_only: "[vis bare åpne saker]"
   wt_opt_disp_ticket_with_other_member: "[vis andre brukeres saker]"

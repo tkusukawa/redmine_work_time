@@ -26,6 +26,7 @@ ko:
   wt_input_ticket_numbers: "또는 티켓 번호를 입력하세요."
   wt_delete_closed_tickets: "완료된 티켓 삭제"
   wt_data_download: "데이터 다운로드"
+  wt_data_download_with_act: "데이터 다운로드(each activity)"
   wt_opt_disp_ticket_with_closed: "[display closed ticket]"
   wt_opt_disp_ticket_opened_only: "[display opened ticket only]"
   wt_opt_disp_ticket_with_other_member: "[display other members ticket]"

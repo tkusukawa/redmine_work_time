@@ -25,6 +25,7 @@ de:
   wt_input_ticket_numbers: "oder Ticket-Nr. direkt eingeben"
   wt_delete_closed_tickets: "delete closed tickets"
   wt_data_download: "Daten laden"
+  wt_data_download_with_act: "Daten laden(each activity)"
   wt_opt_disp_ticket_with_closed: "[display closed ticket]"
   wt_opt_disp_ticket_opened_only: "[display opened ticket only]"
   wt_opt_disp_ticket_with_other_member: "[display other members ticket]"

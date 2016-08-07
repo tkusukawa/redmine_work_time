@@ -193,6 +193,10 @@ if @r_prj_cost.has_key?(-1) then
        onclick="location.href='<%=url_for(@link_params.merge(:action=>"relay_total_data"))%>'"
        value="<%=l(:wt_data_download)%>"
 />
+<input type="button"
+       onclick="location.href='<%=url_for(@link_params.merge(:action=>"relay_total_data_with_act"))%>'"
+       value="<%=l(:wt_data_download_with_act)%>"
+/>
 
 <div style="text-align:right;">
 <%= render :partial=>'select_project' %> <br/>

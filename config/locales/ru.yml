@@ -25,6 +25,7 @@ ru:
   wt_input_ticket_numbers: "или введите номера задач (через запятую)"
   wt_delete_closed_tickets: "удалить закрытые задачи"
   wt_data_download: "экспорт данных"
+  wt_data_download_with_act: "экспорт данных(each activity)"
   wt_opt_disp_ticket_with_closed: "[отобразить закрытые задачи]"
   wt_opt_disp_ticket_opened_only: "[отобразить только открытые задачи]"
   wt_opt_disp_ticket_with_other_member: "[отобразить задачи других участников]"

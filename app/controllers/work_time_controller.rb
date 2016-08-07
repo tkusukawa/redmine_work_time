@@ -146,6 +146,50 @@ class WorkTimeController < ApplicationController
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report_raw.csv"
   end
 
+  def total_data_with_act
+    find_project
+    authorize
+    prepare_values
+    change_member_position
+    change_ticket_position
+    change_project_position
+    member_add_del_check
+    calc_total
+
+    csv_data = %Q|"user","relayed project","relayed ticket","project","ticket","activity","spent time"\n|
+    @issue_act_cost.each do |issue_id, user_act_cost|
+      if issue_id >0
+        issue = Issue.find_by_id(issue_id)
+        next if issue.nil? # チケットが削除されていたらパス
+
+        parent_issue = Issue.find_by_id(@issue_parent[issue_id])
+        next if parent_issue.nil? # チケットが削除されていたらパス
+
+        prj = issue.project
+
+        user_act_cost.each do |user_id, act_cost|
+          user = User.find_by_id(user_id)
+          act_cost.each do |act_id, cost|
+            act = TimeEntryActivity.find_by_id(act_id)
+
+            csv_data << %Q|"#{user}","#{parent_issue.project}","##{parent_issue.id} #{parent_issue.subject}",|
+            csv_data << %Q|"#{prj}","##{issue.id} #{issue.subject}","#{act.name}",|
+            csv_data << %Q|#{cost}\n|
+          end
+        end
+      else # 表示権限の無い工数があった場合
+        user_act_cost.each do |user_id, act_cost|
+          user = User.find_by_id(user_id)
+          act_cost.each do |act_id, cost|
+            csv_data << %Q|"#{user}","private","private","private","private","private",|
+            csv_data << %Q|#{cost}\n|
+          end
+        end
+      end
+    end
+    send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report_raw_with_act.csv"
+  end
+
   def edit_relay
     @message = ""
     find_project
@@ -226,6 +270,45 @@ class WorkTimeController < ApplicationController
       end
     end
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report.csv"
+  end
+
+  def relay_total_data_with_act
+    find_project
+    authorize
+    prepare_values
+    change_member_position
+    change_ticket_position
+    change_project_position
+    member_add_del_check
+    calc_total
+
+    csv_data = %Q|"user","project","ticket","activity","spent time"\n|
+    @r_issue_act_cost.each do |issue_id, user_act_cost|
+      if issue_id >0
+        issue = Issue.find_by_id(issue_id)
+        next if issue.nil?
+        prj = issue.project
+
+        user_act_cost.each do |user_id, act_cost|
+          user = User.find_by_id(user_id)
+          act_cost.each do |act_id, cost|
+            act = TimeEntryActivity.find_by_id(act_id)
+
+            csv_data << %Q|"#{user}","#{prj}","##{issue.id} #{issue.subject}",|
+            csv_data << %Q|"#{act.name}",#{cost}\n|
+          end
+        end
+      else # 表示権限の無い工数があった場合
+        user_act_cost.each do |user_id, act_cost|
+          user = User.find_by_id(user_id)
+          act_cost.each do |act_id, cost|
+            csv_data << %Q|"#{user}","private","private",|
+            csv_data << %Q|"private",#{cost}\n|
+          end
+        end
+      end
+    end
+    send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"monthly_report_with_act.csv"
   end
 
   def ajax_relay
@@ -954,14 +1037,20 @@ private
       @member_cost[i.user_id] = 0
     end
     @issue_parent = Hash.new # clear cash
+
     @issue_cost = Hash.new
     @r_issue_cost = Hash.new
+
+    @prj_cost = Hash.new
+    @r_prj_cost = Hash.new
+
+    @issue_act_cost = Hash.new
+    @r_issue_act_cost = Hash.new
+
     relay = Hash.new
     WtTicketRelay.all.each do |i|
       relay[i.issue_id] = i.parent
     end
-    @prj_cost = Hash.new
-    @r_prj_cost = Hash.new
 
     #当月の時間記録を抽出
     TimeEntry.
@@ -971,6 +1060,7 @@ private
       iid = time_entry.issue_id
       uid = time_entry.user_id
       cost = time_entry.hours
+      act = time_entry.activity_id
       # 本プロジェクトのユーザの工数でなければパス
       next unless @member_cost.key?(uid)
 
@@ -985,8 +1075,10 @@ private
 
       parent_iid = get_parent_issue(relay, iid)
       if !Issue.find_by_id(iid) || !Issue.find_by_id(iid).visible?
+        # 表示権限の無い工数があった場合
         iid = -1 # private
         pid = -1 # private
+        act = -1 # private
       end
       @issue_cost[iid] ||= Hash.new
       @issue_cost[iid][-1] ||= 0
@@ -999,6 +1091,11 @@ private
       @prj_cost[pid][-1] += cost
       @prj_cost[pid][uid] ||= 0
       @prj_cost[pid][uid] += cost
+
+      @issue_act_cost[iid] ||= Hash.new
+      @issue_act_cost[iid][uid] ||= Hash.new
+      @issue_act_cost[iid][uid][act] ||= 0
+      @issue_act_cost[iid][uid][act] += cost
 
       parent_issue = Issue.find_by_id(parent_iid)
       if parent_issue && parent_issue.visible?
@@ -1019,6 +1116,11 @@ private
       @r_prj_cost[parent_pid][-1] += cost
       @r_prj_cost[parent_pid][uid] ||= 0
       @r_prj_cost[parent_pid][uid] += cost
+
+      @r_issue_act_cost[parent_iid] ||= Hash.new
+      @r_issue_act_cost[parent_iid][uid] ||= Hash.new
+      @r_issue_act_cost[parent_iid][uid][act] ||= 0
+      @r_issue_act_cost[parent_iid][uid][act] += cost
     end
   end
 

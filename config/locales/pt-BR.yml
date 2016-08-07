@@ -26,6 +26,7 @@ pt-BR:
   wt_input_ticket_numbers: "ou inclua o número da tarefa"
   wt_delete_closed_tickets: "apagar tarefas fechadas"
   wt_data_download: "download de dados"
+  wt_data_download_with_act: "download de dados(each activity)"
   wt_opt_disp_ticket_with_closed: "[exibe tarefa fechada]"
   wt_opt_disp_ticket_opened_only: "[exibe somente tafera aberta]"
   wt_opt_disp_ticket_with_other_member: "[exibe tarefa de outros membros]"
