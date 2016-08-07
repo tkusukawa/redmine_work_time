@@ -25,6 +25,7 @@ it:
   wt_input_ticket_numbers: "o inserisci i numeri delle segnalazioni"
   wt_delete_closed_tickets: "Elimina segnalazioni chiuse"
   wt_data_download: "download di dati"
+  wt_data_download_with_act: "download di dati(each activity)"
   wt_opt_disp_ticket_with_closed: "[mostra segnalazioni chiuse]"
   wt_opt_disp_ticket_opened_only: "[mostra solo segnalazioni aperte]"
   wt_opt_disp_ticket_with_other_member: "[mostra segnalazioni di altri membri]"

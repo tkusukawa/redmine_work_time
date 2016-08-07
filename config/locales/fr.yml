@@ -25,6 +25,7 @@ fr:
   wt_input_ticket_numbers: "ou entrez le numéro de la demande"
   wt_delete_closed_tickets: "Supprimer les demandes fermées"
   wt_data_download: "Téléchargement des données"
+  wt_data_download_with_act: "Téléchargement des données(each activity)"
   wt_opt_disp_ticket_with_closed: "[afficher les demandes fermés]"
   wt_opt_disp_ticket_opened_only: "[n'afficher que les demandes ouvertes]"
   wt_opt_disp_ticket_with_other_member: "[afficher les demandes des autres membres]"
