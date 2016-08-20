@@ -425,7 +425,7 @@ class WorkTimeController < ApplicationController
     if @this_uid==@crnt_uid then
       add_issue = Issue.find_by_id(@add_issue_id)
       @add_issue_children_cnt = Issue.count(
-          :conditions => ["parent_id = " + add_issue.id.to_s]
+          "parent_id = " + add_issue.id.to_s
       )
       if add_issue && add_issue.visible? then
         prj = add_issue.project
@@ -459,7 +459,7 @@ class WorkTimeController < ApplicationController
           unless UserIssueMonth.exists?(["uid=:u and issue=:i",{:u=>uid, :i=>@add_issue_id}]) then
             # 既存のレコードが存在していなければ追加
             UserIssueMonth.create(:uid=>uid, :issue=>@add_issue_id,
-              :odr=>UserIssueMonth.count(:conditions=>["uid=:u",{:u=>uid}])+1)
+              :odr=>UserIssueMonth.count("uid=#{uid}")+1)
           end
         end
       end
@@ -1364,7 +1364,7 @@ private
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
         cnt_childrens = Issue.count(
-            :conditions => ["parent_id = " + new_issue.id.to_s]
+            "parent_id = " + new_issue.id.to_s
         )
         issue_pack[:cnt_childrens] = cnt_childrens
       end
