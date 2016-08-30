@@ -171,10 +171,15 @@ class WorkTimeController < ApplicationController
           user = User.find_by_id(user_id)
           act_cost.each do |act_id, cost|
             act = TimeEntryActivity.find_by_id(act_id)
-
-            csv_data << %Q|"#{user}","#{parent_issue.project}","##{parent_issue.id} #{parent_issue.subject}",|
-            csv_data << %Q|"#{prj}","##{issue.id} #{issue.subject}","#{act.name}",|
-            csv_data << %Q|#{cost}\n|
+            unless act.nil?
+              csv_data << %Q|"#{user}","#{parent_issue.project}","##{parent_issue.id} #{parent_issue.subject}",|
+              csv_data << %Q|"#{prj}","##{issue.id} #{issue.subject}","#{act.name}",|
+              csv_data << %Q|#{cost}\n|
+            else # can not find activity
+              csv_data << %Q|"#{user}","#{parent_issue.project}","##{parent_issue.id} #{parent_issue.subject}",|
+              csv_data << %Q|"#{prj}","##{issue.id} #{issue.subject}","nil",|
+              csv_data << %Q|#{cost}\n|
+            end
           end
         end
       else # 表示権限の無い工数があった場合
@@ -293,9 +298,13 @@ class WorkTimeController < ApplicationController
           user = User.find_by_id(user_id)
           act_cost.each do |act_id, cost|
             act = TimeEntryActivity.find_by_id(act_id)
-
-            csv_data << %Q|"#{user}","#{prj}","##{issue.id} #{issue.subject}",|
-            csv_data << %Q|"#{act.name}",#{cost}\n|
+            unless act.nil?
+              csv_data << %Q|"#{user}","#{prj}","##{issue.id} #{issue.subject}",|
+              csv_data << %Q|"#{act.name}",#{cost}\n|
+            else # can not find activity
+              csv_data << %Q|"#{user}","#{prj}","##{issue.id} #{issue.subject}",|
+              csv_data << %Q|"nil",#{cost}\n|
+            end
           end
         end
       else # 表示権限の無い工数があった場合
