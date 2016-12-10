@@ -31,7 +31,7 @@ ja:
   wt_opt_disp_ticket_with_other_member: "[他のメンバーのチケットも表示]"
   wt_opt_disp_ticket_mine_only: "[自分のチケットのみ表示]"
   wt_bulkupdate_relations: "親チケットへ一括更新"
-  permission_view_work_time_tab: "工数タブの表示"
+  permission_view_work_time_tab: "工数入力集計対象者"
   permission_view_work_time_other_member: "他のメンバーの工数の表示"
   permission_edit_work_time_total: "工数集計の設定"
   permission_edit_work_time_other_member: "他のメンバーの工数の入力"
