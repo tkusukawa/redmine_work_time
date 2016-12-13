@@ -816,7 +816,7 @@ private
     mem = Member.where(["project_id=:prj", {:prj=>@project.id}]).all
     mem_by_uid = {}
     mem.each do |m|
-      next unless m.user.allowed_to?(:view_work_time_tab, @project)
+      next if m.nil? || m.user.nil? || ! m.user.allowed_to?(:view_work_time_tab, @project)
       mem_by_uid[m.user_id] = m
     end
 
