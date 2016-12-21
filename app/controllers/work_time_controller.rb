@@ -35,6 +35,11 @@ class WorkTimeController < ApplicationController
     find_project
     authorize
     prepare_values
+    if @this_user.nil? || !@this_user.allowed_to?(:view_work_time_tab, @project)
+      @link_params.merge!(:action=>"relay_total")
+      redirect_to @link_params
+      return
+    end
     ticket_pos
     prj_pos
     ticket_del
