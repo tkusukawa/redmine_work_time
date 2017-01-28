@@ -438,9 +438,7 @@ class WorkTimeController < ApplicationController
     @add_count = params[:count]
     if @this_uid==@crnt_uid then
       add_issue = Issue.find_by_id(@add_issue_id)
-      @add_issue_children_cnt = Issue.count(
-          "parent_id = " + add_issue.id.to_s
-      )
+      @add_issue_children_cnt = Issue.where(["parent_id = ?", add_issue.id.to_s]).count
       if add_issue && add_issue.visible? then
         prj = add_issue.project
         if User.current.allowed_to?(:log_time, prj) then
@@ -473,7 +471,8 @@ class WorkTimeController < ApplicationController
           unless UserIssueMonth.exists?(["uid=:u and issue=:i",{:u=>uid, :i=>@add_issue_id}]) then
             # 既存のレコードが存在していなければ追加
             UserIssueMonth.create(:uid=>uid, :issue=>@add_issue_id,
-              :odr=>UserIssueMonth.count("uid=#{uid}")+1)
+              :odr => UserIssueMonth.where(["uid = ?", uid]).count + 1
+            )
           end
         end
       end
@@ -1378,9 +1377,7 @@ private
         prj_pack[:ref_issues][id] = issue_pack
         prj_pack[:odr_issues].push issue_pack
         prj_pack[:count_issues] += 1
-        cnt_childrens = Issue.count(
-            "parent_id = " + new_issue.id.to_s
-        )
+        cnt_childrens = Issue.where(["parent_id = ?", new_issue.id.to_s]).count
         issue_pack[:cnt_childrens] = cnt_childrens
       end
       prj_pack[:ref_issues][id]
