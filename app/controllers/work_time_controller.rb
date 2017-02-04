@@ -449,8 +449,10 @@ class WorkTimeController < ApplicationController
           end
 
           @activities = []
+          @activity_default = nil
           prj.activities.each do |act|
             @activities.push([act.name, act.id])
+            @activity_default = act.id if act.is_default
           end
 
           @custom_fields = TimeEntryCustomField.all

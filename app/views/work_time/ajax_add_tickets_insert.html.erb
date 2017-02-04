@@ -48,7 +48,7 @@
   </td>
   <% end %>
   <td>
-    <%= select_tag "new_time_entry["+@add_issue_id+"]["+@add_count+"][activity_id]", options_for_select(@activities), :required => true %>
+    <%= select_tag "new_time_entry["+@add_issue_id+"]["+@add_count+"][activity_id]", options_for_select(@activities,@activity_default), :required => true %>
   </td>
   <td>
   <%
