@@ -249,6 +249,10 @@ end
        onclick="location.href='<%=url_for(@link_params.merge(:action=>"member_monthly_data"))%>'"
        value="<%=l(:wt_data_download)%>"
 />
+<input type="button"
+       onclick="location.href='<%=url_for(@link_params.merge(:action=>"member_monthly_data_table"))%>'"
+       value="<%=l(:wt_data_download_table)%>"
+/>
 <br/>
 
 <script type="text/javascript">
