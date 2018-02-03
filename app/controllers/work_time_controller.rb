@@ -83,6 +83,43 @@ class WorkTimeController < ApplicationController
     send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"member_monthly.csv"
   end
 
+  def member_monthly_data_table
+    require_login || return
+    if params.key?(:id) then
+      find_project
+    end
+    prepare_values
+    make_pack
+
+    csv_data = %Q|""|
+    (@first_date..@last_date).each do |date|
+      csv_data << %Q|,"#{date}"|
+    end
+    csv_data << "\n"
+    
+    @month_pack[:odr_prjs].each do |prj_pack|
+      next if prj_pack[:count_issues] == 0
+      prj_pack[:odr_issues].each do |issue_pack|
+        next if issue_pack[:count_hours] == 0
+        issue = issue_pack[:issue]
+        
+        csv_data << %Q|"##{issue.id} #{issue.subject}"|
+        
+        (@first_date..@last_date).each do |date|
+          if issue_pack[:total_by_day].has_key?(date) then
+            csv_data << %Q|,"#{issue_pack[:total_by_day][date]}"|
+          else
+            csv_data << %Q|,""|
+          end
+        end
+        
+        csv_data << "\n"
+      end
+    end
+
+    send_data Redmine::CodesetUtil.from_utf8(csv_data, l(:general_csv_encoding)), :type=>"text/csv", :filename=>"member_monthly_table.csv"
+  end
+
   def total
     @message = ""
     find_project
