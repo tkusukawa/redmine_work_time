@@ -1315,20 +1315,10 @@ private
     next_date = @this_date+1
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
     t2 = Time.local(next_date.year, next_date.month, next_date.day)
-    isu = Issue.arel_table
-    jnl = Journal.arel_table
-    union_sql = Issue.where((isu[:author_id].eq(@this_uid))
-      .and(  isu[:created_on].gteq(t1))
-      .and(  isu[:created_on].lt(t2)))
-    .union(
-      Issue.joins(isu.join(jnl).on(isu[:id].eq(jnl[:journalized_id])).join_sources.first)
-      .where(jnl[:journalized_type].eq('Issue')
-        .and(  jnl[:user_id].eq(@this_uid))
-        .and(  jnl[:created_on].gteq(t1))
-        .and(  jnl[:created_on].lt(t2))
-      ).uniq
-    )
-    issues = Issue.from("#{union_sql.to_sql} issues" )
+    issues = Issue.where(["(author_id = :u and created_on >= :t1 and created_on < :t2) or "+
+                              "id in (select journalized_id from journals where journalized_type = 'Issue' and "+
+                              "user_id = :u and created_on >= :t1 and created_on < :t2 group by journalized_id)",
+                          {:u => @this_user, :t1 => t1, :t2 => t2}]).all
 
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
