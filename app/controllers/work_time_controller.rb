@@ -764,7 +764,7 @@ private
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
-          tm_vals = vals.slice! "remaining_hours", "status_id"
+          tm_vals = vals.except "remaining_hours", "status_id"
           tm_vals.merge!(params["new_time_entry_#{issue_id}_#{count}"]) if params.has_key?("new_time_entry_#{issue_id}_#{count}")
           next if tm_vals["hours"].blank? && vals["remaining_hours"].blank? && vals["status_id"].blank?
           if tm_vals["hours"].present? then
@@ -794,7 +794,7 @@ private
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find_by_id(id)
         issue_id = tm.issue.id
-        tm_vals = vals.slice! "remaining_hours", "status_id"
+        tm_vals = vals.except "remaining_hours", "status_id"
         tm_vals.merge!(params["time_entry_"+id.to_s]) if params.has_key?("time_entry_"+id.to_s)
         if tm_vals["hours"].blank? then
           # 工数指定が空文字の場合は工数項目を削除
@@ -1315,20 +1315,10 @@ private
     next_date = @this_date+1
     t1 = Time.local(@this_date.year, @this_date.month, @this_date.day)
     t2 = Time.local(next_date.year, next_date.month, next_date.day)
-    isu = Issue.arel_table
-    jnl = Journal.arel_table
-    union_sql = Issue.where((isu[:author_id].eq(@this_uid))
-      .and(  isu[:created_on].gteq(t1))
-      .and(  isu[:created_on].lt(t2)))
-    .union(
-      Issue.joins(isu.join(jnl).on(isu[:id].eq(jnl[:journalized_id])).join_sources.first)
-      .where(jnl[:journalized_type].eq('Issue')
-        .and(  jnl[:user_id].eq(@this_uid))
-        .and(  jnl[:created_on].gteq(t1))
-        .and(  jnl[:created_on].lt(t2))
-      ).uniq
-    )
-    issues = Issue.from("#{union_sql.to_sql} issues" )
+    issues = Issue.where(["(author_id = :u and created_on >= :t1 and created_on < :t2) or "+
+                              "id in (select journalized_id from journals where journalized_type = 'Issue' and "+
+                              "user_id = :u and created_on >= :t1 and created_on < :t2 group by journalized_id)",
+                          {:u => @this_user, :t1 => t1, :t2 => t2}]).all
 
     issues.each do |issue|
       next if @restrict_project && @restrict_project!=issue.project.id
