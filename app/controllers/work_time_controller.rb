@@ -764,7 +764,7 @@ private
         next if issue.nil? || !issue.visible?
         next if !User.current.allowed_to?(:log_time, issue.project)
         valss.each do |count, vals|
-          tm_vals = vals.slice! "remaining_hours", "status_id"
+          tm_vals = vals.except "remaining_hours", "status_id"
           tm_vals.merge!(params["new_time_entry_#{issue_id}_#{count}"]) if params.has_key?("new_time_entry_#{issue_id}_#{count}")
           next if tm_vals["hours"].blank? && vals["remaining_hours"].blank? && vals["status_id"].blank?
           if tm_vals["hours"].present? then
@@ -794,7 +794,7 @@ private
       params["time_entry"].each do |id, vals|
         tm = TimeEntry.find_by_id(id)
         issue_id = tm.issue.id
-        tm_vals = vals.slice! "remaining_hours", "status_id"
+        tm_vals = vals.except "remaining_hours", "status_id"
         tm_vals.merge!(params["time_entry_"+id.to_s]) if params.has_key?("time_entry_"+id.to_s)
         if tm_vals["hours"].blank? then
           # 工数指定が空文字の場合は工数項目を削除
