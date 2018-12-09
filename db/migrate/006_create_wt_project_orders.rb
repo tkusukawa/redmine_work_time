@@ -1,4 +1,4 @@
-class CreateWtProjectOrders < ActiveRecord::Migration
+class CreateWtProjectOrders < ActiveRecord::Migration[4.2]
   def self.up
     create_table :wt_project_orders do |t|
       t.column :prj, :integer
