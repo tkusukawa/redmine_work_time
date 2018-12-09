@@ -1,4 +1,4 @@
-class CreateWtDailyMemos < ActiveRecord::Migration
+class CreateWtDailyMemos < ActiveRecord::Migration[4.2]
   def self.up
     create_table :wt_daily_memos do |t|
       t.column :day, :date

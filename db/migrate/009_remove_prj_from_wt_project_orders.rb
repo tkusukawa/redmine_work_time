@@ -1,4 +1,4 @@
-class RemovePrjFromWtProjectOrders < ActiveRecord::Migration
+class RemovePrjFromWtProjectOrders < ActiveRecord::Migration[4.2]
   def self.up
     remove_column :wt_project_orders, :prj
   end

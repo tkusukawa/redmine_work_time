@@ -1,4 +1,4 @@
-class CreateUserIssueMonths < ActiveRecord::Migration
+class CreateUserIssueMonths < ActiveRecord::Migration[4.2]
   def self.up
     create_table :user_issue_months do |t|
       t.column :uid, :integer
