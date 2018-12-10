@@ -4,7 +4,7 @@ Redmine::Plugin.register :redmine_work_time do
   name 'Redmine Work Time plugin'
   author 'Tomohisa Kusukawa'
   description 'A plugin to view and update TimeEntry by each user'
-  version '0.3.4'
+  version '0.4.0'
   url 'http://www.redmine.org/plugins/redmine_work_time'
   author_url 'http://about.me/tkusukawa'
   
