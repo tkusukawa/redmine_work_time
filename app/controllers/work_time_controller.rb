@@ -96,15 +96,15 @@ class WorkTimeController < ApplicationController
       csv_data << %Q|,"#{date}"|
     end
     csv_data << "\n"
-    
+
     @month_pack[:odr_prjs].each do |prj_pack|
       next if prj_pack[:count_issues] == 0
       prj_pack[:odr_issues].each do |issue_pack|
         next if issue_pack[:count_hours] == 0
         issue = issue_pack[:issue]
-        
+
         csv_data << %Q|"##{issue.id} #{issue.subject}"|
-        
+
         (@first_date..@last_date).each do |date|
           if issue_pack[:total_by_day].has_key?(date) then
             csv_data << %Q|,"#{issue_pack[:total_by_day][date]}"|
@@ -112,7 +112,7 @@ class WorkTimeController < ApplicationController
             csv_data << %Q|,""|
           end
         end
-        
+
         csv_data << "\n"
       end
     end
@@ -142,7 +142,7 @@ class WorkTimeController < ApplicationController
     change_project_position
     member_add_del_check
     calc_total
-    
+
     csv_data = %Q|"user","relayed project","relayed ticket","project","ticket","spent time"\n|
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
@@ -159,7 +159,7 @@ class WorkTimeController < ApplicationController
         next unless @prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
         next if @prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
         prj =Project.find_by_id(dsp_prj)
-        
+
         #-------------------------------------- チケットのループ
         tickets = WtTicketRelay.order("position").all
         tickets.each do |tic|
@@ -277,7 +277,7 @@ class WorkTimeController < ApplicationController
     change_project_position
     member_add_del_check
     calc_total
-    
+
     csv_data = %Q|"user","project","ticket","spent time"\n|
     #-------------------------------------- メンバーのループ
     @members.each do |mem_info|
@@ -294,7 +294,7 @@ class WorkTimeController < ApplicationController
         next unless @r_prj_cost[dsp_prj].key?(-1) # 値の無いプロジェクトはパス
         next if @r_prj_cost[dsp_prj][-1] == 0 # 値の無いプロジェクトはスパ
         prj =Project.find_by_id(dsp_prj)
-        
+
         #-------------------------------------- チケットのループ
         tickets = WtTicketRelay.order("position").all
         tickets.each do |tic|
@@ -776,14 +776,15 @@ private
               append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
               next
             end
-            if by_other
-              append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
-              append_text += " add time entry of ##{issue.id.to_s}: #{tm_vals[:hours].to_f}h"
-              update_daily_memo(append_text, true)
-            end
             new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => @this_user, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
-            new_entry.save
+            if new_entry.save
+              if by_other
+                append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
+                append_text += " add time entry of ##{issue.id.to_s}: #{tm_vals[:hours].to_f}h"
+                update_daily_memo(append_text, true)
+              end
+            end
             append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
           end
           if vals["remaining_hours"].present? || vals["status_id"].present? then
@@ -806,20 +807,23 @@ private
         end
         if tm_vals["hours"].blank? then
           # 工数指定が空文字の場合は工数項目を削除
-          if by_other
-            append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
-            append_text += " delete time entry of ##{issue_id.to_s}: -#{tm.hours.to_f}h-"
-            update_daily_memo(append_text, true)
+          if tm.destroy
+            if by_other
+              append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
+              append_text += " delete time entry of ##{issue_id.to_s}: -#{tm.hours.to_f}h-"
+              update_daily_memo(append_text, true)
+            end
           end
-          tm.destroy
         else
+          append_text = nil
           if by_other && tm_vals.key?(:hours) && tm.hours.to_f != tm_vals[:hours].to_f
             append_text = "\n[#{Time.now.localtime.strftime("%Y-%m-%d %H:%M")}] #{User.current.to_s}"
             append_text += " update time entry of ##{issue_id.to_s}: -#{tm.hours.to_f}h- #{tm_vals[:hours].to_f}h"
-            update_daily_memo(append_text, true)
           end
           tm.safe_attributes = tm_vals
-          tm.save
+          if tm.save
+            update_daily_memo(append_text, true) if append_text
+          end
           append_error_message_html(@message, hour_update_check_error(tm, issue_id))
         end
         if vals["remaining_hours"].present? || vals["status_id"].present? then
@@ -925,7 +929,7 @@ private
       end
       pos += 1
     end
-    
+
   end
 
   def update_daily_memo(text, append = false) # 日ごとメモの更新
