@@ -781,7 +781,7 @@ private
               append_text += " add time entry of ##{issue.id.to_s}: #{tm_vals[:hours].to_f}h"
               update_daily_memo(append_text, true)
             end
-            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => @this_user, :spent_on => @this_date)
+            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :author => User.current, :user => @this_user, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
             new_entry.save
             append_error_message_html(@message, hour_update_check_error(new_entry, issue_id))
