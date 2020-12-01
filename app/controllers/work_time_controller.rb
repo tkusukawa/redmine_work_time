@@ -776,7 +776,7 @@ private
               append_error_message_html(@message, 'Error: Issue'+issue_id+': No Activities!')
               next
             end
-            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :user => @this_user, :spent_on => @this_date)
+            new_entry = TimeEntry.new(:project => issue.project, :issue => issue, :author => User.current, :user => @this_user, :spent_on => @this_date)
             new_entry.safe_attributes = tm_vals
             if new_entry.save
               if by_other
