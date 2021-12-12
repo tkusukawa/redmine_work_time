@@ -103,6 +103,10 @@ if memo then # この日のメモがある場合
   </div>
 </div>
 <%end%>
+<div hidden>
+<textarea id="dummy_for_ckeditor"></textarea>
+<%= wikitoolbar_for 'dummy_for_ckeditor' %>
+</div>
 
 <%
 memo=WtDailyMemo.where(["day<:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}]).order("day DESC").first
