@@ -58,7 +58,7 @@
     <%= render :partial=>'user_day_table' %>
 
 <%if @this_uid==@crnt_uid || User.current.allowed_to?(:edit_work_time_other_member, @project) %>
-        <%= submit_tag l(:wt_update) %>
+        <input type="button" onclick="submit();" value="<%= l(:wt_update) %>" />
         &#58;
         <input type="button"
                onclick="location.href='<%=url_for(@link_params.merge(:ticket_del=>"closed"))%>'"
@@ -103,10 +103,6 @@ if memo then # この日のメモがある場合
   </div>
 </div>
 <%end%>
-<div hidden>
-<textarea id="dummy_for_ckeditor"></textarea>
-<%= wikitoolbar_for 'dummy_for_ckeditor' %>
-</div>
 
 <%
 memo=WtDailyMemo.where(["day<:d and user_id=:u",{:d=>@this_date,:u=>@this_uid}]).order("day DESC").first
@@ -118,13 +114,7 @@ d = memo.day
 
 <%if @this_uid==@crnt_uid then%>
 [<a href="#"
-    onclick="jQuery.ajax({
-            url: '<%=url_for(@link_params.merge(:action=>"ajax_memo_edit"))%>',
-            data:{asynchronous:true, method:'get'},
-            success: function(response){
-                    jQuery('#memo-wiki').html(response);
-                    }
-            });
+    onclick="jQuery('#memo-wiki').hide(); jQuery('#memo-wiki-edit').show();
             return false;">
   <%=l(:wt_edit_memo)%>
 </a>]
@@ -138,6 +128,26 @@ d = memo.day
 [<%= link_to(l(:wt_next_memo), @link_params.merge(:anchor=>"memo", :day=>d.day, :month=>d.month, :year=>d.year))%>]
 <%end%>
 </div>
+
+  <div id="memo-wiki-edit" hidden>
+    <%
+      year = params["year"]
+      month = params["month"]
+      day = params["day"]
+      user_id = params["user"]
+      date = Date.new(year.to_i,month.to_i,day.to_i)
+      wday_name = l(:wt_week_day_names).split(',')
+      memo=WtDailyMemo.where(["day=:d and user_id=:u",{:d=>date,:u=>user_id}]).first
+      if memo then
+    %>
+      <textarea id="work_time_memo" name="memo" rows="15" cols="100"><%=memo.description -%></textarea>
+    <%else%>
+      <textarea id="work_time_memo" name="memo" rows="15" cols="100"></textarea>
+    <%end%>
+    <br/>
+    <%= submit_tag l(:wt_update) %>
+    <%= wikitoolbar_for 'work_time_memo' %>
+  </div>
 <br/>
 
 <%if User.current.allowed_to?(:view_work_time_other_member, @project) then%>
