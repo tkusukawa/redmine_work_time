@@ -58,7 +58,7 @@
     <%= render :partial=>'user_day_table' %>
 
 <%if @this_uid==@crnt_uid || User.current.allowed_to?(:edit_work_time_other_member, @project) %>
-        <input type="button" onclick="submit();" value="<%= l(:wt_update) %>" />
+        <input type="button" onclick="$(window).off('beforeunload'); window.onbeforeunload = null; submit();" value="<%= l(:wt_update) %>" />
         &#58;
         <input type="button"
                onclick="location.href='<%=url_for(@link_params.merge(:ticket_del=>"closed"))%>'"
@@ -145,7 +145,7 @@ d = memo.day
       <textarea id="work_time_memo" name="memo" rows="15" cols="100"></textarea>
     <%end%>
     <br/>
-    <%= submit_tag l(:wt_update) %>
+    <input type="button" onclick="$(window).off('beforeunload'); window.onbeforeunload = null; submit();" value="<%= l(:wt_update) %>" />
     <%= wikitoolbar_for 'work_time_memo' %>
   </div>
 <br/>
